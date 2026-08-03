@@ -1,0 +1,32 @@
+{
+  "name": "Ritmo — rotina, estudos e treino",
+  "short_name": "Ritmo",
+  "description": "Assistente pessoal de rotina para estudo, treino e alimentação. Funciona offline, guarda tudo no próprio aparelho e analisa seus padrões sem enviar nada para lugar nenhum.",
+  "id": "/ritmo/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "theme_color": "#0E1020",
+  "background_color": "#0E1020",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "education", "health", "lifestyle"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "./icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "./apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ],
+  "screenshots": [
+    { "src": "./screenshot-mobile.png", "sizes": "1080x1920", "type": "image/png", "form_factor": "narrow", "label": "Seu dia, um bloco de cada vez" },
+    { "src": "./screenshot-desktop.png", "sizes": "1920x1080", "type": "image/png", "form_factor": "wide", "label": "Análise de produtividade" }
+  ],
+  "shortcuts": [
+    { "name": "Hoje", "short_name": "Hoje", "url": "./index.html#hoje", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] },
+    { "name": "Treino", "short_name": "Treino", "url": "./index.html#treino", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] },
+    { "name": "Estudo", "short_name": "Estudo", "url": "./index.html#estudo", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] }
+  ]
+}
