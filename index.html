@@ -12,6 +12,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-startup-image" href="./splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="./splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="./splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="./splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+<link rel="apple-touch-startup-image" href="./splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+<link rel="apple-touch-startup-image" href="./splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,11 +25,11 @@
 <style>
 *{box-sizing:border-box}
 html{background:#0E1020;min-height:100%}
-html[data-tema="claro"]{background:#F2F4FB;color-scheme:light}
-html[data-tema="claro"] body{background:var(--ink,#F2F4FB) !important}
+html[data-tema="claro"]{background:#FBFBFD;color-scheme:light}
+[data-tema="claro"] body{background:var(--ink,#FBFBFD) !important}
 #app{min-height:100vh;background:var(--ink,#0E1020)}
-html[data-tema="claro"] #app{background:var(--ink,#F2F4FB)}
-html[data-tema="claro"],body[data-tema="claro"]{
+[data-tema="claro"] #app{background:var(--ink,#F2F4FB)}
+[data-tema="claro"]{
   --ink:#FBFBFD;--ink2:#FFFFFF;--ink3:#FFFFFF;--linha:#E8E9EF;--linha2:#DCDEE7;
   --texto:#12131A;--mute:#6C7080;--fraco:#A6AAB8;--borda2:#D2D5DF;
   --navbg:rgba(251,251,253,.86);--overlaybg:rgba(20,22,34,.32);--sombra:rgba(20,26,54,.14);
@@ -33,21 +39,21 @@ html[data-tema="claro"],body[data-tema="claro"]{
   --el2:0 1px 2px rgba(20,26,54,.05),0 10px 30px -12px rgba(20,26,54,.14);
   --el3:0 2px 6px rgba(20,26,54,.06),0 24px 56px -24px rgba(20,26,54,.18);
   --luz:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,0))}
-html[data-tema="claro"] .cel{background:#6355E8}
-html[data-tema="claro"] .bfill{background:#6355E8}
-html[data-tema="claro"] .mat.on,html[data-tema="claro"] .tipo.on,
-html[data-tema="claro"] .sec.on,html[data-tema="claro"] .btn-salvar,
-html[data-tema="claro"] .btn-grande.roxo{background:#6355E8;border-color:#6355E8;color:#fff}
-html[data-tema="claro"] .filtro.on{background:#141A33;border-color:#141A33;color:#fff}
-html[data-tema="claro"] .agora-btn,html[data-tema="claro"] .btn-grande{color:#fff}
-html[data-tema="claro"] .agora-btn.done{color:var(--c)}
-html[data-tema="claro"] .alerta{background:#6355E8;color:#fff}
-html[data-tema="claro"] .alerta button{background:rgba(255,255,255,.22);color:#fff}
-html[data-tema="claro"] .quick button{color:#9A7714}
-html[data-tema="claro"] .ref.on{color:#9A7714}
-html[data-tema="claro"] .medidor,html[data-tema="claro"] .stat,
-html[data-tema="claro"] .nota,html[data-tema="claro"] .ex,
-html[data-tema="claro"] .comp,html[data-tema="claro"] .prova{box-shadow:0 1px 3px var(--sombra)}
+[data-tema="claro"] .cel{background:#6355E8}
+[data-tema="claro"] .bfill{background:#6355E8}
+[data-tema="claro"] .mat.on,[data-tema="claro"] .tipo.on,
+[data-tema="claro"] .sec.on,[data-tema="claro"] .btn-salvar,
+[data-tema="claro"] .btn-grande.roxo{background:#6355E8;border-color:#6355E8;color:#fff}
+[data-tema="claro"] .filtro.on{background:#141A33;border-color:#141A33;color:#fff}
+[data-tema="claro"] .agora-btn,[data-tema="claro"] .btn-grande{color:#fff}
+[data-tema="claro"] .agora-btn.done{color:var(--c)}
+[data-tema="claro"] .alerta{background:#6355E8;color:#fff}
+[data-tema="claro"] .alerta button{background:rgba(255,255,255,.22);color:#fff}
+[data-tema="claro"] .quick button{color:#9A7714}
+[data-tema="claro"] .ref.on{color:#9A7714}
+[data-tema="claro"] .medidor,[data-tema="claro"] .stat,
+[data-tema="claro"] .nota,[data-tema="claro"] .ex,
+[data-tema="claro"] .comp,[data-tema="claro"] .prova{box-shadow:0 1px 3px var(--sombra)}
 html,body{
   /* superfícies: três níveis de elevação, diferença sutil mas perceptível */
   --ink:#0B0D18;--ink2:#141830;--ink3:#191E3A;--linha:#232945;--linha2:#2E3554;
@@ -323,7 +329,7 @@ h3.sub{font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,system-ui,sa
 .pt.es{background:#EEF0FA}
 .pt.pv{background:#FF5C7A}
 .pt.fill{background:#7C6BFF}
-html[data-tema="claro"] .pt.es{background:#141A33}
+[data-tema="claro"] .pt.es{background:#141A33}
 .mes-dia.hoje{border-color:#2BB3A3}
 .mes-dia.sel{border-color:var(--texto);box-shadow:0 0 0 2px var(--texto)}
 .mes-dia.prova{border-color:rgba(255,92,122,.6)}
@@ -505,7 +511,7 @@ button:active{transform:scale(.975)}
 .dash-aviso.atencao .aviso-ic{background:var(--ambar)}
 .dash-aviso.bom{border-color:rgba(43,179,163,.35);background:rgba(43,179,163,.06)}
 .dash-aviso.bom .aviso-ic{background:var(--verde)}
-html[data-tema="claro"] .dash-aviso p{color:var(--texto)}
+[data-tema="claro"] .dash-aviso p{color:var(--texto)}
 
 /* seções e listas */
 h3.sub{margin:var(--e6) 0 var(--e3);font-size:11px;letter-spacing:.16em}
@@ -753,7 +759,7 @@ nav{padding:var(--e2) 0 max(var(--e2),env(safe-area-inset-bottom))}
 .filtros,.secoes,.filtro-linha{overscroll-behavior-x:contain}
 
 /* Estado de foco visível também em fundo claro. */
-html[data-tema="claro"] button:focus-visible{outline-color:#6355E8}
+[data-tema="claro"] button:focus-visible{outline-color:#6355E8}
 
 @media (prefers-reduced-motion:reduce){
   .bloco.pop .bl-check,.bloco.pop,.copo.on,.chk.on .chk-box{animation:none}
@@ -866,7 +872,7 @@ html[data-tema="claro"] button:focus-visible{outline-color:#6355E8}
 .lt.bom span{background:var(--verde)}
 .lt.atencao span{background:var(--ambar)}
 .lt.neutro span{background:var(--fraco)}
-html[data-tema="claro"] .lt{color:var(--texto)}
+[data-tema="claro"] .lt{color:var(--texto)}
 
 /* ============ exportação ============ */
 .exp-b{display:flex;gap:var(--e3);align-items:flex-start;width:100%;text-align:left;
@@ -1137,16 +1143,16 @@ body{padding-bottom:104px}
 .bloco.passou{opacity:.5}
 .bloco.feito{opacity:.82}
 .bloco.feito .bl-tit{text-decoration-color:var(--fraco);text-decoration-thickness:1px}
-html[data-tema="claro"] .bloco.passou{opacity:.55}
-html[data-tema="claro"] .bloco.feito{opacity:.85}
+[data-tema="claro"] .bloco.passou{opacity:.55}
+[data-tema="claro"] .bloco.feito{opacity:.85}
 
 /* Texto secundário sobre cartão claro: sobe um degrau de contraste. */
 html[data-tema="claro"]{--mute:#5E6373}
-html[data-tema="claro"] .dash-aviso p,
-html[data-tema="claro"] .sug-txt p,
-html[data-tema="claro"] .lt{color:#3A3E4D}
-html[data-tema="claro"] .sobrev em,
-html[data-tema="claro"] .med-txt em{color:#5E6373}
+[data-tema="claro"] .dash-aviso p,
+[data-tema="claro"] .sug-txt p,
+[data-tema="claro"] .lt{color:#3A3E4D}
+[data-tema="claro"] .sobrev em,
+[data-tema="claro"] .med-txt em{color:#5E6373}
 
 /* Selo do "agora" com peso suficiente para ancorar a tela. */
 .agora-tag{font-weight:600;letter-spacing:.22em}
@@ -1243,6 +1249,68 @@ button,.bloco{-webkit-touch-callout:none}
 .in-hora{flex-shrink:0}
 .ed-l2 .ess-btn{margin-left:auto}
 .ed-hist{font-size:10px;letter-spacing:.02em}
+
+/* =====================================================================
+   RITMO 1.1 — dashboard
+   ===================================================================== */
+.dash-ola{margin:var(--e2) 0 var(--e4)}
+.ola-data{display:block;font-size:var(--t-cap);color:var(--mute);
+  letter-spacing:-.005em;margin-bottom:var(--e1)}
+.dash-ola h2{font-size:var(--t-hero);line-height:1.05;letter-spacing:-.045em;margin:0}
+
+.dia-barra{margin-bottom:var(--e5)}
+.db-topo{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:var(--e2);font-size:var(--t-cap)}
+.db-topo span{color:var(--mute)}
+.db-topo b{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;
+  color:var(--texto);font-variant-numeric:tabular-nums}
+.dia-barra .ptrack{height:5px}
+.dia-barra .pfill{background:linear-gradient(90deg,var(--roxo),var(--azul))}
+
+/* anéis de progresso: leitura em um relance, sem texto sobrando */
+.aneis{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));
+  gap:var(--e2);margin-bottom:var(--e6)}
+.anel-c{display:flex;flex-direction:column;align-items:center;gap:var(--e2);
+  background:var(--ink2);background-image:var(--luz);border:1px solid var(--linha);
+  border-radius:var(--r3);padding:var(--e4) var(--e2) var(--e3);color:var(--texto);
+  cursor:pointer;box-shadow:var(--el1);min-height:118px;justify-content:flex-start}
+.anel-c:hover{border-color:var(--linha2)}
+.anel{position:relative;width:42px;height:42px;display:flex;align-items:center;justify-content:center}
+.anel svg{position:absolute;inset:0}
+.anel svg circle:last-child{transition:stroke-dashoffset 820ms var(--ease)}
+.anel i{font-style:normal;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:12px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.anel-r{font-size:11.5px;font-weight:600;letter-spacing:-.01em}
+.anel-d{font-size:9.5px;color:var(--mute);text-align:center;line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  padding:0 2px}
+
+/* agenda curta */
+.ver-dia{width:100%;background:transparent;border:1px dashed var(--linha);
+  border-radius:var(--r2);padding:13px;color:var(--mute);font-size:12.5px;
+  cursor:pointer;margin:calc(var(--e5) * -1 + var(--e2)) 0 var(--e6)}
+.ver-dia:hover{border-color:var(--roxo);color:var(--texto)}
+
+/* área segura do iPhone em todas as bordas */
+body{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+.top{padding-top:calc(var(--e5) + env(safe-area-inset-top))}
+main{padding-left:calc(var(--e5) + env(safe-area-inset-left));
+  padding-right:calc(var(--e5) + env(safe-area-inset-right))}
+.alerta,.atualizar{top:calc(12px + env(safe-area-inset-top))}
+.sheet{padding-bottom:calc(var(--e7) + env(safe-area-inset-bottom))}
+
+@media (max-width:359px){
+  .aneis{grid-template-columns:repeat(2,1fr)}
+  main{padding-left:calc(var(--e4) + env(safe-area-inset-left));
+       padding-right:calc(var(--e4) + env(safe-area-inset-right))}
+}
+
+/* contraste da navegação no tema claro: --fraco é pálido demais sobre branco */
+[data-tema="claro"] .navbtn{color:#7A7F91}
+[data-tema="claro"] .navbtn.on{color:var(--texto)}
+[data-tema="claro"] .anel-d{color:#6C7080}
+[data-tema="claro"] .db-topo span{color:#5E6373}
+.anel i{font-size:11.5px}
 </style>
 </head>
 <body>
@@ -1300,7 +1368,7 @@ var BLOCOS_PADRAO = {
   B("d8",900,"Estudo 2 — lista de exercícios","estudo",75),
   B("d9",990,"Lanche + tempo livre","base",60),
   B("d10",1065,"Mochila pronta + jantar leve","dieta",45),
-  B("d11",1110,"Deslocamento pra UNIVAP","aula",30),
+  B("d11",1110,"Deslocamento pra faculdade","aula",30),
   B("d12",1140,"Aula","aula",220,1),
   B("d13",1380,"Ceia + descompressão","dieta",20),
   B("d14",1400,"Revisão de 15 min da aula","estudo",15,1,"O bloco mais valioso do dia. Só reler o caderno e escrever 3 linhas."),
@@ -1463,9 +1531,24 @@ function diasAte(iso){
   var p=iso.split("-").map(Number);
   return Math.round((new Date(p[0],p[1]-1,p[2])-h)/86400000);
 }
+/* Escape para valores que viram ARGUMENTO de ação dentro de um atributo.
+   Sem isto, uma matéria chamada Cálculo "Aplicado" truncava o atributo
+   e o botão parava de funcionar. */
+function escA(v){
+  return String(v).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+                  .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
-function uid(){ return "b"+Date.now().toString(36)+Math.floor(Math.random()*999).toString(36); }
+var _seqId=0;
+/* Identificador único mesmo em criações no mesmo milissegundo:
+   tempo em base36 + contador de sessão + ruído. */
+function uid(pref){
+  _seqId++;
+  return (pref||"b")+Date.now().toString(36)+"-"+_seqId.toString(36)
+    +Math.floor(Math.random()*1296).toString(36);
+}
 
 
 /* =====================================================================
@@ -1790,9 +1873,13 @@ var Persistencia = (function(){
         var pac=decompor(S), escritas=0;
         for(var store in pac){
           var lista=pac[store];
-          var pendentes=forcar ? lista : lista.filter(function(o){
+          /* mudou() sempre é chamado, inclusive no modo forçado: ele grava
+             o cache. Sem isso, a gravação seguinte a um forcar reescrevia
+             o banco inteiro. */
+          var pendentes=lista.filter(function(o){
             var ch=store+":"+(o.id!==undefined?o.id:o.data!==undefined?o.data:o.nome);
-            return mudou(ch,o);
+            var dif=mudou(ch,o);
+            return forcar || dif;
           });
           if(pendentes.length){
             await DB.salvarVarios(store,pendentes);
@@ -1813,7 +1900,8 @@ var Persistencia = (function(){
 
     async salvarNotas(N,forcar){
       if(modo==="indexeddb"){
-        if(!forcar && !mudou("notas",N)) return 0;
+        var difN=mudou("notas",N);
+        if(!forcar && !difN) return 0;
         var atuais=await DB.buscarTudo("notas");
         var vivos={};
         N.forEach(function(n){ vivos[String(n.id)]=true; });
@@ -1872,7 +1960,7 @@ function padrao(){
     blocos: JSON.parse(JSON.stringify(BLOCOS_PADRAO)),
     metas:{prot:140,agua:8},
     med:{ativo:false,hora:450,horas:11},
-    alertas:true, tema:"escuro",
+    alertas:true, tema:"escuro", nome:"",
     metas2:[], planoEstudo:{}, eventos:[], categorias:["Ideias","Geral"] 
   };
 }
@@ -1887,9 +1975,9 @@ var UI = {
   draft:"", tag:null, dv:false, editando:null, filtro:"Tudo", busca:"",
   backup:"", msg:"", agora:new Date(), alerta:null, ultimoBloco:null, plano:null,
   mesRef:null, diaSel:null, novoEv:{hora:"",titulo:""}, per:30, foco:"tudo",
-  ultimoHTML:null, pulso:null, planoSem:null, materiaTocada:false,
+  ultimoHTML:null, pulso:null, diaTodo:false, planoSem:null, materiaTocada:false,
   metaForm:false, novaMeta:{titulo:"",escopo:"ano",fonte:"estudo_h",alvo:""},
-  expPer:30, expMsg:"", temAtualizacao:false, pwaMsg:""
+  expPer:30, expMsg:"", expFalhou:false, temAtualizacao:false, pwaMsg:""
 };
 
 function hojeKey(){ return chave(UI.agora); }
@@ -2400,7 +2488,9 @@ function montarPlanilha(n){
 }
 
 /* ---------- download local ---------- */
+var _ultimoArquivo=null;
 function baixar(nome,conteudo,mime,binario){
+  _ultimoArquivo={nome:nome,conteudo:conteudo,mime:mime,binario:binario};
   try{
     var dados;
     if(binario){
@@ -2415,7 +2505,27 @@ function baixar(nome,conteudo,mime,binario){
     document.body.appendChild(a); a.click();
     setTimeout(function(){ try{ URL.revokeObjectURL(url); a.remove(); }catch(e){} },2000);
     return true;
-  }catch(e){ console.error("download falhou:",e); return false; }
+  }catch(e){ console.error("[Ritmo] download falhou:",e); return false; }
+}
+
+/* Plano B para quando o navegador bloqueia o download — comum em PWA
+   instalado no iOS. Abre o arquivo numa aba, de onde dá para salvar
+   ou compartilhar pelo menu do sistema. */
+function abrirEmAba(){
+  if(!_ultimoArquivo) return false;
+  try{
+    var a=_ultimoArquivo, dados;
+    if(a.binario){
+      var b=new Uint8Array(a.conteudo.length);
+      for(var i=0;i<a.conteudo.length;i++) b[i]=a.conteudo.charCodeAt(i)&0xFF;
+      dados=b;
+    } else dados="\uFEFF"+a.conteudo;
+    var url=URL.createObjectURL(new Blob([dados],{type:a.mime}));
+    var w=window.open(url,"_blank");
+    if(!w) return false;
+    setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} },30000);
+    return true;
+  }catch(e){ console.error("[Ritmo] abrir em aba falhou:",e); return false; }
 }
 
 /* =====================================================================
@@ -3480,6 +3590,9 @@ function histBlocoCalc(id,n){
 }
 function prioDe(b){ return (b.p===undefined?1:b.p); }
 
+/* Só a primeira letra: text-transform:capitalize deixava "3 De Agosto". */
+function maiuscula(t){ return String(t).charAt(0).toUpperCase()+String(t).slice(1); }
+
 function saudacao(){
   var h=UI.agora.getHours();
   if(h<5) return "Ainda acordado";
@@ -3525,7 +3638,7 @@ function itemBloco(b,feito,estado,interativo,marcas,extras){
     +((marcas&&prioDe(b)===0)?" leve":"")
     +((marcas&&UI.pulso===b.id)?" pop":"");
   return '<li class="'+classes+'" style="--c:'+CORES[b.k]+'"'
-    +(interativo?' data-a="marcar:'+b.id+'"':'')+'>'
+    +(interativo?' data-a="marcar:'+escA(b.id)+'"':'')+'>'
     +'<span class="bl-hora">'+hhmm(b.t)+'</span>'
     +'<span class="bl-pino">'+icone(ICON[b.k],17)+'</span>'
     +'<span class="bl-tit">'+esc(b.titulo)
@@ -3612,6 +3725,10 @@ function render(){
 }
 
 /* ---- hoje ---- */
+/* A tela responde três perguntas, nesta ordem:
+   1. Como está meu dia?     -> saudação + barra de progresso
+   2. O que faço agora?      -> card Agora, sozinho, sem concorrência
+   3. Como está meu progresso? -> anéis + agenda curta                     */
 function viewHoje(d,vis,min){
   var atual=null,prox=null;
   for(var i=0;i<vis.length;i++){
@@ -3622,37 +3739,34 @@ function viewHoje(d,vis,min){
   var feitos=vis.filter(function(b){return d.feitos[b.id];}).length;
   var pct=vis.length?Math.round(feitos/vis.length*100):0;
   var mm=somaMin(d);
-  var av=avisoDia();
   var h="";
 
-  /* saudação */
-  /* Saudação com o resumo do dia em uma linha: dá o estado geral antes
-     do foco, sem competir com o card AGORA — que segue sendo a tese da tela. */
-  var resumo=[];
-  resumo.push(feitos+" de "+vis.length+" blocos");
-  if(mm>0) resumo.push(fmtMin(mm)+" de estudo");
-  if(d.treino) resumo.push("treino feito");
-  if(num(d.prot)>0) resumo.push(num(d.prot)+"g de proteína");
-  h+='<section class="dash-ola"><h2>'+saudacao()+', Gustavo</h2>'
-   + '<p>'+(d.sobrevivencia?"Modo sobrevivência ligado — só o essencial conta hoje."
-        :resumo.join(" · "))+'</p></section>';
+  /* ---------- 1. como está meu dia ---------- */
+  var dt=UI.agora;
+  h+='<section class="dash-ola">'
+   + '<span class="ola-data">'+maiuscula(NOMES_DIA[dt.getDay()])+', '+dt.getDate()
+   + ' de '+MES_NOME[dt.getMonth()]+'</span>'
+   + '<h2>'+saudacao()+(S.nome?', '+esc(S.nome):'')+'</h2>'
+   + '</section>';
 
-  /* bloco atual */
+  h+='<div class="dia-barra"><div class="db-topo">'
+   + '<span>'+pct+'% do dia concluído</span><b>'+feitos+'/'+vis.length+'</b></div>'
+   + '<div class="ptrack"><div class="pfill" style="width:'+pct+'%"></div></div></div>';
+
+  /* ---------- 2. o que faço agora ---------- */
   h+='<section class="agora" style="--c:'+cor+'">';
   if(atual){
     var dec=Math.min(1,(min-atual.t)/atual.dur);
     var rev=atual.titulo.toLowerCase().indexOf("revis")===0;
+    var mp=(atual.k==="estudo")?materiaDoBloco(hojeKey(),atual.id):null;
     h+='<div class="agora-bar" style="width:'+(dec*100)+'%"></div>'
       +'<div class="agora-tag"><i class="pulso"></i>agora</div>'
       +'<h2 class="agora-tit">'+esc(atual.titulo)+'</h2>'
-      +'<div class="agora-meta">'+hhmm(atual.t)+' → '+hhmm(atual.t+atual.dur)
+      +'<div class="agora-meta">'+hhmm(atual.t)+' — '+hhmm(atual.t+atual.dur)
       +' <span class="agora-falta">faltam '+(atual.t+atual.dur-min)+' min</span></div>'
-      +(function(){
-         var mp=(atual.k==="estudo")?materiaDoBloco(hojeKey(),atual.id):null;
-         return mp?'<div class="agora-mat">matéria de hoje: <b>'+esc(mp)+'</b></div>':'';
-       })()
+      +(mp?'<div class="agora-mat">matéria de hoje: <b>'+esc(mp)+'</b></div>':'')
       +(atual.nota?'<p class="agora-nota">'+esc(atual.nota)+'</p>':'')
-      +'<div class="agora-acoes"><button class="agora-btn'+(d.feitos[atual.id]?" done":"")+'" data-a="marcar:'+atual.id+'">'
+      +'<div class="agora-acoes"><button class="agora-btn'+(d.feitos[atual.id]?" done":"")+'" data-a="marcar:'+escA(atual.id)+'">'
       +(d.feitos[atual.id]?"✓ feito":"marcar como feito")+'</button>'
       +'<button class="agora-nota-btn" data-a="anotar:'+(rev?1:0)+'">'+(rev?"escrever as 3 linhas":"anotar")+'</button></div>';
   } else {
@@ -3662,52 +3776,54 @@ function viewHoje(d,vis,min){
   }
   h+='</section>';
 
-  /* próxima tarefa */
+  /* próxima atividade, sozinha */
   if(prox){
-    h+='<button class="dash-prox" data-a="marcar:'+prox.id+'" style="--c:'+CORES[prox.k]+'">'
+    h+='<button class="dash-prox" data-a="marcar:'+escA(prox.id)+'" style="--c:'+CORES[prox.k]+'">'
       +'<span class="prox-ic">'+icone(ICON[prox.k],18)+'</span>'
       +'<span class="prox-txt"><em>a seguir · '+hhmm(prox.t)+'</em><b>'+esc(prox.titulo)+'</b></span>'
       +'<span class="prox-em">em '+(prox.t-min)+' min</span></button>';
   }
 
-  /* resumo do dia */
-  h+='<div class="dash-resumo">'
-   + metrica(feitos+'<i>/'+vis.length+'</i>','blocos', pct/100, 'var(--roxo)')
-   + metrica(num(d.agua)+'<i>/'+metaAgua()+'</i>','água', num(d.agua)/metaAgua(), 'var(--verde)')
-   + metrica(num(d.prot)+'<i>g</i>','proteína', num(d.prot)/metaProt(), 'var(--ambar)')
-   + metrica((mm>=60?(mm/60).toFixed(1):mm)+'<i>'+(mm>=60?'h':'min')+'</i>','estudo', Math.min(1,mm/180), 'var(--roxo)')
-   + '</div>';
+  /* ---------- 3. como está meu progresso ---------- */
+  var ma=metaAgua(), mp2=metaProt();
+  var refs=Object.keys(d.refs||{}).length;
+  var anel=function(rot,valor,frac,cor,detalhe,acao){
+    var r=17, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(1,frac)));
+    return '<button class="anel-c"'+(acao?' data-a="'+acao+'"':'')+'>'
+      +'<span class="anel"><svg width="42" height="42" viewBox="0 0 42 42">'
+      +'<circle cx="21" cy="21" r="'+r+'" fill="none" stroke="var(--linha)" stroke-width="3.4"/>'
+      +'<circle cx="21" cy="21" r="'+r+'" fill="none" stroke="'+cor+'" stroke-width="3.4" '
+      +'stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" '
+      +'transform="rotate(-90 21 21)"/></svg><i>'+valor+'</i></span>'
+      +'<span class="anel-r">'+rot+'</span>'
+      +'<span class="anel-d">'+detalhe+'</span></button>';
+  };
 
-  /* barra de progresso */
-  h+='<div class="dash-prog"><div class="ptrack"><div class="pfill" style="width:'+pct+'%"></div></div>'
-   + '<span class="pnum">'+pct+'%</span></div>';
-
-  /* metas: só as que estão em andamento, em uma linha compacta */
   var metasAtivas=(S.metas2||[]).map(function(g){ return {g:g,P:progressoMeta(g)}; })
     .filter(function(x){ return x.P.pct<100; })
-    .sort(function(a,b){ return b.P.pct-a.P.pct; }).slice(0,3);
-  if(metasAtivas.length){
-    h+='<div class="metas-faixa">'+metasAtivas.map(function(x){
-      var cor=x.P.estado==="atrasada"?"var(--ambar)":"var(--roxo)";
-      var r=15.5, c=2*Math.PI*r, off=c*(1-Math.min(1,x.P.pct/100));
-      return '<button class="mf" data-a="tab:dados"><span class="mf-anel">'
-        +'<svg width="38" height="38" viewBox="0 0 38 38">'
-        +'<circle cx="19" cy="19" r="'+r+'" fill="none" stroke="var(--linha)" stroke-width="3"/>'
-        +'<circle cx="19" cy="19" r="'+r+'" fill="none" stroke="'+cor+'" stroke-width="3" '
-        +'stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" '
-        +'transform="rotate(-90 19 19)"/></svg>'
-        +'<i>'+Math.round(x.P.pct)+'</i></span>'
-        +'<span class="mf-t">'+esc(x.g.titulo)+'</span></button>';
-    }).join("")+'</div>';
-  }
+    .sort(function(a,b){ return b.P.pct-a.P.pct; });
 
-  /* aviso único */
-  var vz=VOZES[av.tipo]||VOZES.sugestao;
+  h+='<h3 class="sub">Progresso do dia</h3><div class="aneis">'
+   + anel("Água", num(d.agua), num(d.agua)/ma, "var(--verde)", "de "+ma+" copos", null)
+   + anel("Estudo", (mm>=60?(mm/60).toFixed(1)+"h":mm+"m"), Math.min(1,mm/120), "var(--azul)",
+          "de 2h por dia", "tab:estudo")
+   + anel("Treino", d.treino?"✓":"—", d.treino?1:0, "var(--laranja)",
+          d.treino?esc(d.treino):"não feito", "tab:treino")
+   + anel("Comida", refs+"/"+REFEICOES.length, refs/REFEICOES.length, "var(--ambar)",
+          num(d.prot)+"g de "+mp2+"g", null)
+   + (metasAtivas.length
+      ? anel("Metas", Math.round(metasAtivas[0].P.pct)+"%", metasAtivas[0].P.pct/100, "var(--roxo)",
+             esc(metasAtivas[0].g.titulo), "tab:dados")
+      : "")
+   + '</div>';
+
+  /* ---------- assistente: uma mensagem só ---------- */
+  var av=avisoDia(), vz=VOZES[av.tipo]||VOZES.sugestao;
   h+='<div class="dash-aviso '+av.tom+'"><span class="aviso-ic"></span>'
    + '<div class="aviso-txt"><span class="voz">'+vz.ic+' '+vz.lab+'</span>'
    + '<p>'+esc(av.txt)+'</p></div></div>';
 
-  /* proposta de replanejamento — só aparece se você pediu */
+  /* proposta de replanejamento, quando pedida */
   if(UI.plano){
     var pl=UI.plano;
     h+='<div class="plano"><div class="plano-top"><b>Proposta para o resto do dia</b>'
@@ -3727,7 +3843,7 @@ function viewHoje(d,vis,min){
           +(pl.cortados.length>=4?"O dia já estava cheio demais — escolher o que cai é parte do trabalho."
             :"Fica para amanhã.")+'</p>';
       }
-      h+='<p class="plano-nota">A aula e os blocos já feitos não se movem. Isso vale só para hoje — o molde da sua rotina continua igual.</p>';
+      h+='<p class="plano-nota">A aula e os blocos já feitos não se movem. Isso vale só para hoje.</p>';
     }
     h+='<div class="plano-btns">'
       +(pl.mudancas.length?'<button class="btn-salvar" data-a="plano-ok">aplicar só hoje</button>':'')
@@ -3738,10 +3854,8 @@ function viewHoje(d,vis,min){
       +'<div class="plano-btns"><button class="btn-ghost-mini" data-a="plano-undo">voltar aos horários originais</button></div></div>';
   }
 
-  /* sugestões do motor de regras */
-  /* o dashboard já mostra a regra do topo; aqui vêm as seguintes,
-     senão o mesmo texto aparecia duas vezes na mesma tela. */
-  var sug=motorRegras().slice(1).filter(function(x){ return x.pri>=40; }).slice(0,3);
+  /* sugestões seguintes */
+  var sug=motorRegras().slice(1).filter(function(x){ return x.pri>=40; }).slice(0,2);
   if(sug.length){
     h+='<h3 class="sub">Assistente Ritmo</h3><div class="sugs">'
       +sug.map(function(x){
@@ -3754,15 +3868,35 @@ function viewHoje(d,vis,min){
       }).join("")+'</div>';
   }
 
-  /* remédio */
+  /* medicação */
   var jm=janelaMed();
   if(jm){
     var ativo = min>=jm.ini && min<jm.fim;
     h += '<div class="med'+(ativo?" on":"")+'"><span class="med-dot"></span><div class="med-txt">'
-      + (d.med?"Remédio tomado hoje":"Você tomou o remédio hoje?")
+      + (d.med?"Medicação tomada hoje":"Você tomou a medicação hoje?")
       + '<em>'+(ativo?"janela ativa até "+hhmm(jm.fim):"janela: "+hhmm(jm.ini)+" → "+hhmm(jm.fim))+'</em></div>'
       + '<button class="med-btn" data-a="med-check">'+(d.med?"✓ sim":"marcar")+'</button></div>';
   }
+
+  /* ---------- agenda: só o que vem, com opção de abrir o dia ---------- */
+  var restantes=vis.filter(function(b){ return b.t+b.dur>min; });
+  var lista = UI.diaTodo ? vis : restantes.slice(0,4);
+  h+='<h3 class="sub">Agenda</h3>';
+  if(!lista.length){
+    h+='<div class="vazio">Nada mais agendado hoje.</div>';
+  } else {
+    h+='<ul class="timeline">'+lista.map(function(b){
+      var feito=!!d.feitos[b.id];
+      var estado=(atual&&atual.id===b.id)?"atual":((min>=b.t+b.dur&&!feito)?"passou":"");
+      var pico=(b.k==="estudo")&&dentroJanela(b.t);
+      var mpb=(b.k==="estudo")?materiaDoBloco(hojeKey(),b.id):null;
+      return itemBloco(b,feito,estado,true,true,
+        (mpb?'<i class="bl-mat">'+esc(mpb)+'</i>':'')+(pico?'<i class="bl-pico">na janela</i>':''));
+    }).join("")+'</ul>';
+  }
+  if(vis.length>lista.length || UI.diaTodo)
+    h+='<button class="ver-dia" data-a="dia-todo">'
+      +(UI.diaTodo?"mostrar só o que vem":"ver o dia inteiro ("+vis.length+" blocos)")+'</button>';
 
   /* sobrevivência */
   h+='<button class="sobrev'+(d.sobrevivencia?" on":"")+'" data-a="sobrev"><span class="sdot"></span><span>'
@@ -3771,28 +3905,17 @@ function viewHoje(d,vis,min){
       :"dia ruim? liga aqui e a rotina encolhe pro mínimo.")
     +'</em></span></button>';
 
-  /* linha do tempo */
-  h+='<h3 class="sub">A rotina de hoje</h3>';
-  h+='<ul class="timeline">'+vis.map(function(b){
-    var feito=!!d.feitos[b.id];
-    var estado=(atual&&atual.id===b.id)?"atual":((min>=b.t+b.dur&&!feito)?"passou":"");
-    var pico=(b.k==="estudo")&&dentroJanela(b.t);
-    var mp=(b.k==="estudo")?materiaDoBloco(hojeKey(),b.id):null;
-    return itemBloco(b,feito,estado,true,true,
-      (mp?'<i class="bl-mat">'+esc(mp)+'</i>':'')+(pico?'<i class="bl-pico">na janela</i>':''));
-  }).join("")+'</ul>';
-
   /* comida */
   h+='<h3 class="sub">Comida de hoje</h3><div class="refs">'
-    +REFEICOES.map(function(r){ return '<button class="ref'+(d.refs[r]?" on":"")+'" data-a="ref:'+r+'">'+r+'</button>'; }).join("")
+    +REFEICOES.map(function(r){ return '<button class="ref'+(d.refs[r]?" on":"")+'" data-a="ref:'+escA(r)+'">'+r+'</button>'; }).join("")
     +'</div>';
-  var mp=metaProt(), pctProt=Math.max(0,Math.min(100,num(d.prot)/mp*100));
-  h+='<div class="medidor"><div class="med-top"><span>Proteína</span><b>'+num(d.prot)+' / '+mp+' g</b></div>'
+  var pctProt=Math.max(0,Math.min(100,num(d.prot)/mp2*100));
+  h+='<div class="medidor"><div class="med-top"><span>Proteína</span><b>'+num(d.prot)+' / '+mp2+' g</b></div>'
     +'<div class="ptrack"><div class="pfill prot" style="width:'+pctProt+'%"></div></div>'
     +'<div class="quick"><button data-a="prot:20">+20g</button><button data-a="prot:30">+30g</button>'
     +'<button data-a="prot:40">+40g</button><button class="undo" data-a="prot:-20">−20g</button></div></div>';
-  var copos="", ma=metaAgua();
-  for(var c=0;c<ma;c++) copos+='<button class="copo'+(c<d.agua?" on":"")+'" data-a="agua:'+c+'"></button>';
+  var copos="";
+  for(var c=0;c<ma;c++) copos+='<button class="copo'+(c<d.agua?" on":"")+'" data-a="agua:'+c+'" aria-label="copo '+(c+1)+'"></button>';
   h+='<div class="medidor"><div class="med-top"><span>Água</span><b>'+num(d.agua)+' / '+ma+' copos</b></div>'
     +'<div class="copos">'+copos+'</div></div>';
   return h;
@@ -3824,9 +3947,9 @@ function viewTreino(d){
     return '<li class="ex'+(st?" "+st:"")+'"><div class="ex-head"><span class="ex-n">'+pad(i+1)+'</span>'
       +'<span class="ex-nome">'+esc(e[0])+'</span><span class="ex-series">'+e[1]+'</span></div>'
       +'<div class="ex-carga"><span class="ex-ult">'+(u?"último: "+u.kg+"kg × "+u.reps:"primeira vez")+'</span>'
-      +'<input class="in" type="number" inputmode="decimal" placeholder="kg" value="'+(r.kg||"")+'" data-f="kg'+i+'" data-ex="'+esc(e[0])+'" data-campo="kg">'
+      +'<input class="in" type="number" inputmode="decimal" placeholder="kg" value="'+(r.kg||"")+'" data-f="kg'+i+'" data-ex="'+escA(e[0])+'" data-campo="kg">'
       +'<span class="xx">×</span>'
-      +'<input class="in" type="number" inputmode="numeric" placeholder="reps" value="'+(r.reps||"")+'" data-f="rp'+i+'" data-ex="'+esc(e[0])+'" data-campo="reps">'
+      +'<input class="in" type="number" inputmode="numeric" placeholder="reps" value="'+(r.reps||"")+'" data-f="rp'+i+'" data-ex="'+escA(e[0])+'" data-campo="reps">'
       +'<span class="seta">'+seta+'</span></div></li>';
   }).join("")+'</ul>';
   h+='<button class="btn-grande" data-a="treino-ok">Concluir '+t.nome+' ('+preench+'/'+t.ex.length+' anotados) →</button>';
@@ -3955,7 +4078,7 @@ function viewEstudo(d){
   }
 
   h+='<h3 class="sub">Bloco de estudo</h3><div class="materias">'
-    +S.materias.map(function(m){ return '<button class="mat'+(m===UI.materia?" on":"")+'" data-a="mat:'+m+'">'+esc(m)+'</button>'; }).join("")
+    +S.materias.map(function(m){ return '<button class="mat'+(m===UI.materia?" on":"")+'" data-a="mat:'+escA(m)+'">'+esc(m)+'</button>'; }).join("")
     +'</div>';
 
   var total=(UI.pausa?300:1500),frac=1-UI.seg/total,R=74,C=2*Math.PI*R;
@@ -4031,7 +4154,7 @@ function viewNotas(){
   var h='<div class="comp'+(UI.editando?" editando":"")+'">'
     +'<textarea class="comp-txt" data-f="draft" rows="'+(UI.draft.split("\n").length>3?8:3)+'" placeholder="O que ficou na cabeça agora?">'+esc(UI.draft)+'</textarea>'
     +'<div class="comp-tags">'+tags().map(function(t){
-        return '<button class="tag'+(t===UI.tag?" on":"")+'" style="--c:'+corTag(t)+'" data-a="ntag:'+t+'">'+esc(t)+'</button>';
+        return '<button class="tag'+(t===UI.tag?" on":"")+'" style="--c:'+corTag(t)+'" data-a="ntag:'+escA(t)+'">'+esc(t)+'</button>';
       }).join("")+'</div>'
     +'<div class="comp-acoes"><div class="comp-esq">'
     +'<button class="btn-mini" data-a="modelo">modelo da aula</button>'
@@ -4047,7 +4170,7 @@ function viewNotas(){
       var c=t==="Tudo"?"":t==="Dúvidas"?abertas:t==="Favoritas"?favs
             :N.filter(function(n){return n.tag===t;}).length;
       return '<button class="filtro'+(t===UI.filtro?" on":"")
-        +(t==="Dúvidas"?" dv":"")+(t==="Favoritas"?" fv":"")+'" data-a="nfiltro:'+t+'">'
+        +(t==="Dúvidas"?" dv":"")+(t==="Favoritas"?" fv":"")+'" data-a="nfiltro:'+escA(t)+'">'
         +esc(t)+(c?'<i>'+c+'</i>':'')+'</button>';
     }).join("")+'</div>';
 
@@ -4122,7 +4245,7 @@ function viewMes(){
     if(temProva) pontos+='<i class="pt pv"></i>';
     if(temEv) pontos+='<i class="pt cp"></i>';
 
-    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" prova":"")+'" data-a="dsel:'+k+'">'
+    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" prova":"")+'" data-a="dsel:'+escA(k)+'">'
       +'<span class="mes-num">'+dnum+'</span>'
       +'<span class="mes-anel" style="opacity:'+(0.08+pct*0.44).toFixed(3)+'"></span>'
       +'<span class="mes-pts">'+pontos+'</span></button>';
@@ -4225,7 +4348,7 @@ function viewDados(){
       return '<button class="chip'+(n===pp[0]?" on":"")+'" data-a="per:'+pp[0]+'">'+pp[1]+'</button>';
     }).join("")+'</div>'
     +'<div class="filtros">'+FOCOS.map(function(f){
-      return '<button class="filtro'+(foco===f[0]?" on":"")+'" data-a="foco:'+f[0]+'">'+f[1]+'</button>';
+      return '<button class="filtro'+(foco===f[0]?" on":"")+'" data-a="foco:'+escA(f[0])+'">'+f[1]+'</button>';
     }).join("")+'</div>';
 
   /* --- leitura geral --- */
@@ -4280,7 +4403,7 @@ function viewDados(){
         var x='<div class="meta-c '+P.estado.replace(" ","-")+'">'
           +'<div class="meta-top"><div><b>'+esc(g.titulo)+'</b>'
           +'<em>'+(g.escopo==="ano"?"meta do ano":"meta do mês")+' · '+FONTES[g.fonte].lab+'</em></div>'
-          +'<button class="meta-x" data-a="meta-del:'+g.id+'">✕</button></div>'
+          +'<button class="meta-x" data-a="meta-del:'+escA(g.id)+'">✕</button></div>'
           +'<div class="meta-num"><b>'+fmtMeta(P.acum,g)+'</b><span>de '+fmtMeta(g.alvo,g)+'</span>'
           +'<i class="meta-pct">'+Math.round(P.pct)+'%</i></div>'
           +'<div class="ptrack"><div class="pfill" style="width:'+barra+'%;background:'+cor+'"></div></div>'
@@ -4304,8 +4427,8 @@ function viewDados(){
           x+='<p class="meta-nota">Sem progresso ainda — não dá pra projetar.</p>';
         if(g.fonte==="manual")
           x+='<div class="meta-manual"><input class="in-larga" type="number" inputmode="decimal" '
-            +'data-metaval="'+g.id+'" value="'+num(g.valor)+'">'
-            +'<button class="btn-ghost-mini" data-a="meta-inc:'+g.id+'">+'+(g.passo||1)+'</button></div>';
+            +'data-metaval="'+escA(g.id)+'" value="'+num(g.valor)+'">'
+            +'<button class="btn-ghost-mini" data-a="meta-inc:'+escA(g.id)+'">+'+(g.passo||1)+'</button></div>';
         return x+'</div>';
       }).join("");
     } else {
@@ -4503,7 +4626,7 @@ function viewAjustes(){
   var MENU=[
     ["rotina","lista","Rotina do dia","Horários, blocos, o que é essencial"],
     ["materias","estudo","Matérias","Nomes usados no estudo, provas e notas"],
-    ["remedio","remedio","Remédio e foco","Janela do Venvanse e check diário"],
+    ["remedio","remedio","Medicação e foco","Janela de efeito e check diário"],
     ["alertas","sino","Lembretes","Avisos no app e horários pro celular"],
     ["metas","dieta","Comida e água","Meta de proteína e copos por dia"],
     ["aparencia","tema","Aparência","Escuro ou claro"],
@@ -4521,7 +4644,7 @@ function viewAjustes(){
 
   if(!atual){
     h+='<ul class="menu">'+MENU.map(function(m){
-      return '<li><button data-a="sec:'+m[0]+'"><span class="menu-ic">'+icone(m[1],17)+'</span>'
+      return '<li><button data-a="sec:'+escA(m[0])+'"><span class="menu-ic">'+icone(m[1],17)+'</span>'
         +'<span class="menu-txt"><b>'+m[2]+'</b><em>'+m[3]+'</em></span>'
         +'<span class="menu-seta">'+icone("seta",16)+'</span></button></li>';
     }).join("")+'</ul>'
@@ -4535,11 +4658,14 @@ function viewAjustes(){
                ["claro","Claro","Fundo branco, pra sol na tela."]];
     h+=temas.map(function(t){
       var on=(S.tema||"escuro")===t[0];
-      return '<button class="tema-op'+(on?" on":"")+'" data-a="tema:'+t[0]+'">'
+      return '<button class="tema-op'+(on?" on":"")+'" data-a="tema:'+escA(t[0])+'">'
         +'<span class="tema-bola '+t[0]+'"></span><span class="tema-txt"><b>'+t[1]+'</b><em>'+t[2]+'</em></span>'
         +'<span class="tema-ck">'+(on?"✓":"")+'</span></button>';
     }).join("");
-    h+='<p class="explica">O escuro é o padrão porque o bloco em que você mais abre o app é a revisão das 23h20 — tela clara nesse horário atrapalha o sono.</p>';
+    h+='<p class="explica">O escuro é o padrão porque à noite, que é quando o app mais é aberto, tela clara atrapalha o sono.</p>'
+      +'<h3 class="sub">Seu nome</h3>'
+      +'<input class="in-texto" data-f="nome" placeholder="Como quer ser chamado" value="'+escA(S.nome||"")+'">'
+      +'<p class="explica">Usado só na saudação da tela inicial. Deixe em branco se preferir sem nome.</p>';
   }
 
   if(UI.sec==="materias"){
@@ -4559,13 +4685,13 @@ function viewAjustes(){
 
   if(UI.sec==="rotina"){
     h+='<div class="tipos">'+Object.keys(BLOCOS_PADRAO).map(function(k){
-        return '<button class="tipo'+(UI.tipo===k?" on":"")+'" data-a="tipo:'+k+'">'+NOME_TEMPLATE[k]+'</button>';
+        return '<button class="tipo'+(UI.tipo===k?" on":"")+'" data-a="tipo:'+escA(k)+'">'+NOME_TEMPLATE[k]+'</button>';
       }).join("")+'</div>';
 
     var destinos=Object.keys(BLOCOS_PADRAO).filter(function(k){ return k!==UI.tipo; });
     h+='<div class="rot-acoes"><span>Copiar este dia para:</span>'
       +destinos.map(function(k){
-        return '<button class="btn-ghost-mini" data-a="rot-copiar:'+k+'">'+NOME_TEMPLATE[k]+'</button>';
+        return '<button class="btn-ghost-mini" data-a="rot-copiar:'+escA(k)+'">'+NOME_TEMPLATE[k]+'</button>';
       }).join("")+'</div>';
 
     var lista=(S.blocos[UI.tipo]||[]).slice().sort(function(a,b){ return a.t-b.t; });
@@ -4574,25 +4700,25 @@ function viewAjustes(){
       var hb=histBloco(b.id,14), pr=prioDe(b);
       return '<div class="ed-bloco prio-'+pr+'">'
         +'<div class="ed-l1">'
-        +'<input class="in-hora" type="time" value="'+hhmm(b.t)+'" data-bl="'+b.id+'" data-campo="t">'
-        +'<input class="in-texto" value="'+esc(b.titulo)+'" data-bl="'+b.id+'" data-campo="titulo" data-f="t'+b.id+'">'
+        +'<input class="in-hora" type="time" value="'+hhmm(b.t)+'" data-bl="'+escA(b.id)+'" data-campo="t">'
+        +'<input class="in-texto" value="'+esc(b.titulo)+'" data-bl="'+escA(b.id)+'" data-campo="titulo" data-f="t'+b.id+'">'
         +'</div>'
         +'<div class="ed-l2">'
         +'<span class="campo-dur"><input class="in-dur" type="number" inputmode="numeric" '
-        +'value="'+b.dur+'" data-bl="'+b.id+'" data-campo="dur" aria-label="duração em minutos">'
+        +'value="'+b.dur+'" data-bl="'+escA(b.id)+'" data-campo="dur" aria-label="duração em minutos">'
         +'<i>min</i></span>'
-        +'<select class="in-cat" data-bl="'+b.id+'" data-campo="k">'
+        +'<select class="in-cat" data-bl="'+escA(b.id)+'" data-campo="k">'
         +Object.keys(NOME_CAT).map(function(c){ return '<option value="'+c+'"'+(b.k===c?" selected":"")+'>'+NOME_CAT[c]+'</option>'; }).join("")
         +'</select>'
-        +'<button class="ess-btn'+(b.e?" on":"")+'" data-a="bl-ess:'+b.id+'">essencial</button>'
+        +'<button class="ess-btn'+(b.e?" on":"")+'" data-a="bl-ess:'+escA(b.id)+'">essencial</button>'
         +'</div>'
         +'<div class="ed-l3">'
-        +'<button class="mini-b" data-a="bl-sobe:'+b.id+'"'+(idx===0?' disabled':'')+'>↑</button>'
-        +'<button class="mini-b" data-a="bl-desce:'+b.id+'"'+(idx===lista.length-1?' disabled':'')+'>↓</button>'
-        +'<button class="mini-b prio p'+pr+'" data-a="bl-prio:'+b.id+'">'+PRIO[pr][1]+'</button>'
-        +'<button class="mini-b" data-a="bl-dup:'+b.id+'">duplicar</button>'
+        +'<button class="mini-b" data-a="bl-sobe:'+escA(b.id)+'"'+(idx===0?' disabled':'')+'>↑</button>'
+        +'<button class="mini-b" data-a="bl-desce:'+escA(b.id)+'"'+(idx===lista.length-1?' disabled':'')+'>↓</button>'
+        +'<button class="mini-b prio p'+pr+'" data-a="bl-prio:'+escA(b.id)+'">'+PRIO[pr][1]+'</button>'
+        +'<button class="mini-b" data-a="bl-dup:'+escA(b.id)+'">duplicar</button>'
         +'<span class="ed-hist">'+(hb.t?hb.f+"/"+hb.t+" dias":"sem histórico")+'</span>'
-        +'<button class="del" data-a="bl-del:'+b.id+'">✕</button>'
+        +'<button class="del" data-a="bl-del:'+escA(b.id)+'">✕</button>'
         +'</div></div>';
     }).join("");
 
@@ -4610,7 +4736,7 @@ function viewAjustes(){
         +'<label>Duração (horas)<input class="in-larga" type="number" inputmode="numeric" value="'+S.med.horas+'" data-med="horas"></label></div>';
     }
     h+='<p class="explica">Os blocos de estudo dentro do intervalo ganham a marca "na janela". A ideia: matéria pesada dentro da janela, tarefa mecânica fora.</p>'
-      +'<p class="explica">São só os valores que você informar — o app não sabe nada sobre sua dose e não faz recomendação médica. Horário e ajuste é conversa com seu psiquiatra.</p>';
+      +'<p class="explica">São só os valores que você informar — o app não sabe nada sobre sua dose e não faz recomendação médica. Horário e ajuste é conversa com seu médico.</p>';
   }
 
   if(UI.sec==="alertas"){
@@ -4619,7 +4745,7 @@ function viewAjustes(){
       +'<button class="btn-ghost" data-a="pedir-perm">permitir notificação do navegador</button>'
       +'<p class="explica">Limite honesto: o navegador só avisa com o app aberto. Pra tocar com o celular no bolso, use o calendário ou os alarmes com estes horários:</p>'
       +[[hhmm(horaDe("treino")),"Treino"],[hhmm(horaDe("estudo")),"Estudo 1 — matéria pesada"],
-        [hhmm(horaDe("aula")),"Sair pra UNIVAP"],[hhmm(horaDe("revisao")),"Revisão de 15 min"]]
+        [hhmm(horaDe("aula")),"Sair para a aula"],[hhmm(horaDe("revisao")),"Revisão de 15 min"]]
         .map(function(l){ return '<div class="lembrete"><b>'+l[0]+'</b><span>'+l[1]+'</span></div>'; }).join("")
       +'<p class="explica">Os horários seguem a sua rotina editada. Se mudar um bloco, atualize o alarme também.</p>';
   }
@@ -4665,7 +4791,9 @@ function viewAjustes(){
       +'proteína, metas e estatísticas</em></span></button>'
       +'<p class="explica">Os dois arquivos são montados dentro do próprio aparelho, a partir dos seus '
       +'dados salvos. Nada é enviado para lugar nenhum e nada precisa de internet.</p>';
-    if(UI.expMsg) h+='<p class="explica" style="color:var(--verde)">'+esc(UI.expMsg)+'</p>';
+    if(UI.expMsg) h+='<p class="explica" style="color:'+(UI.expFalhou?"var(--ambar)":"var(--verde)")+'">'+esc(UI.expMsg)+'</p>';
+    if(UI.expFalhou)
+      h+='<button class="btn-ghost" data-a="exp-aba">abrir o arquivo em uma aba</button>';
   }
 
   if(UI.sec==="backup"){
@@ -4707,6 +4835,7 @@ document.addEventListener("input",function(ev){
   if(ds.f==="busca"){ UI.busca=t.value; render(); return; }
   if(ds.f==="bkp"){ UI.backup=t.value; return; }
   if(ds.f==="evhora"){ UI.novoEv.hora=t.value; return; }
+  if(ds.f==="nome"){ S.nome=t.value.slice(0,24); salvar(); return; }
   if(ds.f==="mtit"){ UI.novaMeta.titulo=t.value; return; }
   if(ds.f==="malvo"){ UI.novaMeta.alvo=t.value; return; }
   if(ds.f==="mfonte"){ UI.novaMeta.fonte=t.value; return; }
@@ -4771,7 +4900,7 @@ function acao(cmd,arg){
     if(!tit) return;
     var hr=null;
     if(UI.novoEv.hora){ var ph=UI.novoEv.hora.split(":").map(Number); hr=ph[0]*60+ph[1]; }
-    S.eventos=(S.eventos||[]).concat([{id:Date.now(),data:UI.diaSel,hora:hr,titulo:tit}]);
+    S.eventos=(S.eventos||[]).concat([{id:uid("e"),data:UI.diaSel,hora:hr,titulo:tit}]);
     UI.novoEv={hora:"",titulo:""};
     salvar(); render(); return;
   }
@@ -4873,6 +5002,11 @@ function acao(cmd,arg){
     }).catch(function(e){ UI.pwaMsg="erro: "+e.message; render(); });
     return;
   }
+  if(cmd==="exp-aba"){
+    UI.expMsg = abrirEmAba() ? "Arquivo aberto em outra aba. Use o menu de compartilhar para salvar."
+                             : "O navegador também bloqueou a abertura. Tente pelo Safari ou Chrome, fora do app instalado.";
+    UI.expFalhou=false; render(); return;
+  }
   if(cmd==="exp-per"){ UI.expPer=Number(arg); UI.expMsg=""; render(); return; }
   if(cmd==="exp-pdf"){
     try{
@@ -4880,7 +5014,8 @@ function acao(cmd,arg){
       var pdf=montarRelatorio(nP);
       var okP=baixar("ritmo-relatorio-"+chave(UI.agora)+".pdf", pdf, "application/pdf", true);
       UI.expMsg = okP ? "Relatório gerado ("+Math.round(pdf.length/1024)+" KB). Procure em Downloads ou no menu de compartilhar."
-                      : "Não foi possível salvar o arquivo aqui. Tente abrir o app em outra aba.";
+                      : "O navegador bloqueou o download.";
+      UI.expFalhou = !okP;
     }catch(e){ UI.expMsg="Erro ao gerar o PDF: "+e.message; }
     C={}; render(); return;
   }
@@ -4890,7 +5025,8 @@ function acao(cmd,arg){
       var xls=montarPlanilha(nX);
       var okX=baixar("ritmo-dados-"+chave(UI.agora)+".xls", xls, "application/vnd.ms-excel", false);
       UI.expMsg = okX ? "Planilha gerada ("+Math.round(xls.length/1024)+" KB). Abre no Excel, Numbers ou Google Sheets."
-                      : "Não foi possível salvar o arquivo aqui.";
+                      : "O navegador bloqueou o download.";
+      UI.expFalhou = !okX;
     }catch(e){ UI.expMsg="Erro ao gerar a planilha: "+e.message; }
     C={}; render(); return;
   }
@@ -4920,7 +5056,7 @@ function acao(cmd,arg){
     var mod=MODELOS[Number(arg)];
     if(mod){
       S.metas2=(S.metas2||[]).concat([{
-        id:"m"+Date.now().toString(36), titulo:mod.titulo, escopo:mod.escopo,
+        id:uid("m"), titulo:mod.titulo, escopo:mod.escopo,
         fonte:mod.fonte, alvo:mod.alvo, passo:mod.passo||1, unid:mod.unid,
         valor:0, hist:{}
       }]);
@@ -4947,7 +5083,7 @@ function acao(cmd,arg){
     var t=(UI.novaMeta.titulo||"").trim(), al=num(UI.novaMeta.alvo);
     if(!t||al<=0){ UI.msg="Dê um nome e um alvo maior que zero."; render(); return; }
     S.metas2=(S.metas2||[]).concat([{
-      id:"m"+Date.now().toString(36), titulo:t, escopo:UI.novaMeta.escopo,
+      id:uid("m"), titulo:t, escopo:UI.novaMeta.escopo,
       fonte:UI.novaMeta.fonte, alvo:al, passo:1, valor:0, hist:{}
     }]);
     UI.metaForm=false; salvar(); render(); return;
@@ -4985,6 +5121,7 @@ function acao(cmd,arg){
   if(cmd==="plano-undo"){ UI.plano=null; mudarDia({ajuste:null}); return; }
   if(cmd==="ir-rotina"){ UI.ajustes=true; UI.sec="rotina"; UI.msg=""; render(); return; }
   if(cmd==="ir-duvidas"){ UI.aba="notas"; UI.filtro="Dúvidas"; render(); return; }
+  if(cmd==="dia-todo"){ UI.diaTodo=!UI.diaTodo; render(); return; }
   if(cmd==="sobrev"){ mudarDia({sobrevivencia:!d.sobrevivencia}); return; }
   if(cmd==="ref"){
     var r=Object.assign({},d.refs);
@@ -5014,7 +5151,7 @@ function acao(cmd,arg){
   if(cmd==="pomo-zerar"){ pararPomo(); UI.pausa=false; UI.seg=1500; render(); return; }
   if(cmd==="prova-add"){
     if(!UI.novaProva.data) return;
-    S.provas.push({id:Date.now(),materia:UI.novaProva.materia,data:UI.novaProva.data});
+    S.provas.push({id:uid("p"),materia:UI.novaProva.materia,data:UI.novaProva.data});
     UI.novaProva.data=""; salvar(); render(); return;
   }
   if(cmd==="prova-del"){ S.provas=S.provas.filter(function(p){ return String(p.id)!==arg; }); salvar(); render(); return; }
@@ -5031,7 +5168,7 @@ function acao(cmd,arg){
       N=N.map(function(n){ return String(n.id)===String(UI.editando)?Object.assign(n,{txt:txt,tag:UI.tag,duvida:duv}):n; });
       UI.editando=null;
     } else {
-      N.unshift({id:Date.now(),txt:txt,tag:UI.tag,ts:Date.now(),fix:false,duvida:duv,resolvida:false});
+      N.unshift({id:uid("n"),txt:txt,tag:UI.tag,ts:Date.now(),fix:false,duvida:duv,resolvida:false});
     }
     UI.draft=""; UI.dv=false; salvarNotas(); render(); return;
   }
@@ -5253,12 +5390,24 @@ var PWA = (function(){
     if(!document.hidden){ UI.agora=new Date(); vigiar(); render(); }
   });
 
-  setInterval(function(){
-    UI.agora=new Date();
-    vigiar();
-    var tag=document.activeElement?document.activeElement.tagName:"";
-    if(!UI.rodando && tag!=="INPUT" && tag!=="TEXTAREA" && tag!=="SELECT") render();
-  },20000);
+  /* O relógio não precisa girar com o app em segundo plano: economiza
+     bateria e evita renders invisíveis. Ao voltar, o listener de
+     visibilidade atualiza tudo de uma vez. */
+  var pulso=null;
+  function ligarPulso(){
+    if(pulso) return;
+    pulso=setInterval(function(){
+      UI.agora=new Date();
+      vigiar();
+      var tag=document.activeElement?document.activeElement.tagName:"";
+      if(!UI.rodando && tag!=="INPUT" && tag!=="TEXTAREA" && tag!=="SELECT") render();
+    },20000);
+  }
+  function desligarPulso(){ if(pulso){ clearInterval(pulso); pulso=null; } }
+  ligarPulso();
+  if(document.addEventListener) document.addEventListener("visibilitychange",function(){
+    if(document.hidden) desligarPulso(); else ligarPulso();
+  });
 })();
 </script>
 </body>

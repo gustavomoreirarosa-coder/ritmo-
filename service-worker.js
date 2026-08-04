@@ -4,7 +4,7 @@
    O cache antigo é apagado na ativação; os dados do usuário vivem no
    IndexedDB e NUNCA são tocados por este arquivo.
    ===================================================================== */
-const VERSAO = 'ritmo-v1.0.0';
+const VERSAO = 'ritmo-v1.1.0';
 const CACHE_ESTATICO = `${VERSAO}-estatico`;
 const CACHE_DINAMICO = `${VERSAO}-dinamico`;
 const CACHE_FONTES   = `${VERSAO}-fontes`;
@@ -17,8 +17,12 @@ const PRE_CACHE = [
   './manifest.json',
   './icone-192.png',
   './icone-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './favicon-32.png'
 ];
+
+/* Splash screens do iOS: pesadas e usadas só na abertura. Ficam fora do
+   pré-cache e entram sob demanda, pela estratégia de imagem. */
 
 /* ---------------------------------------------------------------- instalação */
 self.addEventListener('install', evento => {
