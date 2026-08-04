@@ -46,10 +46,19 @@ nesse protocolo.
 
 Para conferir o que está guardado: Ajustes → Aplicativo → *verificar banco de dados*.
 
+## Rodar os testes
+
+```bash
+node testes.js
+```
+
+Sem dependências. Falha se qualquer tela ou função de domínio mudar sem
+intenção. Rode antes de publicar qualquer alteração.
+
 ## Publicar uma nova versão
 
 1. Edite o `index.html`
-2. Em `service-worker.js`, troque a linha `const VERSAO = 'ritmo-v1.0.0'`
+2. Em `service-worker.js`, troque a linha `const VERSAO = 'ritmo-v1.1.0'`
    por um número novo (`ritmo-v1.0.1`)
 3. Reenvie os arquivos
 
