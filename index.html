@@ -95,7 +95,7 @@ button,input,select,textarea{font-family:inherit}
 main{padding:0 20px;max-width:620px;margin:0 auto}
 
 /* alerta de bloco */
-.alerta{position:fixed;left:12px;right:12px;top:12px;z-index:60;background:#7C6BFF;color:#0E1020;
+body>.alerta,#app>.alerta{position:fixed;left:12px;right:12px;top:12px;z-index:60;background:#7C6BFF;color:#0E1020;
   border-radius:15px;padding:14px 16px;display:flex;align-items:center;gap:12px;
   box-shadow:0 12px 40px var(--sombra)}
 .alerta b{font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:15px;display:block}
@@ -332,7 +332,7 @@ h3.sub{font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,system-ui,sa
 [data-tema="claro"] .pt.es{background:#141A33}
 .mes-dia.hoje{border-color:#2BB3A3}
 .mes-dia.sel{border-color:var(--texto);box-shadow:0 0 0 2px var(--texto)}
-.mes-dia.prova{border-color:rgba(255,92,122,.6)}
+.mes-dia.com-prova{border-color:rgba(255,92,122,.6)}
 .legenda{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:6px}
 .legenda span{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--mute)}
 .veredito{background:linear-gradient(160deg,rgba(255,92,122,.14),var(--ink2));
@@ -850,7 +850,7 @@ nav{padding:var(--e2) 0 max(var(--e2),env(safe-area-inset-bottom))}
 .est.adiantada{color:var(--verde)}
 .meta-nota{margin:var(--e3) 0 0;font-size:12px;line-height:1.5;color:var(--mute)}
 .meta-nota.feita{color:var(--verde)}
-.meta-nota.alerta{color:var(--ambar)}
+.meta-nota.fora-do-prazo{color:var(--ambar)}
 .meta-manual{display:flex;gap:var(--e2);margin-top:var(--e3)}
 .meta-manual .in-larga{flex:1}
 .modelos{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--e3)}
@@ -1044,7 +1044,7 @@ button:focus-visible{outline:2px solid var(--roxo);outline-offset:3px;border-rad
 .mes-dia.hoje{border-color:var(--verde)}
 .mes-dia.sel{border-color:transparent;
   box-shadow:0 0 0 2px var(--roxo),var(--el1);background:var(--ink3)}
-.mes-dia.prova{border-color:color-mix(in srgb,var(--vermelho) 42%,transparent)}
+.mes-dia.com-prova{border-color:color-mix(in srgb,var(--vermelho) 42%,transparent)}
 .mes-nav{border-radius:var(--r2);width:40px;height:40px}
 .legenda{gap:14px;margin:var(--e3) 0 var(--e5)}
 
@@ -1311,10 +1311,106 @@ main{padding-left:calc(var(--e5) + env(safe-area-inset-left));
 [data-tema="claro"] .anel-d{color:#6C7080}
 [data-tema="claro"] .db-topo span{color:#5E6373}
 .anel i{font-size:11.5px}
+
+/* ---------- pomodoro ---------- */
+.pomo-fases{display:flex;gap:var(--e2);margin-bottom:var(--e4)}
+.pfase{flex:1;background:var(--ink2);border:1px solid var(--linha);border-radius:var(--r2);
+  padding:11px 4px;color:var(--mute);font-size:12px;cursor:pointer;line-height:1.25}
+.pfase i{display:block;font-style:normal;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:9.5px;margin-top:3px;opacity:.75}
+.pfase.on{background:var(--roxo);border-color:var(--roxo);color:#fff;font-weight:600}
+.pomo-c{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;
+  color:var(--fraco);margin-top:5px}
+
+/* ---------- selos das notas ---------- */
+.selo{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:8.5px;letter-spacing:.08em;
+  text-transform:uppercase;border:1px solid var(--linha);border-radius:5px;padding:2px 6px;
+  color:var(--mute)}
+.selo.pri-alta{color:var(--vermelho);border-color:color-mix(in srgb,var(--vermelho) 40%,transparent)}
+.selo.pri-media{color:var(--ambar);border-color:color-mix(in srgb,var(--ambar) 38%,transparent)}
+.selo.prazo.perto{color:var(--ambar);border-color:color-mix(in srgb,var(--ambar) 38%,transparent)}
+.selo.prazo.venceu{color:var(--vermelho);border-color:color-mix(in srgb,var(--vermelho) 45%,transparent);
+  background:color-mix(in srgb,var(--vermelho) 8%,transparent)}
+.selo.rec{color:var(--roxo)}
+.comp-extras{display:flex;gap:var(--e2);margin:var(--e3) 0 0;flex-wrap:wrap}
+.comp-extras .in-cat{flex:1;min-width:104px}
+.comp-extras .in-hora{flex:1;min-width:118px}
+.chk-txt{padding-left:2px}
+.chk-lista .chk[data-sub]{padding-left:var(--e5)}
+
+/* ---------- semana do calendário ---------- */
+.semana{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--e4)}
+.sem-dia{display:grid;grid-template-columns:52px 6px 1fr;gap:var(--e3);align-items:stretch;
+  background:var(--ink2);background-image:var(--luz);border:1px solid var(--linha);
+  border-radius:var(--r3);padding:var(--e3) var(--e4);color:var(--texto);cursor:pointer;
+  text-align:left;box-shadow:var(--el1);min-height:60px}
+.sem-dia.hoje{border-color:var(--verde)}
+.sem-dia.sel{box-shadow:0 0 0 2px var(--roxo),var(--el1)}
+.sd-cab{display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.sd-cab i{font-style:normal;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.sd-cab b{font-family:'Space Grotesk',sans-serif;font-size:20px;letter-spacing:-.04em}
+.sd-barra{background:var(--linha);border-radius:99px;display:flex;align-items:flex-end;overflow:hidden}
+.sd-barra span{width:100%;background:var(--roxo);border-radius:99px;transition:height 620ms var(--ease)}
+.sd-itens{display:flex;flex-wrap:wrap;gap:4px;align-content:center;padding:2px 0}
+.sd-p,.sd-b{font-style:normal;font-size:10px;border-radius:5px;padding:2px 6px;
+  border:1px solid var(--linha);color:var(--mute);white-space:nowrap}
+.sd-p.sd-prova{color:var(--vermelho);border-color:color-mix(in srgb,var(--vermelho) 38%,transparent)}
+.sd-p.sd-ev{color:var(--verde);border-color:color-mix(in srgb,var(--verde) 34%,transparent)}
+.sd-b{color:var(--c);border-color:color-mix(in srgb,var(--c) 30%,transparent)}
+.sd-b.ok{opacity:.45;text-decoration:line-through}
+.ev-rec{display:inline-block;font-style:normal;font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--roxo);margin-left:7px}
+.ev button{background:none;border:none;color:var(--fraco);cursor:pointer;padding:2px 3px;
+  display:flex;align-items:center}
+
+/* ---------- metas e resumo ---------- */
+.meta-selos{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.selo.cat{border-color:currentColor;opacity:.85}
+.meta-obs{margin:var(--e3) 0 0;font-size:12.5px;line-height:1.5;color:var(--mute);
+  border-left:2px solid var(--linha);padding-left:var(--e3)}
+.rot-campo{display:block;font-size:12px;color:var(--mute);margin-bottom:var(--e2)}
+.rot-campo input{margin-top:5px}
+.resumo-g{display:grid;grid-template-columns:1fr 1fr;gap:var(--e2);margin-bottom:var(--e3)}
+.rg{background:var(--ink2);background-image:var(--luz);border:1px solid var(--linha);
+  border-radius:var(--r3);padding:var(--e4);box-shadow:var(--el1)}
+.rg span{display:block;font-size:var(--t-micro);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute)}
+.rg b{display:block;font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;
+  letter-spacing:-.045em;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.rg i{display:block;font-style:normal;font-size:11px;color:var(--mute);line-height:1.4}
+
+/* ---------- skeleton, perigo ---------- */
+.skel{padding:calc(28px + env(safe-area-inset-top)) var(--e5) var(--e5);max-width:680px;margin:0 auto}
+.sk{background:linear-gradient(90deg,var(--ink2) 0%,var(--ink3) 50%,var(--ink2) 100%);
+  background-size:220% 100%;border-radius:var(--r2);animation:brilho 1.5s ease-in-out infinite}
+.sk-card{border-radius:var(--r4)}
+.sk-grade{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--e2);margin-top:var(--e4)}
+@keyframes brilho{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+
+.perigo{background:color-mix(in srgb,var(--vermelho) 8%,var(--ink2));
+  border:1px solid color-mix(in srgb,var(--vermelho) 40%,transparent);
+  border-radius:var(--r3);padding:var(--e4);margin-bottom:var(--e3)}
+.perigo b{display:block;font-size:14.5px;margin-bottom:6px}
+.perigo span{display:block;font-size:12.5px;line-height:1.55;color:var(--mute);margin-bottom:var(--e3)}
+.btn-perigo{background:var(--vermelho);border:none;color:#fff;border-radius:var(--r2);
+  padding:12px 18px;font-size:13.5px;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
-<div id="app"><div class="load">carregando seu ritmo…</div></div>
+<div id="app"><div class="skel" role="status" aria-label="Carregando">
+  <div class="sk sk-linha" style="width:38%;height:11px"></div>
+  <div class="sk sk-linha" style="width:62%;height:30px;margin-top:14px"></div>
+  <div class="sk sk-linha" style="width:100%;height:6px;margin-top:22px"></div>
+  <div class="sk sk-card" style="height:190px;margin-top:26px"></div>
+  <div class="sk sk-card" style="height:62px;margin-top:12px"></div>
+  <div class="sk-grade">
+    <div class="sk sk-card" style="height:118px"></div>
+    <div class="sk sk-card" style="height:118px"></div>
+    <div class="sk sk-card" style="height:118px"></div>
+  </div>
+</div></div>
 
 <script>
 /* ================= padrões ================= */
@@ -1324,6 +1420,28 @@ function temDuvida(t){
   var m = t.match(/n[ãa]o entendi:?\s*([\s\S]*?)(?:\n\s*o que cai|$)/i);
   return !!(m && m[1].trim().length > 2);
 }
+var PRI_NOTA=[["","sem prioridade"],["alta","alta"],["media","média"],["baixa","baixa"]];
+
+/* Progresso de uma nota com checklist: itens marcados sobre o total.
+   Subtarefas são linhas indentadas — a contagem é a mesma. */
+function progressoNota(n){
+  var linhas=String(n.txt||"").split("\n");
+  var f=0,tt=0;
+  linhas.forEach(function(l){
+    var m=l.match(/^\s*\[( |x)?\]/i);
+    if(!m) return;
+    tt++;
+    if((m[1]||"").toLowerCase()==="x") f++;
+  });
+  return {feitos:f,total:tt,pct:tt?f/tt:0};
+}
+/* Estado do prazo, para ordenar e colorir. */
+function prazoNota(n){
+  if(!n.prazo) return null;
+  var dd=diasAte(n.prazo);
+  return {dias:dd, vencida:dd<0, hoje:dd===0, perto:dd>=0&&dd<=2};
+}
+
 function renderTexto(n){
   var linhas=n.txt.split("\n");
   var temCheck=linhas.some(function(l){ return /^\s*\[[ x]?\]/i.test(l); });
@@ -1510,6 +1628,46 @@ function icone(nome,tam,esp){
     +'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';
 }
 
+/* =====================================================================
+   INTERNACIONALIZAÇÃO
+   Dicionário por idioma com fallback para a chave. Traduzir o app é
+   acrescentar um objeto aqui — nenhuma outra parte do código muda.
+   ===================================================================== */
+var IDIOMAS={
+  "pt-BR":{
+    nome:"Português (Brasil)",
+    hoje:"Hoje", mes:"Mês", treino:"Treino", estudo:"Estudo", notas:"Notas", dados:"Dados",
+    agora:"agora", aSeguir:"a seguir", feito:"feito", marcarFeito:"marcar como feito",
+    anotar:"anotar", agenda:"Agenda", progressoDia:"Progresso do dia",
+    agua:"Água", comida:"Comida", metas:"Metas", ajustes:"Ajustes",
+    bomDia:"Bom dia", boaTarde:"Boa tarde", boaNoite:"Boa noite", acordado:"Ainda acordado",
+    diaConcluido:"do dia concluído", semanaAtual:"esta semana", mesAtual:"este mês",
+    tempoProdutivo:"tempo produtivo", tempoDescanso:"descanso", tarefasConcluidas:"tarefas concluídas",
+    sequencia:"sequência", cancelar:"cancelar", salvar:"salvar", excluir:"excluir",
+    prioridade:"prioridade", prazo:"prazo", categoria:"categoria", observacoes:"observações",
+    alta:"alta", normal:"normal", baixa:"baixa"
+  },
+  "en-US":{
+    nome:"English (US)",
+    hoje:"Today", mes:"Month", treino:"Workout", estudo:"Study", notas:"Notes", dados:"Stats",
+    agora:"now", aSeguir:"next", feito:"done", marcarFeito:"mark as done",
+    anotar:"note", agenda:"Agenda", progressoDia:"Today's progress",
+    agua:"Water", comida:"Food", metas:"Goals", ajustes:"Settings",
+    bomDia:"Good morning", boaTarde:"Good afternoon", boaNoite:"Good evening", acordado:"Still up",
+    diaConcluido:"of the day done", semanaAtual:"this week", mesAtual:"this month",
+    tempoProdutivo:"focused time", tempoDescanso:"rest", tarefasConcluidas:"tasks done",
+    sequencia:"streak", cancelar:"cancel", salvar:"save", excluir:"delete",
+    prioridade:"priority", prazo:"due", categoria:"category", observacoes:"notes",
+    alta:"high", normal:"normal", baixa:"low"
+  }
+};
+/* Tradução com queda para pt-BR e, por fim, para a própria chave. */
+function t(chave){
+  var id=(typeof S!=="undefined" && S && S.idioma) ? S.idioma : "pt-BR";
+  var d=IDIOMAS[id]||IDIOMAS["pt-BR"];
+  return d[chave]!==undefined ? d[chave] : (IDIOMAS["pt-BR"][chave]!==undefined ? IDIOMAS["pt-BR"][chave] : chave);
+}
+
 /* ================= helpers ================= */
 function pad(n){ return String(n).padStart(2,"0"); }
 function hhmm(m){ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+":"+pad(m%60); }
@@ -1527,7 +1685,8 @@ function montarDiaCalc(d){
   return lista.sort(function(a,b){ return a.t-b.t; });
 }
 function diasAte(iso){
-  var h=new Date(); h.setHours(0,0,0,0);
+  var base=(typeof UI!=="undefined" && UI && UI.agora)?UI.agora:new Date();
+  var h=new Date(base.getFullYear(),base.getMonth(),base.getDate());
   var p=iso.split("-").map(Number);
   return Math.round((new Date(p[0],p[1]-1,p[2])-h)/86400000);
 }
@@ -1719,12 +1878,16 @@ var Persistencia = (function(){
       pacotes.treino.push({nome:n,historico:S.cargas[n]});
     });
     (S.provas||[]).forEach(function(p){ pacotes.provas.push({id:String(p.id),materia:p.materia,data:p.data}); });
-    (S.eventos||[]).forEach(function(e){ pacotes.calendario.push({id:String(e.id),data:e.data,hora:e.hora,titulo:e.titulo}); });
+    (S.eventos||[]).forEach(function(e){
+      pacotes.calendario.push({id:String(e.id),data:e.data,hora:e.hora,
+        titulo:e.titulo,rec:e.rec||""});
+    });
     (S.metas2||[]).forEach(function(g){ pacotes.progresso.push(Object.assign({},g)); });
 
     [["metas",S.metas],["med",S.med],["alertas",S.alertas],["tema",S.tema],
      ["materias",S.materias],["categorias",S.categorias],["rotacao",S.rotacao],
-     ["planoEstudo",S.planoEstudo]].forEach(function(par){
+     ["planoEstudo",S.planoEstudo],["nome",S.nome],["idioma",S.idioma],
+     ["pomo",S.pomo],["backupAuto",S.backupAuto]].forEach(function(par){
       pacotes.configuracoes.push({id:par[0],valor:par[1]});
     });
     return pacotes;
@@ -1938,6 +2101,40 @@ var Persistencia = (function(){
       return true;
     },
 
+    /* Cópia de segurança guardada no próprio banco, sobrescrita uma vez
+       por dia. Não substitui o backup manual — protege de erro de edição. */
+    async backupAutomatico(S_,N_){
+      if(!S_ || S_.backupAuto && S_.backupAuto.ativo===false) return false;
+      try{
+        var hoje=chave(UI.agora);
+        var atual=await DB.buscar("configuracoes","_backup");
+        if(atual && atual.quando===hoje) return false;
+        await DB.salvar("configuracoes",{
+          id:"_backup", quando:hoje,
+          valor:JSON.stringify({estado:S_,notas:N_}).slice(0,4500000)
+        });
+        log("backup automático do dia gravado");
+        return true;
+      }catch(e){ aviso("backup automático:",e.message); return false; }
+    },
+    async lerBackupAutomatico(){
+      try{
+        var b=await DB.buscar("configuracoes","_backup");
+        return b && b.valor ? {quando:b.quando, dados:b.valor} : null;
+      }catch(e){ return null; }
+    },
+    /* Apaga tudo. Só é chamado com dupla confirmação do usuário. */
+    async resetGeral(){
+      if(modo!=="indexeddb") { memoria={}; cache={}; return true; }
+      var nomes=Object.keys(DB.stores);
+      for(var i=0;i<nomes.length;i++){
+        try{ await DB.limpar(nomes[i]); }catch(e){ aviso("reset de",nomes[i],e.message); }
+      }
+      cache={};
+      log("reset geral executado pelo usuário");
+      return true;
+    },
+
     async diagnostico(){
       var out={modo:modo,stores:{}};
       if(modo==="indexeddb"){
@@ -1961,7 +2158,10 @@ function padrao(){
     metas:{prot:140,agua:8},
     med:{ativo:false,hora:450,horas:11},
     alertas:true, tema:"escuro", nome:"",
-    metas2:[], planoEstudo:{}, eventos:[], categorias:["Ideias","Geral"] 
+    metas2:[], planoEstudo:{}, eventos:[],
+    pomo:{ciclos:[],foco:25,curto:5,longo:15,ate:4},
+    backupAuto:{ativo:true,quando:null,dados:null},
+    idioma:"pt-BR", categorias:["Ideias","Geral"] 
   };
 }
 function diaVazio(){ return {feitos:{},sobrevivencia:false,minutos:{},treino:null,prot:0,agua:0,refs:{},med:false,ajuste:null}; }
@@ -1970,14 +2170,17 @@ var S = padrao();
 var N = [];
 var UI = {
   aba:"hoje", ajustes:false, sec:null, tipo:"semana",
-  materia:null, seg:1500, rodando:false, pausa:false, timer:null,
+  materia:null, seg:1500, fase:"foco", rodando:false, pausa:false, timer:null,
   reg:{}, novaProva:{materia:null,data:""},
   draft:"", tag:null, dv:false, editando:null, filtro:"Tudo", busca:"",
+  notaPri:"", notaPrazo:"", notaRec:"",
   backup:"", msg:"", agora:new Date(), alerta:null, ultimoBloco:null, plano:null,
-  mesRef:null, diaSel:null, novoEv:{hora:"",titulo:""}, per:30, foco:"tudo",
+  mesRef:null, diaSel:null, novoEv:{hora:"",titulo:"",rec:""}, per:30, foco:"tudo",
+  vistaCal:"mes", semanaRef:null,
   ultimoHTML:null, pulso:null, diaTodo:false, planoSem:null, materiaTocada:false,
-  metaForm:false, novaMeta:{titulo:"",escopo:"ano",fonte:"estudo_h",alvo:""},
-  expPer:30, expMsg:"", expFalhou:false, temAtualizacao:false, pwaMsg:""
+  metaForm:false, novaMeta:{titulo:"",escopo:"mes",fonte:"estudo_h",alvo:"",
+    categoria:"estudos",prioridade:"normal",prazo:"",obs:""},
+  expPer:30, expMsg:"", expFalhou:false, confirmaReset:false, temAtualizacao:false, pwaMsg:""
 };
 
 function hojeKey(){ return chave(UI.agora); }
@@ -2487,6 +2690,44 @@ function montarPlanilha(n){
   return x+'</Workbook>';
 }
 
+/* ---------- exportação em CSV ---------- */
+function csvCampo(v){
+  var t=(v===null||v===undefined)?"":String(v);
+  return /[";\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+}
+function montarCSV(n){
+  C={};
+  var serie=serieDias(n), linhas=[];
+  linhas.push(["Data","Dia","Blocos feitos","Blocos previstos","Conclusão %",
+               "Minutos de estudo","Treino","Proteína (g)","Água (copos)","Refeições"].join(";"));
+  serie.forEach(function(d){
+    linhas.push([d.k, NOMES_DIA[d.d.getDay()], d.feitos, d.total,
+      Math.round(d.pct*100), d.min, d.treino?"sim":"não",
+      d.prot, d.agua, d.refs].map(csvCampo).join(";"));
+  });
+  /* ponto e vírgula é o separador que o Excel em português espera */
+  return linhas.join("\r\n");
+}
+
+/* ---------- exportação em CSV ---------- */
+function csvCampo(v){
+  var t=(v===null||v===undefined)?"":String(v);
+  return /[";\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+}
+/* Ponto e vírgula: é o separador que o Excel em português espera. */
+function montarCSV(n){
+  C={};
+  var serie=serieDias(n), linhas=[];
+  linhas.push(["Data","Dia","Blocos feitos","Blocos previstos","Conclusao %",
+               "Minutos de estudo","Treino","Proteina (g)","Agua (copos)","Refeicoes"].join(";"));
+  serie.forEach(function(d){
+    linhas.push([d.k,NOMES_DIA[d.d.getDay()],d.feitos,d.total,
+      Math.round(d.pct*100),d.min,d.treino?"sim":"nao",
+      d.prot,d.agua,d.refs].map(csvCampo).join(";"));
+  });
+  return linhas.join("\r\n");
+}
+
 /* ---------- download local ---------- */
 var _ultimoArquivo=null;
 function baixar(nome,conteudo,mime,binario){
@@ -2739,11 +2980,27 @@ var FONTES={
   manual:    {lab:"Contagem manual",       unid:"",      modo:"soma"}
 };
 
+/* Prazo próprio da meta, quando definido, tem prioridade sobre o fim do período. */
+function prazoMeta(g){
+  if(!g.prazo) return null;
+  var p=g.prazo.split("-").map(Number);
+  return new Date(p[0],p[1]-1,p[2]);
+}
+function diasParaPrazo(g){
+  var d=prazoMeta(g);
+  return d===null?null:diasAte(g.prazo);
+}
+
 var MODELOS=[
   {titulo:"Estudar 800 horas",        escopo:"ano", fonte:"estudo_h",   alvo:800},
   {titulo:"Treinar 220 vezes",        escopo:"ano", fonte:"treinos",    alvo:220},
   {titulo:"Ler 20 livros",            escopo:"ano", fonte:"manual",     alvo:20,   passo:1},
   {titulo:"Economizar R$ 15.000",     escopo:"ano", fonte:"manual",     alvo:15000, passo:100, unid:" R$"},
+  {titulo:"Estudar 2 horas hoje",     escopo:"dia", fonte:"estudo_h",   alvo:2,  categoria:"estudos"},
+  {titulo:"Beber 8 copos hoje",       escopo:"dia", fonte:"agua_dias",  alvo:1,  categoria:"saude"},
+  {titulo:"Treinar 4 vezes na semana",escopo:"semana",fonte:"treinos",  alvo:4,  categoria:"exercicio"},
+  {titulo:"Estudar 12 horas na semana",escopo:"semana",fonte:"estudo_h",alvo:12, categoria:"estudos"},
+  {titulo:"Ler 30 páginas por dia",   escopo:"dia", fonte:"manual",     alvo:30, passo:5, categoria:"leitura"},
   {titulo:"Estudar 60 horas",         escopo:"mes", fonte:"estudo_h",   alvo:60},
   {titulo:"Treinar 20 vezes",         escopo:"mes", fonte:"treinos",    alvo:20},
   {titulo:"Completar 90% da rotina",  escopo:"mes", fonte:"rotina_pct", alvo:90},
@@ -2751,10 +3008,31 @@ var MODELOS=[
 ];
 
 /* Limites do período de uma meta e quanto dele já passou. */
+var CAT_META={
+  estudos:  {lab:"Estudos",     cor:"var(--azul)"},
+  trabalho: {lab:"Trabalho",    cor:"var(--roxo)"},
+  exercicio:{lab:"Exercícios",  cor:"var(--laranja)"},
+  leitura:  {lab:"Leitura",     cor:"var(--roxo2)"},
+  saude:    {lab:"Saúde",       cor:"var(--verde)"},
+  financas: {lab:"Finanças",    cor:"var(--ambar)"},
+  outra:    {lab:"Personalizada",cor:"var(--fraco)"}
+};
+var ESCOPOS=[["dia","Diária"],["semana","Semanal"],["mes","Mensal"],["ano","Anual"]];
+
 function periodoMeta(escopo){
-  var a=UI.agora.getFullYear(), m=UI.agora.getMonth();
-  var ini = escopo==="ano" ? new Date(a,0,1) : new Date(a,m,1);
-  var fim = escopo==="ano" ? new Date(a,11,31) : new Date(a,m+1,0);
+  var a=UI.agora.getFullYear(), m=UI.agora.getMonth(), hj=UI.agora.getDate();
+  var ini, fim;
+  if(escopo==="dia"){
+    ini=new Date(a,m,hj); fim=new Date(a,m,hj);
+  } else if(escopo==="semana"){
+    /* semana começando na segunda-feira */
+    var dow=(UI.agora.getDay()+6)%7;
+    ini=new Date(a,m,hj-dow); fim=new Date(a,m,hj-dow+6);
+  } else if(escopo==="ano"){
+    ini=new Date(a,0,1); fim=new Date(a,11,31);
+  } else {
+    ini=new Date(a,m,1); fim=new Date(a,m+1,0);
+  }
   var hoje=new Date(UI.agora.getFullYear(),UI.agora.getMonth(),UI.agora.getDate());
   var total=Math.round((fim-ini)/86400000)+1;
   var passados=Math.min(total, Math.round((hoje-ini)/86400000)+1);
@@ -3400,6 +3678,22 @@ function motorRegrasCalc(){
       acao:null});
   }
 
+  /* --- tarefa com prazo estourando --- */
+  var venc=N.filter(function(x){
+    if(!x.prazo) return false;
+    var p=progressoNota(x);
+    if(p.total && p.feitos===p.total) return false;
+    return diasAte(x.prazo)<=1;
+  }).sort(function(a,b){ return diasAte(a.prazo)-diasAte(b.prazo); })[0];
+  if(venc){
+    var dv2=diasAte(venc.prazo);
+    add({tipo:"atencao",pri:82,tom:dv2<0?"urgente":"atencao",
+      tit:dv2<0?"Tarefa vencida":dv2===0?"Tarefa vence hoje":"Tarefa vence amanhã",
+      txt:venc.txt.split("\n")[0].replace(/^\s*\[[ x]?\]\s*/i,"").slice(0,80)
+        +(venc.pri==="alta"?" — marcada como alta prioridade.":"."),
+      acao:{lab:"abrir notas",cmd:"tab:notas"}});
+  }
+
   /* --- sem treino registrado --- */
   var semTreino=0;
   for(var st=1;st<=14;st++){
@@ -3595,10 +3889,10 @@ function maiuscula(t){ return String(t).charAt(0).toUpperCase()+String(t).slice(
 
 function saudacao(){
   var h=UI.agora.getHours();
-  if(h<5) return "Ainda acordado";
-  if(h<12) return "Bom dia";
-  if(h<18) return "Boa tarde";
-  return "Boa noite";
+  if(h<5) return t("acordado");
+  if(h<12) return t("bomDia");
+  if(h<18) return t("boaTarde");
+  return t("boaNoite");
 }
 
 /* o dashboard continua com um aviso só: o topo do motor de regras */
@@ -3649,6 +3943,12 @@ function itemBloco(b,feito,estado,interativo,marcas,extras){
 }
 
 /* Minutos formatados de forma compacta: 45m, 1.5h. */
+/* Corta com reticências: texto truncado seco parece bug. */
+function corta(t,n){
+  t=String(t||"");
+  return t.length>n ? t.slice(0,n-1).trimEnd()+"…" : t;
+}
+
 function fmtMin(v){ return v>=60 ? (v/60).toFixed(1)+"h" : v+"m"; }
 
 /* ================= render ================= */
@@ -3750,7 +4050,7 @@ function viewHoje(d,vis,min){
    + '</section>';
 
   h+='<div class="dia-barra"><div class="db-topo">'
-   + '<span>'+pct+'% do dia concluído</span><b>'+feitos+'/'+vis.length+'</b></div>'
+   + '<span>'+pct+'% '+t("diaConcluido")+'</span><b>'+feitos+'/'+vis.length+'</b></div>'
    + '<div class="ptrack"><div class="pfill" style="width:'+pct+'%"></div></div></div>';
 
   /* ---------- 2. o que faço agora ---------- */
@@ -3803,18 +4103,52 @@ function viewHoje(d,vis,min){
     .filter(function(x){ return x.P.pct<100; })
     .sort(function(a,b){ return b.P.pct-a.P.pct; });
 
-  h+='<h3 class="sub">Progresso do dia</h3><div class="aneis">'
-   + anel("Água", num(d.agua), num(d.agua)/ma, "var(--verde)", "de "+ma+" copos", null)
-   + anel("Estudo", (mm>=60?(mm/60).toFixed(1)+"h":mm+"m"), Math.min(1,mm/120), "var(--azul)",
+  h+='<h3 class="sub">'+t("progressoDia")+'</h3><div class="aneis">'
+   + anel(t("agua"), num(d.agua), num(d.agua)/ma, "var(--verde)", "de "+ma+" copos", null)
+   + anel(t("estudo"), (mm>=60?(mm/60).toFixed(1)+"h":mm+"m"), Math.min(1,mm/120), "var(--azul)",
           "de 2h por dia", "tab:estudo")
-   + anel("Treino", d.treino?"✓":"—", d.treino?1:0, "var(--laranja)",
+   + anel(t("treino"), d.treino?"✓":"—", d.treino?1:0, "var(--laranja)",
           d.treino?esc(d.treino):"não feito", "tab:treino")
-   + anel("Comida", refs+"/"+REFEICOES.length, refs/REFEICOES.length, "var(--ambar)",
+   + anel(t("comida"), refs+"/"+REFEICOES.length, refs/REFEICOES.length, "var(--ambar)",
           num(d.prot)+"g de "+mp2+"g", null)
    + (metasAtivas.length
-      ? anel("Metas", Math.round(metasAtivas[0].P.pct)+"%", metasAtivas[0].P.pct/100, "var(--roxo)",
+      ? anel(t("metas"), Math.round(metasAtivas[0].P.pct)+"%", metasAtivas[0].P.pct/100, "var(--roxo)",
              esc(metasAtivas[0].g.titulo), "tab:dados")
       : "")
+   + '</div>';
+
+  /* ---------- resumo da semana e do mês ---------- */
+  var s7=serieDias(7), s30=serieDias(30);
+  var agrega=function(serie){
+    var o={min:0,treinos:0,pct:0,n:0,blocos:0};
+    serie.forEach(function(x){
+      o.min+=x.min; if(x.treino) o.treinos++;
+      o.blocos+=x.feitos;
+      if(x.reg){ o.pct+=x.pct; o.n++; }
+    });
+    o.media=o.n?o.pct/o.n:0;
+    return o;
+  };
+  var A7=agrega(s7), A30=agrega(s30);
+  /* Descanso = tempo dos blocos de base concluídos (pausas, livre, sono). */
+  var descanso=0;
+  vis.forEach(function(b){ if(b.k==="base" && d.feitos[b.id]) descanso+=b.dur; });
+  var seqD=sequencias();
+
+  h+='<h3 class="sub">Resumo</h3>'
+   + '<div class="resumo-g">'
+   + '<div class="rg"><span>'+t("semanaAtual")+'</span>'
+   +   '<b>'+Math.round(A7.media*100)+'%</b>'
+   +   '<i>'+(A7.min/60).toFixed(1)+'h de estudo · '+A7.treinos+' treinos</i></div>'
+   + '<div class="rg"><span>'+t("mesAtual")+'</span>'
+   +   '<b>'+Math.round(A30.media*100)+'%</b>'
+   +   '<i>'+(A30.min/60).toFixed(1)+'h de estudo · '+A30.treinos+' treinos</i></div>'
+   + '</div>'
+   + '<div class="dash-resumo">'
+   + metrica(fmtMin(mm),t("tempoProdutivo"), Math.min(1,mm/240), 'var(--azul)')
+   + metrica(fmtMin(descanso),t("tempoDescanso"), Math.min(1,descanso/180), 'var(--verde)')
+   + metrica(A30.blocos+'',t("tarefasConcluidas"), Math.min(1,A30.blocos/200), 'var(--roxo)')
+   + metrica(seqD.atual+'',t("sequencia"), Math.min(1,seqD.atual/21), 'var(--laranja)')
    + '</div>';
 
   /* ---------- assistente: uma mensagem só ---------- */
@@ -3881,7 +4215,7 @@ function viewHoje(d,vis,min){
   /* ---------- agenda: só o que vem, com opção de abrir o dia ---------- */
   var restantes=vis.filter(function(b){ return b.t+b.dur>min; });
   var lista = UI.diaTodo ? vis : restantes.slice(0,4);
-  h+='<h3 class="sub">Agenda</h3>';
+  h+='<h3 class="sub">'+t("agenda")+'</h3>';
   if(!lista.length){
     h+='<div class="vazio">Nada mais agendado hoje.</div>';
   } else {
@@ -4081,12 +4415,19 @@ function viewEstudo(d){
     +S.materias.map(function(m){ return '<button class="mat'+(m===UI.materia?" on":"")+'" data-a="mat:'+escA(m)+'">'+esc(m)+'</button>'; }).join("")
     +'</div>';
 
-  var total=(UI.pausa?300:1500),frac=1-UI.seg/total,R=74,C=2*Math.PI*R;
+  var cfp=cfgPomo();
+  h+='<div class="pomo-fases">'+[["foco","Foco",cfp.foco],["curto","Pausa curta",cfp.curto],
+      ["longo","Pausa longa",cfp.longo]].map(function(x){
+      return '<button class="pfase'+(UI.fase===x[0]?" on":"")+'" data-a="pomo-fase:'+x[0]+'">'
+        +x[1]+'<i>'+x[2]+'min</i></button>';
+    }).join("")+'</div>';
+  var total=segundosDaFase(UI.fase),frac=1-UI.seg/total,R=74,C=2*Math.PI*R;
   h+='<div class="pomo"><svg viewBox="0 0 180 180" class="ring">'
     +'<circle cx="90" cy="90" r="'+R+'" class="ring-bg"></circle>'
-    +'<circle cx="90" cy="90" r="'+R+'" class="ring-fg" id="ring" style="stroke-dasharray:'+C+';stroke-dashoffset:'+(C*(1-frac))+';stroke:'+(UI.pausa?CORES.treino:CORES.estudo)+'"></circle>'
+    +'<circle cx="90" cy="90" r="'+R+'" class="ring-fg" id="ring" style="stroke-dasharray:'+C+';stroke-dashoffset:'+(C*(1-frac))+';stroke:'+(UI.fase==="foco"?"var(--azul)":UI.fase==="curto"?"var(--verde)":"var(--laranja)")+'"></circle>'
     +'</svg><div class="pomo-in"><div class="pomo-t" id="reloj">'+pad(Math.floor(UI.seg/60))+':'+pad(UI.seg%60)+'</div>'
-    +'<div class="pomo-l">'+(UI.pausa?"pausa":"foco")+'</div></div></div>'
+    +'<div class="pomo-l">'+(UI.fase==="foco"?"foco":UI.fase==="curto"?"pausa curta":"pausa longa")+'</div>'
+    +'<div class="pomo-c">'+ciclosHoje()+' de '+cfp.ate+' até a longa</div></div></div>'
     +'<div class="pomo-btns"><button class="btn-grande roxo" data-a="pomo">'+(UI.rodando?"pausar":"começar")+'</button>'
     +'<button class="btn-ghost" data-a="pomo-zerar">zerar</button></div>';
 
@@ -4130,6 +4471,30 @@ function viewEstudo(d){
         return linhaBarra(m, v/maxPM, fmtMin(v));
       }).join("")+'</div>';
 
+  /* histórico do pomodoro */
+  var cic=(S.pomo.ciclos||[]);
+  if(cic.length){
+    var serie14=[], labs=[];
+    for(var ci=13;ci>=0;ci--){
+      var kd=chave(diasAtras(ci));
+      serie14.push(cic.filter(function(x){ return x.data===kd && x.fase==="foco"; }).length);
+      labs.push(ci%2===0?String(diasAtras(ci).getDate()):"");
+    }
+    var totalCic=cic.filter(function(x){ return x.fase==="foco"; }).length;
+    var minFoco=cic.reduce(function(a,x){ return a+(x.fase==="foco"?num(x.min):0); },0);
+    var pausas=cic.filter(function(x){ return x.fase!=="foco"; }).length;
+    h+='<h3 class="sub">Pomodoro</h3><div class="dash-resumo">'
+      + metrica(ciclosHoje()+'','ciclos hoje', Math.min(1,ciclosHoje()/8), 'var(--azul)')
+      + metrica(totalCic+'','ciclos no total', Math.min(1,totalCic/100), 'var(--azul)')
+      + metrica(fmtMin(minFoco)+'','tempo focado', Math.min(1,minFoco/3000), 'var(--roxo)')
+      + metrica(pausas+'','pausas', Math.min(1,pausas/100), 'var(--verde)')
+      + '</div>'
+      + '<div class="cartao"><div class="cartao-top"><span>Ciclos por dia · 14 dias</span></div>'
+      + grafBarras(serie14, labs, '#6B8AFF', 62)
+      + '<div class="cartao-pe">média de <b>'+(serie14.reduce(function(a,b){return a+b;},0)/14).toFixed(1)
+      + '</b> ciclos por dia</div></div>';
+  }
+
   /* revisões: o que está esfriando */
   var revs=S.materias.map(function(m){
       return {m:m, dias:ultimoEstudo(m)};
@@ -4156,9 +4521,20 @@ function viewNotas(){
     +'<div class="comp-tags">'+tags().map(function(t){
         return '<button class="tag'+(t===UI.tag?" on":"")+'" style="--c:'+corTag(t)+'" data-a="ntag:'+escA(t)+'">'+esc(t)+'</button>';
       }).join("")+'</div>'
+    +'<div class="comp-extras">'
+    +'<select class="in-cat" data-f="npri" aria-label="prioridade">'
+    +PRI_NOTA.map(function(x){
+        return '<option value="'+x[0]+'"'+((UI.notaPri||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
+      }).join("")+'</select>'
+    +'<input class="in-hora" type="date" data-f="nprazo" value="'+escA(UI.notaPrazo||"")+'" aria-label="prazo">'
+    +'<select class="in-cat" data-f="nrec" aria-label="recorrência">'
+    +RECORRENCIAS.map(function(x){
+        return '<option value="'+x[0]+'"'+((UI.notaRec||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
+      }).join("")+'</select></div>'
     +'<div class="comp-acoes"><div class="comp-esq">'
     +'<button class="btn-mini" data-a="modelo">modelo da aula</button>'
-    +'<button class="btn-mini" data-a="checklist">+ checklist</button></div><div class="comp-dir">'
+    +'<button class="btn-mini" data-a="checklist">+ checklist</button>'
+    +'<button class="btn-mini" data-a="subtarefa">+ subtarefa</button></div><div class="comp-dir">'
     +'<button class="btn-dv'+(UI.dv?" on":"")+'" data-a="ndv">⍰ dúvida</button>'
     +(UI.editando?'<button class="btn-ghost-mini" data-a="ncancel">cancelar</button>':'')
     +'<button class="btn-salvar" data-a="nsalvar">'+(UI.editando?"atualizar":"salvar")+'</button></div></div></div>';
@@ -4184,7 +4560,16 @@ function viewNotas(){
       if(!q) return true;
       return n.txt.toLowerCase().indexOf(q)>=0 || (n.tag||"").toLowerCase().indexOf(q)>=0;
     })
-     .sort(function(a,b){ return (b.fix?1:0)-(a.fix?1:0)||b.ts-a.ts; });
+     .sort(function(a,b){
+       /* fixadas primeiro; depois prazo mais próximo; depois prioridade; depois recentes */
+       var f=(b.fix?1:0)-(a.fix?1:0); if(f) return f;
+       var pa=a.prazo?diasAte(a.prazo):9999, pb=b.prazo?diasAte(b.prazo):9999;
+       if(pa!==pb) return pa-pb;
+       var ord={alta:0,media:1,baixa:2,"":3};
+       var oa=ord[a.pri||""], ob=ord[b.pri||""];
+       if(oa!==ob) return oa-ob;
+       return b.ts-a.ts;
+     });
 
   if(!lista.length){
     h+='<div class="vazio">'+(N.length===0
@@ -4198,6 +4583,14 @@ function viewNotas(){
       var ab=n.duvida&&!n.resolvida;
       return '<li class="nota'+(n.fix?" fix":"")+(ab?" duvida":"")+'" style="--c:'+(ab?"#FF5C7A":corTag(n.tag))+'">'
         +'<div class="nota-top"><span class="nota-tag">'+(ab?"⍰ ":"")+esc(n.tag)+'</span>'
+        +(n.pri?'<span class="selo pri-'+esc(n.pri)+'">'+esc(n.pri)+'</span>':'')
+        +(function(){
+            var pz=prazoNota(n);
+            if(!pz) return '';
+            var lab = pz.vencida?"venceu": pz.hoje?"hoje": pz.dias===1?"amanhã":"em "+pz.dias+"d";
+            return '<span class="selo prazo'+(pz.vencida?" venceu":pz.perto?" perto":"")+'">'+lab+'</span>';
+          })()
+        +(n.rec?'<span class="selo rec">repete</span>':'')
         +'<span class="nota-data">'+q+'</span>'
         +'<button class="nota-ic" data-a="nfix:'+n.id+'">'+(n.fix?"★":"☆")+'</button>'
         +'<button class="nota-ic apagar" data-a="ndel:'+n.id+'">✕</button></div>'
@@ -4209,6 +4602,35 @@ function viewNotas(){
   return h;
 }
 
+/* =====================================================================
+   CALENDÁRIO
+   Eventos podem repetir. A recorrência é calculada na leitura — nada é
+   materializado no banco, então mudar a regra corrige o passado e o
+   futuro de uma vez.
+   ===================================================================== */
+var RECORRENCIAS=[["","Não repete"],["d","Todo dia"],["u","Dias úteis"],
+                  ["s","Toda semana"],["m","Todo mês"]];
+
+/* O evento cai nesta data? */
+function eventoNoDia(ev,dataK,dt){
+  if(ev.data===dataK) return true;
+  if(!ev.rec) return false;
+  if(dataK<ev.data) return false;
+  var p=ev.data.split("-").map(Number);
+  var origem=new Date(p[0],p[1]-1,p[2]);
+  var difDias=Math.round((dt-origem)/86400000);
+  if(difDias<0) return false;
+  if(ev.rec==="d") return true;
+  if(ev.rec==="u") return dt.getDay()>=1 && dt.getDay()<=5;
+  if(ev.rec==="s") return difDias%7===0;
+  if(ev.rec==="m") return dt.getDate()===origem.getDate();
+  return false;
+}
+function eventosDoDia(dataK,dt){
+  return (S.eventos||[]).filter(function(e){ return eventoNoDia(e,dataK,dt); })
+    .sort(function(a,b){ return (a.hora==null?9999:a.hora)-(b.hora==null?9999:b.hora); });
+}
+
 /* ---- mês ---- */
 var MES_NOME=["janeiro","fevereiro","março","abril","maio","junho","julho",
   "agosto","setembro","outubro","novembro","dezembro"];
@@ -4216,12 +4638,19 @@ var MES_NOME=["janeiro","fevereiro","março","abril","maio","junho","julho",
 function viewMes(){
   if(!UI.mesRef) UI.mesRef=new Date(UI.agora.getFullYear(),UI.agora.getMonth(),1);
   if(!UI.diaSel) UI.diaSel=chave(UI.agora);
+  /* alternador entre mês e semana */
+  h='<div class="filtro-linha" style="margin-bottom:var(--e3)">'
+    +[["mes","Mês"],["semana","Semana"]].map(function(x){
+      return '<button class="chip'+((UI.vistaCal||"mes")===x[0]?" on":"")+'" data-a="cal-vista:'+x[0]+'">'+x[1]+'</button>';
+    }).join("")+'</div>';
+  if((UI.vistaCal||"mes")==="semana") return h+viewSemana();
+
   var ref=UI.mesRef, ano=ref.getFullYear(), mes=ref.getMonth();
   var primeiro=new Date(ano,mes,1), qtd=new Date(ano,mes+1,0).getDate();
   var offset=primeiro.getDay();
   var hojeK=chave(UI.agora);
 
-  var h='<div class="mes-top"><button class="mes-nav" data-a="mes:-1">‹</button>'
+  h+='<div class="mes-top"><button class="mes-nav" data-a="mes:-1">‹</button>'
     +'<div><div class="eyebrow">'+ano+'</div><h2 class="mes-nome">'+MES_NOME[mes]+'</h2></div>'
     +'<button class="mes-nav" data-a="mes:1" aria-label="Próximo mês">'+icone("seta",18)+'</button></div>';
 
@@ -4236,7 +4665,7 @@ function viewMes(){
     var f=reg?Object.keys(reg.feitos||{}).length:0;
     var pct=vis.length?Math.min(1,f/vis.length):0;
     var temProva=S.provas.some(function(p){ return p.data===k; });
-    var temEv=(S.eventos||[]).some(function(e){ return e.data===k; });
+    var temEv=eventosDoDia(k,dt).length>0;
     var mm=0; if(reg&&reg.minutos) Object.keys(reg.minutos).forEach(function(x){ mm+=reg.minutos[x]; });
 
     var pontos='';
@@ -4245,7 +4674,7 @@ function viewMes(){
     if(temProva) pontos+='<i class="pt pv"></i>';
     if(temEv) pontos+='<i class="pt cp"></i>';
 
-    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" prova":"")+'" data-a="dsel:'+escA(k)+'">'
+    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" com-prova":"")+'" data-a="dsel:'+escA(k)+'">'
       +'<span class="mes-num">'+dnum+'</span>'
       +'<span class="mes-anel" style="opacity:'+(0.08+pct*0.44).toFixed(3)+'"></span>'
       +'<span class="mes-pts">'+pontos+'</span></button>';
@@ -4280,21 +4709,70 @@ function viewMes(){
   if(reg.treino) h+='<p class="explica">Treino registrado: '+esc(reg.treino)+'</p>';
 
   /* eventos do dia */
-  var evs=(S.eventos||[]).filter(function(e){ return e.data===UI.diaSel; })
-                         .sort(function(a,b){ return (a.hora||0)-(b.hora||0); });
+  var evs=eventosDoDia(UI.diaSel,sel);
   h+='<h3 class="sub">Compromissos</h3>';
   if(evs.length){
     h+='<div class="evs">'+evs.map(function(e){
+      var rec=RECORRENCIAS.filter(function(r){ return r[0]===(e.rec||""); })[0];
       return '<div class="ev"><b>'+(e.hora!=null?hhmm(e.hora):"dia todo")+'</b>'
-        +'<span>'+esc(e.titulo)+'</span>'
-        +'<button data-a="ev-del:'+e.id+'">✕</button></div>';
+        +'<span>'+esc(e.titulo)
+        +(e.rec?'<i class="ev-rec">'+rec[1].toLowerCase()+'</i>':'')+'</span>'
+        +'<button data-a="ev-edit:'+escA(e.id)+'" aria-label="editar">'+icone("lista",13)+'</button>'
+        +'<button data-a="ev-del:'+escA(e.id)+'" aria-label="excluir">✕</button></div>';
     }).join("")+'</div>';
   }
   h+='<div class="add-ev">'
     +'<input class="in-hora" type="time" data-f="evhora" value="'+(UI.novoEv.hora||"")+'">'
-    +'<input class="in-texto" data-f="evtit" placeholder="Prova, consulta, entrega…" value="'+esc(UI.novoEv.titulo||"")+'">'
-    +'<button class="btn-salvar" data-a="ev-add">+</button></div>';
+    +'<input class="in-texto" data-f="evtit" placeholder="Prova, consulta, entrega…" value="'+escA(UI.novoEv.titulo||"")+'">'
+    +'<button class="btn-salvar" data-a="ev-add">'+(UI.novoEv.id?"salvar":"+")+'</button></div>'
+    +'<select class="in-cat" data-f="evrec" style="width:100%;margin-bottom:var(--e5)">'
+    +RECORRENCIAS.map(function(r){
+        return '<option value="'+r[0]+'"'+((UI.novoEv.rec||"")===r[0]?" selected":"")+'>'+r[1]+'</option>';
+      }).join("")+'</select>';
 
+  return h;
+}
+
+/* Visão de semana: sete colunas com os blocos e eventos de cada dia. */
+function viewSemana(){
+  var base=UI.semanaRef?new Date(UI.semanaRef):new Date(UI.agora);
+  var dow=(base.getDay()+6)%7;
+  var ini=new Date(base.getFullYear(),base.getMonth(),base.getDate()-dow);
+  var hojeK=chave(UI.agora);
+  var dias=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(ini); d.setDate(d.getDate()+i);
+    var k=chave(d), reg=S.dias[k];
+    var blocos=montarDia(d).filter(function(b){ return b.k!=="base"; });
+    dias.push({d:d,k:k,reg:reg,blocos:blocos,evs:eventosDoDia(k,d),
+      provas:S.provas.filter(function(p){ return p.data===k; })});
+  }
+  var fim=dias[6].d;
+  var h='<div class="mes-top"><button class="mes-nav" data-a="sem:-1" aria-label="Semana anterior">'+icone("voltar",18)+'</button>'
+    +'<div><div class="eyebrow">'+ini.getFullYear()+'</div>'
+    +'<h2 class="mes-nome">'+pad(ini.getDate())+'/'+pad(ini.getMonth()+1)
+    +' — '+pad(fim.getDate())+'/'+pad(fim.getMonth()+1)+'</h2></div>'
+    +'<button class="mes-nav" data-a="sem:1" aria-label="Próxima semana">'+icone("seta",18)+'</button></div>';
+
+  h+='<div class="semana">'+dias.map(function(x){
+    var feitos=x.reg?Object.keys(x.reg.feitos||{}).length:0;
+    var vis=x.reg?visiveis(x.reg,montarDia(x.d)):montarDia(x.d);
+    var pct=vis.length?Math.min(1,feitos/vis.length):0;
+    return '<button class="sem-dia'+(x.k===hojeK?" hoje":"")+(x.k===UI.diaSel?" sel":"")+'" '
+      +'data-a="sem-dia:'+escA(x.k)+'">'
+      +'<span class="sd-cab"><i>'+NOMES_DIA[x.d.getDay()].slice(0,3)+'</i><b>'+x.d.getDate()+'</b></span>'
+      +'<span class="sd-barra"><span style="height:'+(pct*100)+'%"></span></span>'
+      +'<span class="sd-itens">'
+      + x.provas.map(function(p){ return '<i class="sd-p sd-prova">'+esc(corta(p.materia,11))+'</i>'; }).join("")
+      + x.evs.slice(0,3).map(function(e){
+          return '<i class="sd-p sd-ev">'+(e.hora!=null?hhmm(e.hora)+" ":"")+esc(corta(e.titulo,14))+'</i>'; }).join("")
+      + x.blocos.filter(function(b){ return b.e; }).slice(0,3).map(function(b){
+          var ok=x.reg&&x.reg.feitos&&x.reg.feitos[b.id];
+          return '<i class="sd-b'+(ok?" ok":"")+'" style="--c:'+CORES[b.k]+'">'+esc(corta(b.titulo,16))+'</i>'; }).join("")
+      +'</span></button>';
+  }).join("")+'</div>';
+
+  h+='<p class="explica">Toque em um dia para abrir a agenda completa dele no mês.</p>';
   return h;
 }
 
@@ -4402,7 +4880,19 @@ function viewDados(){
         var barra=Math.min(100,P.pct);
         var x='<div class="meta-c '+P.estado.replace(" ","-")+'">'
           +'<div class="meta-top"><div><b>'+esc(g.titulo)+'</b>'
-          +'<em>'+(g.escopo==="ano"?"meta do ano":"meta do mês")+' · '+FONTES[g.fonte].lab+'</em></div>'
+          +'<em>'+({dia:"meta de hoje",semana:"meta da semana",mes:"meta do mês",ano:"meta do ano"}[g.escopo]||"meta")
+          +' · '+FONTES[g.fonte].lab+'</em>'
+          +'<span class="meta-selos">'
+          +(g.categoria?'<i class="selo cat" style="color:'+(CAT_META[g.categoria]||CAT_META.outra).cor+'">'
+             +(CAT_META[g.categoria]||CAT_META.outra).lab+'</i>':'')
+          +(g.prioridade&&g.prioridade!=="normal"?'<i class="selo pri-'+esc(g.prioridade)+'">'+esc(g.prioridade)+'</i>':'')
+          +(function(){
+              var dp=diasParaPrazo(g);
+              if(dp===null) return '';
+              return '<i class="selo prazo'+(dp<0?" venceu":dp<=3?" perto":"")+'">'
+                +(dp<0?"venceu":dp===0?"prazo hoje":"prazo em "+dp+"d")+'</i>';
+            })()
+          +'</span></div>'
           +'<button class="meta-x" data-a="meta-del:'+escA(g.id)+'">✕</button></div>'
           +'<div class="meta-num"><b>'+fmtMeta(P.acum,g)+'</b><span>de '+fmtMeta(g.alvo,g)+'</span>'
           +'<i class="meta-pct">'+Math.round(P.pct)+'%</i></div>'
@@ -4415,7 +4905,7 @@ function viewDados(){
           +'<span class="est '+P.estado.replace(" ","-")+'"><em>situação</em>'+P.estado+'</span>'
           +'</div>';
         if(P.dataPrevista && P.estado!=="feita")
-          x+='<p class="meta-nota'+(P.dataPrevista>P.per.fim?' alerta':'')+'">'
+          x+='<p class="meta-nota'+(P.dataPrevista>P.per.fim?' fora-do-prazo':'')+'">'
             +'No ritmo atual, você chega ao alvo em '+dataCurta(P.dataPrevista)
             +(P.dataPrevista>P.per.fim
                ? ' — depois do fim do período. Para fechar a tempo seriam '
@@ -4425,6 +4915,7 @@ function viewDados(){
           x+='<p class="meta-nota feita">Meta batida. Nada a fazer aqui.</p>';
         else if(!P.ritmo)
           x+='<p class="meta-nota">Sem progresso ainda — não dá pra projetar.</p>';
+        if(g.obs) x+='<p class="meta-obs">'+esc(g.obs)+'</p>';
         if(g.fonte==="manual")
           x+='<div class="meta-manual"><input class="in-larga" type="number" inputmode="decimal" '
             +'data-metaval="'+escA(g.id)+'" value="'+num(g.valor)+'">'
@@ -4442,9 +4933,21 @@ function viewDados(){
             +'<span>'+esc(m.titulo)+'</span><i>'+(m.escopo==="ano"?"ano":"mês")+'</i></button>';
         }).join("")+'</div>';
     if(UI.metaForm){
-      h+='<div class="cartao"><input class="in-texto" data-f="mtit" placeholder="Nome da meta" value="'+esc(UI.novaMeta.titulo)+'" style="margin-bottom:8px">'
-        +'<div class="tipos"><button class="tipo'+(UI.novaMeta.escopo==="ano"?" on":"")+'" data-a="mesc:ano">Ano</button>'
-        +'<button class="tipo'+(UI.novaMeta.escopo==="mes"?" on":"")+'" data-a="mesc:mes">Mês</button></div>'
+      h+='<div class="cartao"><input class="in-texto" data-f="mtit" placeholder="Nome da meta" value="'+escA(UI.novaMeta.titulo)+'" style="margin-bottom:8px">'
+        +'<div class="tipos">'+ESCOPOS.map(function(e){
+            return '<button class="tipo'+(UI.novaMeta.escopo===e[0]?" on":"")+'" data-a="mesc:'+e[0]+'">'+e[1]+'</button>';
+          }).join("")+'</div>'
+        +'<div class="metas" style="margin-bottom:8px">'
+        +'<label>Categoria<select class="in-larga" data-f="mcat">'
+        +Object.keys(CAT_META).map(function(c){
+            return '<option value="'+c+'"'+(UI.novaMeta.categoria===c?" selected":"")+'>'+CAT_META[c].lab+'</option>';
+          }).join("")+'</select></label>'
+        +'<label>Prioridade<select class="in-larga" data-f="mpri">'
+        +["normal","alta","baixa"].map(function(x){
+            return '<option value="'+x+'"'+(UI.novaMeta.prioridade===x?" selected":"")+'>'+x+'</option>';
+          }).join("")+'</select></label></div>'
+        +'<label class="rot-campo">Prazo (opcional)<input class="in-larga" type="date" data-f="mprazo" value="'+escA(UI.novaMeta.prazo||"")+'"></label>'
+        +'<label class="rot-campo">Observações<input class="in-texto" data-f="mobs" placeholder="Por que essa meta importa" value="'+escA(UI.novaMeta.obs||"")+'"></label>'
         +'<select class="in-cat" data-f="mfonte" style="width:100%;margin-bottom:8px">'
         +Object.keys(FONTES).map(function(k){
             return '<option value="'+k+'"'+(UI.novaMeta.fonte===k?" selected":"")+'>'+FONTES[k].lab+'</option>';
@@ -4663,6 +5166,13 @@ function viewAjustes(){
         +'<span class="tema-ck">'+(on?"✓":"")+'</span></button>';
     }).join("");
     h+='<p class="explica">O escuro é o padrão porque à noite, que é quando o app mais é aberto, tela clara atrapalha o sono.</p>'
+      +'<h3 class="sub">Idioma</h3>'
+      +'<select class="in-larga" data-f="idioma" style="width:100%">'
+      +Object.keys(IDIOMAS).map(function(k){
+          return '<option value="'+k+'"'+((S.idioma||"pt-BR")===k?" selected":"")+'>'+IDIOMAS[k].nome+'</option>';
+        }).join("")+'</select>'
+      +'<p class="explica">A tradução cobre a tela inicial e os rótulos principais. '
+      +'O conteúdo que você escreve — blocos, matérias, notas — fica como está.</p>'
       +'<h3 class="sub">Seu nome</h3>'
       +'<input class="in-texto" data-f="nome" placeholder="Como quer ser chamado" value="'+escA(S.nome||"")+'">'
       +'<p class="explica">Usado só na saudação da tela inicial. Deixe em branco se preferir sem nome.</p>';
@@ -4786,6 +5296,9 @@ function viewAjustes(){
       +'<button class="exp-b" data-a="exp-pdf"><span class="exp-ic">▤</span>'
       +'<span class="exp-t"><b>Relatório em PDF</b><em>resumo, produtividade, estudos, treino, '
       +'alimentação, rotina, metas e evolução — com gráficos</em></span></button>'
+      +'<button class="exp-b" data-a="exp-csv"><span class="exp-ic">'+icone("lista",17)+'</span>'
+      +'<span class="exp-t"><b>CSV simples</b><em>uma linha por dia — abre em qualquer '
+      +'planilha, editor de texto ou ferramenta de análise</em></span></button>'
       +'<button class="exp-b" data-a="exp-xls"><span class="exp-ic">▦</span>'
       +'<span class="exp-t"><b>Planilha para Excel</b><em>7 abas: rotina, estudos, treinos, água, '
       +'proteína, metas e estatísticas</em></span></button>'
@@ -4800,6 +5313,24 @@ function viewAjustes(){
     h+='<textarea class="backup" data-f="bkp" rows="5" placeholder="Toque em exportar, copie o texto e guarde numa nota do celular.">'+esc(UI.backup)+'</textarea>'
       +'<div class="backup-btns"><button class="btn-ghost" data-a="exportar">exportar</button>'
       +'<button class="btn-ghost" data-a="importar">restaurar</button></div>';
+
+    h+='<h3 class="sub">Backup automático</h3>'
+      +'<button class="btn-ghost" data-a="bkp-auto">'
+      +((S.backupAuto&&S.backupAuto.ativo!==false)?"✓ ligado — uma cópia por dia":"desligado")+'</button>'
+      +'<button class="btn-ghost" data-a="bkp-ver" style="margin-top:8px">ver a última cópia automática</button>'
+      +'<p class="explica">Guardado no próprio banco do aparelho, sobrescrito uma vez por dia. '
+      +'Protege de erro de edição, mas não substitui o backup manual: se você desinstalar o app, some junto.</p>';
+
+    h+='<h3 class="sub">Apagar tudo</h3>';
+    if(UI.confirmaReset){
+      h+='<div class="perigo"><b>Isso apaga todos os seus dados</b>'
+        +'<span>Rotina, histórico, notas, metas e configurações. Não dá para desfazer. '
+        +'Exporte um backup antes se tiver qualquer dúvida.</span>'
+        +'<div class="plano-btns"><button class="btn-perigo" data-a="reset-ok">apagar definitivamente</button>'
+        +'<button class="btn-ghost-mini" data-a="reset-nao">cancelar</button></div></div>';
+    } else {
+      h+='<button class="btn-ghost" data-a="reset-pedir">apagar todos os dados…</button>';
+    }
   }
   if(UI.msg) h+='<p class="explica">'+esc(UI.msg)+'</p>';
   h+='</div></div>';
@@ -4833,18 +5364,27 @@ document.addEventListener("input",function(ev){
   if(ds.ex){ UI.reg[ds.ex]=UI.reg[ds.ex]||{}; UI.reg[ds.ex][ds.campo]=t.value; return; }
   if(ds.f==="draft"){ UI.draft=t.value; return; }
   if(ds.f==="busca"){ UI.busca=t.value; render(); return; }
+  if(ds.f==="npri"){ UI.notaPri=t.value; return; }
+  if(ds.f==="nprazo"){ UI.notaPrazo=t.value; return; }
+  if(ds.f==="nrec"){ UI.notaRec=t.value; return; }
   if(ds.f==="bkp"){ UI.backup=t.value; return; }
   if(ds.f==="evhora"){ UI.novoEv.hora=t.value; return; }
   if(ds.f==="nome"){ S.nome=t.value.slice(0,24); salvar(); return; }
+  if(ds.f==="idioma"){ S.idioma=t.value; salvar(); render(); return; }
   if(ds.f==="mtit"){ UI.novaMeta.titulo=t.value; return; }
   if(ds.f==="malvo"){ UI.novaMeta.alvo=t.value; return; }
   if(ds.f==="mfonte"){ UI.novaMeta.fonte=t.value; return; }
+  if(ds.f==="mcat"){ UI.novaMeta.categoria=t.value; return; }
+  if(ds.f==="mpri"){ UI.novaMeta.prioridade=t.value; return; }
+  if(ds.f==="mprazo"){ UI.novaMeta.prazo=t.value; return; }
+  if(ds.f==="mobs"){ UI.novaMeta.obs=t.value; return; }
   if(ds.metaval){
     var gm=(S.metas2||[]).filter(function(x){ return x.id===ds.metaval; })[0];
     if(gm){ gm.valor=num(t.value); registraHist(gm); salvar(); }
     return;
   }
   if(ds.f==="evtit"){ UI.novoEv.titulo=t.value; return; }
+  if(ds.f==="evrec"){ UI.novoEv.rec=t.value; render(); return; }
   if(ds.f==="pdata"){ UI.novaProva.data=t.value; return; }
   if(ds.f==="psel"){ UI.novaProva.materia=t.value; return; }
   if(ds.cat!==undefined){
@@ -4881,6 +5421,12 @@ document.addEventListener("change",function(ev){
   var ds=ev.target.dataset;
   if(ds.f==="psel") UI.novaProva.materia=ev.target.value;
   if(ds.f==="mfonte"){ UI.novaMeta.fonte=ev.target.value; render(); }
+  if(ds.f==="idioma"){ S.idioma=ev.target.value; salvar(); render(); }
+  if(ds.f==="mcat"){ UI.novaMeta.categoria=ev.target.value; }
+  if(ds.f==="mpri"){ UI.novaMeta.prioridade=ev.target.value; }
+  if(ds.f==="npri"){ UI.notaPri=ev.target.value; }
+  if(ds.f==="nrec"){ UI.notaRec=ev.target.value; }
+  if(ds.f==="evrec"){ UI.novoEv.rec=ev.target.value; }
   if(ds.bl && ds.campo==="k") render();
 });
 
@@ -4895,13 +5441,36 @@ function acao(cmd,arg){
   if(cmd==="dsel"){ UI.diaSel=arg; render(); return; }
   if(cmd==="per"){ UI.per=Number(arg); render(); return; }
   if(cmd==="foco"){ UI.foco=arg; render(); return; }
+  if(cmd==="cal-vista"){ UI.vistaCal=arg; render(); return; }
+  if(cmd==="sem"){
+    var b=UI.semanaRef?new Date(UI.semanaRef):new Date(UI.agora);
+    b.setDate(b.getDate()+Number(arg)*7); UI.semanaRef=b; render(); return;
+  }
+  if(cmd==="sem-dia"){ UI.diaSel=arg; UI.vistaCal="mes"; render(); return; }
+  if(cmd==="ev-edit"){
+    var alvo=(S.eventos||[]).filter(function(e){ return String(e.id)===arg; })[0];
+    if(alvo){
+      UI.novoEv={id:alvo.id, hora:alvo.hora!=null?hhmm(alvo.hora):"", titulo:alvo.titulo, rec:alvo.rec||""};
+      render();
+    }
+    return;
+  }
   if(cmd==="ev-add"){
     var tit=(UI.novoEv.titulo||"").trim();
     if(!tit) return;
     var hr=null;
     if(UI.novoEv.hora){ var ph=UI.novoEv.hora.split(":").map(Number); hr=ph[0]*60+ph[1]; }
-    S.eventos=(S.eventos||[]).concat([{id:uid("e"),data:UI.diaSel,hora:hr,titulo:tit}]);
-    UI.novoEv={hora:"",titulo:""};
+    if(UI.novoEv.id){
+      /* edição: preserva o id e a data de origem da recorrência */
+      S.eventos=(S.eventos||[]).map(function(e){
+        return String(e.id)===String(UI.novoEv.id)
+          ? Object.assign({},e,{hora:hr,titulo:tit,rec:UI.novoEv.rec||""}) : e;
+      });
+    } else {
+      S.eventos=(S.eventos||[]).concat([{id:uid("e"),data:UI.diaSel,hora:hr,
+        titulo:tit,rec:UI.novoEv.rec||""}]);
+    }
+    UI.novoEv={hora:"",titulo:"",rec:""};
     salvar(); render(); return;
   }
   if(cmd==="ev-del"){
@@ -4974,8 +5543,11 @@ function acao(cmd,arg){
   if(cmd==="pedir-perm"){
     try{
       if(window.Notification) Notification.requestPermission().then(function(p){
-        UI.msg = p==="granted" ? "Notificação liberada (só funciona com a aba aberta)."
-                               : "O navegador não liberou. Use os Lembretes do celular.";
+        if(p==="granted"){
+          var n=agendarAvisos();
+          UI.msg="Notificações liberadas. "+n+" aviso(s) agendado(s) para as próximas horas. "
+                +"Com o app fechado, o celular pode não entregar — mantenha também os lembretes do sistema.";
+        } else UI.msg="O navegador não liberou. Use os Lembretes do celular.";
         render();
       });
       else { UI.msg="Este navegador não suporta notificação aqui. Use os Lembretes."; render(); }
@@ -5001,6 +5573,17 @@ function acao(cmd,arg){
       UI.pwaMsg=linhas.join("\n"); render();
     }).catch(function(e){ UI.pwaMsg="erro: "+e.message; render(); });
     return;
+  }
+  if(cmd==="exp-csv"){
+    try{
+      var nC=UI.expPer||30;
+      var csv=montarCSV(nC);
+      var okC=baixar("ritmo-"+chave(UI.agora)+".csv", csv, "text/csv;charset=utf-8", false);
+      UI.expMsg = okC ? "CSV gerado com "+(csv.split("\r\n").length-1)+" linhas."
+                      : "O navegador bloqueou o download.";
+      UI.expFalhou=!okC;
+    }catch(e){ UI.expMsg="Erro ao gerar o CSV: "+e.message; }
+    C={}; render(); return;
   }
   if(cmd==="exp-aba"){
     UI.expMsg = abrirEmAba() ? "Arquivo aberto em outra aba. Use o menu de compartilhar para salvar."
@@ -5030,6 +5613,30 @@ function acao(cmd,arg){
     }catch(e){ UI.expMsg="Erro ao gerar a planilha: "+e.message; }
     C={}; render(); return;
   }
+  if(cmd==="bkp-auto"){
+    S.backupAuto=S.backupAuto||{};
+    S.backupAuto.ativo=!(S.backupAuto.ativo!==false);
+    salvar(); render(); return;
+  }
+  if(cmd==="bkp-ver"){
+    Persistencia.lerBackupAutomatico().then(function(b){
+      if(b){ UI.backup=b.dados; UI.msg="Cópia de "+b.quando+" carregada no campo acima. Toque em restaurar para aplicar."; }
+      else UI.msg="Ainda não há cópia automática. Ela é gravada alguns segundos após abrir o app.";
+      render();
+    });
+    return;
+  }
+  if(cmd==="reset-pedir"){ UI.confirmaReset=true; render(); return; }
+  if(cmd==="reset-nao"){ UI.confirmaReset=false; render(); return; }
+  if(cmd==="reset-ok"){
+    UI.confirmaReset=false;
+    Persistencia.resetGeral().then(function(){
+      S=padrao(); N=[]; UI.ultimoHTML=null; C={};
+      UI.msg="Tudo apagado. O app voltou ao estado inicial.";
+      salvar(); salvarNotas(); render();
+    }).catch(function(e){ UI.msg="Não foi possível apagar: "+e.message; render(); });
+    return;
+  }
   if(cmd==="exportar"){ UI.backup=JSON.stringify({estado:S,notas:N}); UI.msg="Copie o texto acima e guarde numa nota."; render(); return; }
   if(cmd==="importar"){
     try{
@@ -5058,7 +5665,8 @@ function acao(cmd,arg){
       S.metas2=(S.metas2||[]).concat([{
         id:uid("m"), titulo:mod.titulo, escopo:mod.escopo,
         fonte:mod.fonte, alvo:mod.alvo, passo:mod.passo||1, unid:mod.unid,
-        valor:0, hist:{}
+        valor:0, hist:{}, categoria:mod.categoria||"outra",
+        prioridade:"normal", prazo:"", obs:""
       }]);
       salvar();
     }
@@ -5075,7 +5683,8 @@ function acao(cmd,arg){
   }
   if(cmd==="meta-form"){
     UI.metaForm=!UI.metaForm;
-    if(UI.metaForm) UI.novaMeta={titulo:"",escopo:"ano",fonte:"estudo_h",alvo:""};
+    if(UI.metaForm) UI.novaMeta={titulo:"",escopo:"mes",fonte:"estudo_h",alvo:"",
+      categoria:"estudos",prioridade:"normal",prazo:"",obs:""};
     render(); return;
   }
   if(cmd==="mesc"){ UI.novaMeta.escopo=arg; render(); return; }
@@ -5084,7 +5693,10 @@ function acao(cmd,arg){
     if(!t||al<=0){ UI.msg="Dê um nome e um alvo maior que zero."; render(); return; }
     S.metas2=(S.metas2||[]).concat([{
       id:uid("m"), titulo:t, escopo:UI.novaMeta.escopo,
-      fonte:UI.novaMeta.fonte, alvo:al, passo:1, valor:0, hist:{}
+      fonte:UI.novaMeta.fonte, alvo:al, passo:1, valor:0, hist:{},
+      categoria:UI.novaMeta.categoria||"outra",
+      prioridade:UI.novaMeta.prioridade||"normal",
+      prazo:UI.novaMeta.prazo||"", obs:(UI.novaMeta.obs||"").slice(0,180)
     }]);
     UI.metaForm=false; salvar(); render(); return;
   }
@@ -5148,7 +5760,15 @@ function acao(cmd,arg){
 
   if(cmd==="mat"){ UI.materia=arg; UI.materiaTocada=true; render(); return; }
   if(cmd==="pomo"){ UI.rodando?pararPomo():iniciarPomo(); return; }
-  if(cmd==="pomo-zerar"){ pararPomo(); UI.pausa=false; UI.seg=1500; render(); return; }
+  if(cmd==="pomo-zerar"){ pararPomo(); UI.fase="foco"; UI.pausa=false; UI.seg=segundosDaFase("foco"); render(); return; }
+  if(cmd==="pomo-fase"){
+    pararPomo(); UI.fase=arg; UI.pausa=(arg!=="foco"); UI.seg=segundosDaFase(arg); render(); return;
+  }
+  if(cmd==="pomo-cfg"){
+    var pp=arg.split("|"); S.pomo[pp[0]]=Math.max(1,Math.min(120,num(pp[1])));
+    if(!UI.rodando){ UI.seg=segundosDaFase(UI.fase); }
+    salvar(); render(); return;
+  }
   if(cmd==="prova-add"){
     if(!UI.novaProva.data) return;
     S.provas.push({id:uid("p"),materia:UI.novaProva.materia,data:UI.novaProva.data});
@@ -5164,13 +5784,17 @@ function acao(cmd,arg){
     var txt=UI.draft.trim();
     if(!txt) return;
     var duv=UI.dv||temDuvida(txt);
+    var extras={pri:UI.notaPri||"", prazo:UI.notaPrazo||"", rec:UI.notaRec||""};
     if(UI.editando){
-      N=N.map(function(n){ return String(n.id)===String(UI.editando)?Object.assign(n,{txt:txt,tag:UI.tag,duvida:duv}):n; });
+      N=N.map(function(n){ return String(n.id)===String(UI.editando)
+        ? Object.assign(n,{txt:txt,tag:UI.tag,duvida:duv},extras) : n; });
       UI.editando=null;
     } else {
-      N.unshift({id:uid("n"),txt:txt,tag:UI.tag,ts:Date.now(),fix:false,duvida:duv,resolvida:false});
+      N.unshift(Object.assign({id:uid("n"),txt:txt,tag:UI.tag,ts:Date.now(),
+        fix:false,duvida:duv,resolvida:false},extras));
     }
-    UI.draft=""; UI.dv=false; salvarNotas(); render(); return;
+    UI.draft=""; UI.dv=false; UI.notaPri=""; UI.notaPrazo=""; UI.notaRec="";
+    salvarNotas(); render(); return;
   }
   if(cmd==="nfiltro"){ UI.filtro=arg; render(); return; }
   if(cmd==="ndel"){ N=N.filter(function(n){ return String(n.id)!==arg; }); salvarNotas(); render(); return; }
@@ -5196,6 +5820,11 @@ function acao(cmd,arg){
     else UI.draft="[ ] ";
     render(); return;
   }
+  if(cmd==="subtarefa"){
+    /* subtarefa é um item indentado: a contagem soma junto, a leitura hierarquiza */
+    UI.draft = (UI.draft.trim()? UI.draft+"\n" : "") + "   [ ] ";
+    render(); return;
+  }
   if(cmd==="cat-add"){ S.categorias=(S.categorias||[]).concat(["Nova categoria"]); salvar(); render(); return; }
   if(cmd==="cat-del"){
     S.categorias=(S.categorias||[]).filter(function(x,n){ return n!==Number(arg); });
@@ -5203,30 +5832,65 @@ function acao(cmd,arg){
   }
   if(cmd==="nedit"){
     var alvo=N.filter(function(n){ return String(n.id)===arg; })[0];
-    if(alvo){ UI.editando=alvo.id; UI.draft=alvo.txt; UI.tag=alvo.tag; UI.dv=!!alvo.duvida; render(); }
+    if(alvo){ UI.editando=alvo.id; UI.draft=alvo.txt; UI.tag=alvo.tag; UI.dv=!!alvo.duvida;
+      UI.notaPri=alvo.pri||""; UI.notaPrazo=alvo.prazo||""; UI.notaRec=alvo.rec||""; render(); }
     return;
   }
 }
 
 /* ---- pomodoro ---- */
+/* Fases do pomodoro: foco -> curto -> foco ... e, a cada N ciclos, longo. */
+function cfgPomo(){
+  var c=S.pomo||{};
+  return {foco:num(c.foco)||25, curto:num(c.curto)||5, longo:num(c.longo)||15, ate:num(c.ate)||4};
+}
+function segundosDaFase(fase){
+  var c=cfgPomo();
+  return (fase==="foco"?c.foco:fase==="curto"?c.curto:c.longo)*60;
+}
+function ciclosHoje(){
+  var k=hojeKey();
+  return (S.pomo.ciclos||[]).filter(function(x){ return x.data===k && x.fase==="foco"; }).length;
+}
+function proximaFase(){
+  var c=cfgPomo();
+  if(UI.fase!=="foco") return "foco";
+  var feitos=ciclosHoje();          /* o ciclo recém-concluído já está aqui */
+  return (feitos>0 && feitos % c.ate === 0) ? "longo" : "curto";
+}
+
 function iniciarPomo(){
   UI.rodando=true; render();
   UI.timer=setInterval(function(){
     UI.seg--;
     if(UI.seg<=0){
       clearInterval(UI.timer); UI.rodando=false;
-      if(!UI.pausa){
+      if(UI.fase==="foco"){
+        var min=cfgPomo().foco;
         var d=dia(),m=Object.assign({},d.minutos);
-        m[UI.materia]=(m[UI.materia]||0)+25;
+        m[UI.materia]=(m[UI.materia]||0)+min;
+        /* registro do ciclo: alimenta o histórico e as estatísticas */
+        S.pomo.ciclos=(S.pomo.ciclos||[]).concat([{
+          data:hojeKey(), ts:Date.now(), fase:"foco", min:min, materia:UI.materia
+        }]).slice(-500);
         mudarDia({minutos:m});
+        notificar("Foco concluído", min+" min em "+UI.materia+". Hora da pausa.");
+      } else {
+        S.pomo.ciclos=(S.pomo.ciclos||[]).concat([{
+          data:hojeKey(), ts:Date.now(), fase:UI.fase, min:segundosDaFase(UI.fase)/60
+        }]).slice(-500);
+        salvar();
+        notificar("Pausa terminada", "Pronto para o próximo bloco de foco.");
       }
-      UI.pausa=!UI.pausa; UI.seg=UI.pausa?300:1500;
+      UI.fase=proximaFase();
+      UI.pausa=(UI.fase!=="foco");
+      UI.seg=segundosDaFase(UI.fase);
       bip(); render(); return;
     }
     var r=document.getElementById("reloj");
     if(r){
       r.textContent=pad(Math.floor(UI.seg/60))+":"+pad(UI.seg%60);
-      var total=UI.pausa?300:1500,C=2*Math.PI*74;
+      var total=segundosDaFase(UI.fase),C=2*Math.PI*74;
       var anel=document.getElementById("ring");
       if(anel) anel.style.strokeDashoffset=C*(UI.seg/total);
     }
@@ -5249,6 +5913,65 @@ function bip(){
     g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.5);
     o.start(); o.stop(ctx.currentTime+0.5);
   }catch(e){}
+}
+
+/* =====================================================================
+   NOTIFICAÇÕES LOCAIS
+   Sem servidor e sem push: usamos a API de Notification do navegador.
+   Limite honesto — com o app fechado a entrega depende do sistema
+   operacional; por isso o lembrete nativo continua sendo recomendado.
+   ===================================================================== */
+function podeNotificar(){
+  try{ return typeof Notification!=="undefined" && Notification.permission==="granted"; }
+  catch(e){ return false; }
+}
+function notificar(titulo,corpo,tag){
+  if(typeof S==="undefined" || !S || !S.alertas) return false;
+  try{
+    if(!podeNotificar()) return false;
+    if(typeof navigator!=="undefined" && navigator.serviceWorker && navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(function(reg){
+        reg.showNotification(titulo,{body:corpo, tag:tag||"ritmo",
+          icon:"./icone-192.png", badge:"./favicon-32.png"});
+      }).catch(function(){ try{ new Notification(titulo,{body:corpo}); }catch(e){} });
+      return true;
+    }
+    new Notification(titulo,{body:corpo});
+    return true;
+  }catch(e){ console.warn("[Ritmo] notificação falhou:",e.message); return false; }
+}
+
+/* Agenda os avisos enquanto o app está aberto. Cada bloco dispara uma
+   vez só, controlado por chave, para não repetir a cada render. */
+var _agendados={};
+function agendarAvisos(){
+  if(typeof S==="undefined" || !S || !S.alertas || !podeNotificar()) return 0;
+  var min=UI.agora.getHours()*60+UI.agora.getMinutes();
+  var d=dia(), vis=visiveis(d,montarDia(UI.agora)), n=0;
+  vis.forEach(function(b){
+    if(b.k==="base") return;
+    var ch=hojeKey()+":"+b.id;
+    if(_agendados[ch]) return;
+    var faltam=(b.t-min)*60000;
+    if(faltam<=0 || faltam>3*3600000) return;   /* só as próximas 3 horas */
+    _agendados[ch]=setTimeout(function(){
+      notificar(b.titulo,"Começa agora · "+hhmm(b.t),"bloco-"+b.id);
+    },faltam);
+    n++;
+  });
+  var chR=hojeKey()+":resumo";
+  if(!_agendados[chR]){
+    var alvo=(20*60-min)*60000;
+    if(alvo>0 && alvo<6*3600000){
+      _agendados[chR]=setTimeout(function(){
+        var dd=dia(), vv=visiveis(dd,montarDia(UI.agora));
+        var f=vv.filter(function(b){ return dd.feitos[b.id]; }).length;
+        notificar("Resumo do dia",f+" de "+vv.length+" blocos concluídos.","resumo");
+      },alvo);
+      n++;
+    }
+  }
+  return n;
 }
 
 /* ---- vigia de blocos ---- */
@@ -5384,6 +6107,8 @@ var PWA = (function(){
   render();
   vigiar();
   PWA.registrar();
+  /* backup do dia, uma vez por sessão, sem bloquear a abertura */
+  setTimeout(function(){ Persistencia.backupAutomatico(S,N); }, 4000);
 
   /* Ao voltar de segundo plano o relógio podia ficar até 20s atrasado. */
   if(document.addEventListener) document.addEventListener("visibilitychange",function(){
@@ -5405,8 +6130,9 @@ var PWA = (function(){
   }
   function desligarPulso(){ if(pulso){ clearInterval(pulso); pulso=null; } }
   ligarPulso();
+  agendarAvisos();
   if(document.addEventListener) document.addEventListener("visibilitychange",function(){
-    if(document.hidden) desligarPulso(); else ligarPulso();
+    if(document.hidden) desligarPulso(); else { ligarPulso(); agendarAvisos(); }
   });
 })();
 </script>

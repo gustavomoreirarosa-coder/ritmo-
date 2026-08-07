@@ -149,6 +149,14 @@ grupo("1. Integridade estrutural");
   ok("sem chamadas de rede no app", !/\bfetch\s*\(|XMLHttpRequest/.test(js));
   ok("apenas as duas chaves de storage conhecidas",
      !/storage\.(set|get)\("(?!ritmo:v1|ritmo:notas:v1)/.test(js));
+
+  /* Regressão conhecida: um modificador com o mesmo nome de outra regra
+     herda os estilos dela. Já aconteceu três vezes (.pt.ev, .meta-nota.alerta,
+     .mes-dia.prova). Este teste impede a quarta. */
+  const modificadores = new Set([...css.matchAll(/\.([a-z][\w-]*)\.([a-z][\w-]*)\{/g)].map(m=>m[2]));
+  const regrasProprias = new Set([...css.matchAll(/\n\.([a-z][\w-]*)\{/g)].map(m=>m[1]));
+  const colisoes = [...modificadores].filter(m => regrasProprias.has(m));
+  ok("nenhum modificador CSS colide com regra própria", colisoes.length===0, colisoes.join(", "));
 }
 
 /* ================================================================ 2. BUGS DA 1.1 */
@@ -292,6 +300,220 @@ grupo("6. Exportação");
   ok("planilha não tem XML quebrado", !/<Data ss:Type="String">[^<]*<(?!\/Data)/.test(x2));
 }
 
+
+/* ================================================================ 8. RITMO 1.2 */
+grupo("8. Metas: escopo diário e semanal");
+{
+  cenario();
+  const dia_ = periodoMeta("dia");
+  igual("período diário tem 1 dia", dia_.total, 1);
+  const sem = periodoMeta("semana");
+  igual("período semanal tem 7 dias", sem.total, 7);
+  ok("semana começa na segunda", sem.ini.getDay() === 1);
+  const mes = periodoMeta("mes");
+  ok("período mensal entre 28 e 31 dias", mes.total >= 28 && mes.total <= 31);
+  const ano = periodoMeta("ano");
+  ok("período anual tem 365 ou 366", ano.total === 365 || ano.total === 366);
+
+  cenario();
+  S.metas2 = [
+    { id:"d1", titulo:"Estudar 2h hoje", escopo:"dia", fonte:"estudo_h", alvo:2,
+      passo:1, valor:0, hist:{}, categoria:"estudos", prioridade:"alta", prazo:"", obs:"teste" },
+    { id:"s1", titulo:"Treinar 4x", escopo:"semana", fonte:"treinos", alvo:4,
+      passo:1, valor:0, hist:{}, categoria:"exercicio", prioridade:"normal", prazo:"", obs:"" }];
+  C = {};
+  const Pd = progressoMeta(S.metas2[0]);
+  ok("meta diária calcula progresso", Pd.acum >= 0 && Pd.per.total === 1);
+  const Ps = progressoMeta(S.metas2[1]);
+  ok("meta semanal calcula progresso", Ps.per.total === 7);
+
+  ok("todas as categorias têm rótulo e cor",
+     Object.keys(CAT_META).every(c => CAT_META[c].lab && CAT_META[c].cor));
+  igual("existem 4 escopos", ESCOPOS.length, 4);
+
+  const comPrazo = { id:"x", titulo:"x", escopo:"mes", fonte:"manual", alvo:10,
+    valor:0, hist:{}, prazo:k(-5) };
+  ok("prazo próprio é lido", diasParaPrazo(comPrazo) === 5);
+  ok("meta sem prazo devolve null", diasParaPrazo({ id:"y" }) === null);
+
+  C = {};
+  UI.foco = "metas";
+  const hm = viewDados();
+  ok("tela de metas mostra categoria", hm.includes("Estudos") || hm.includes("selo cat"));
+  ok("tela de metas mostra observação", hm.includes("teste"));
+}
+
+grupo("9. Pomodoro");
+{
+  cenario();
+  const c = cfgPomo();
+  ok("configuração tem as três fases", c.foco > 0 && c.curto > 0 && c.longo > 0);
+  igual("foco em segundos", segundosDaFase("foco"), c.foco * 60);
+  igual("pausa curta em segundos", segundosDaFase("curto"), c.curto * 60);
+  igual("pausa longa em segundos", segundosDaFase("longo"), c.longo * 60);
+
+  igual("sem ciclos no início", ciclosHoje(), 0);
+  S.pomo.ciclos = [];
+  for (let i = 0; i < 3; i++)
+    S.pomo.ciclos.push({ data: k(0), ts: Date.now(), fase:"foco", min:25, materia:"Cálculo" });
+  igual("conta os ciclos de hoje", ciclosHoje(), 3);
+
+  UI.fase = "foco";
+  igual("após 4º ciclo vem a pausa longa", (function(){
+    S.pomo.ciclos.push({ data:k(0), ts:Date.now(), fase:"foco", min:25 });
+    return proximaFase();
+  })(), "longo");
+
+  S.pomo.ciclos = [{ data:k(0), ts:Date.now(), fase:"foco", min:25 }];
+  UI.fase = "foco";
+  igual("antes disso vem a pausa curta", proximaFase(), "curto");
+  UI.fase = "curto";
+  igual("depois da pausa volta o foco", proximaFase(), "foco");
+
+  S.pomo.ciclos = [];
+  for (let i = 0; i < 6; i++)
+    S.pomo.ciclos.push({ data:k(i), ts:Date.now(), fase:"foco", min:25, materia:"Cálculo" });
+  C = {};
+  const he = viewEstudo(dia());
+  ok("estudo mostra histórico do pomodoro", he.includes("Pomodoro"));
+  ok("histórico sem valor inválido", !/undefined|NaN/.test(he));
+}
+
+grupo("10. Calendário: recorrência e semana");
+{
+  cenario();
+  const base = new Date(2026, 7, 3);          /* segunda */
+  const evSemanal = { id:"e1", data:"2026-08-03", hora:600, titulo:"Reunião", rec:"s" };
+  ok("evento semanal cai no mesmo dia",
+     eventoNoDia(evSemanal, "2026-08-03", base));
+  ok("evento semanal cai 7 dias depois",
+     eventoNoDia(evSemanal, "2026-08-10", new Date(2026,7,10)));
+  ok("evento semanal não cai 3 dias depois",
+     !eventoNoDia(evSemanal, "2026-08-06", new Date(2026,7,6)));
+  ok("recorrência não vale para o passado",
+     !eventoNoDia(evSemanal, "2026-07-27", new Date(2026,6,27)));
+
+  const evUtil = { id:"e2", data:"2026-08-03", hora:null, titulo:"Aula", rec:"u" };
+  ok("dias úteis inclui sexta", eventoNoDia(evUtil, "2026-08-07", new Date(2026,7,7)));
+  ok("dias úteis exclui sábado", !eventoNoDia(evUtil, "2026-08-08", new Date(2026,7,8)));
+
+  const evMensal = { id:"e3", data:"2026-08-03", titulo:"Boleto", rec:"m" };
+  ok("mensal cai no mesmo dia do mês", eventoNoDia(evMensal, "2026-09-03", new Date(2026,8,3)));
+  ok("mensal não cai em outro dia", !eventoNoDia(evMensal, "2026-09-04", new Date(2026,8,4)));
+
+  const semRec = { id:"e4", data:"2026-08-03", titulo:"Único" };
+  ok("evento sem recorrência só cai uma vez",
+     eventoNoDia(semRec,"2026-08-03",base) && !eventoNoDia(semRec,"2026-08-10",new Date(2026,7,10)));
+
+  S.eventos = [evSemanal, evUtil, semRec];
+  ok("eventosDoDia junta e ordena", eventosDoDia("2026-08-03", base).length === 3);
+  const ord = eventosDoDia("2026-08-03", base);
+  ok("evento sem hora vai por último", ord[ord.length-1].hora == null);
+
+  C = {}; UI.vistaCal = "semana";
+  const hs = viewSemana();
+  ok("visão de semana renderiza", hs.length > 300 && !/undefined|NaN/.test(hs));
+  ok("visão de semana tem 7 dias", (hs.match(/class="sem-dia/g)||[]).length === 7);
+  igual("existem 5 opções de recorrência", RECORRENCIAS.length, 5);
+  UI.vistaCal = "mes";
+}
+
+grupo("11. Checklist avançado");
+{
+  cenario();
+  const n1 = { id:"t1", txt:"[ ] um\n[x] dois\n   [ ] subtarefa", tag:"Cálculo",
+               ts:Date.now(), pri:"alta", prazo:k(-1), rec:"s" };
+  const p = progressoNota(n1);
+  igual("conta todos os itens, inclusive subtarefa", p.total, 3);
+  igual("conta os concluídos", p.feitos, 1);
+  ok("percentual coerente", Math.abs(p.pct - 1/3) < 0.01);
+
+  const pz = prazoNota(n1);
+  ok("prazo em 1 dia é 'perto'", pz.perto === true && pz.vencida === false);
+  ok("nota sem prazo devolve null", prazoNota({ id:"x" }) === null);
+  const venc = prazoNota({ prazo: k(3) });
+  ok("prazo passado é marcado como vencido", venc.vencida === true);
+
+  N = [n1];
+  C = {};
+  const hn = viewNotas();
+  ok("nota mostra selo de prioridade", hn.includes("pri-alta"));
+  ok("nota mostra selo de prazo", hn.includes("selo prazo"));
+  ok("nota mostra selo de recorrência", hn.includes("selo rec"));
+  ok("compositor tem os três campos novos",
+     hn.includes('data-f="npri"') && hn.includes('data-f="nprazo"') && hn.includes('data-f="nrec"'));
+  ok("checklist renderiza itens clicáveis", hn.includes("chk-lista"));
+
+  /* ordenação: prazo mais próximo primeiro */
+  N = [{ id:"a", txt:"sem prazo", tag:"Geral", ts:Date.now() },
+       { id:"b", txt:"urgente", tag:"Geral", ts:Date.now()-1000, prazo:k(1) },
+       { id:"c", txt:"depois", tag:"Geral", ts:Date.now(), prazo:k(-10) }];
+  C = {};
+  const ordem = viewNotas();
+  ok("nota vencida aparece antes da sem prazo",
+     ordem.indexOf("urgente") < ordem.indexOf("sem prazo"));
+
+  C = {};
+  const regras = motorRegras();
+  ok("assistente avisa sobre prazo",
+     regras.some(r => /vence|vencida/i.test(r.tit)));
+}
+
+grupo("12. Internacionalização");
+{
+  cenario();
+  S.idioma = "pt-BR";
+  igual("traduz para português", t("hoje"), "Hoje");
+  S.idioma = "en-US";
+  igual("traduz para inglês", t("hoje"), "Today");
+  ok("saudação segue o idioma", ["Good morning","Good afternoon","Good evening","Still up"]
+     .includes(saudacao()));
+  igual("chave inexistente devolve ela mesma", t("chaveQueNaoExiste"), "chaveQueNaoExiste");
+  S.idioma = "xx-XX";
+  igual("idioma desconhecido cai no português", t("hoje"), "Hoje");
+  S.idioma = "pt-BR";
+
+  const chavesPt = Object.keys(IDIOMAS["pt-BR"]);
+  const chavesEn = Object.keys(IDIOMAS["en-US"]);
+  igual("os dois idiomas têm as mesmas chaves", chavesPt.length, chavesEn.length);
+  ok("nenhuma chave sem tradução", chavesPt.every(c => IDIOMAS["en-US"][c] !== undefined));
+
+  C = {};
+  const d = dia(), vis = visiveis(d, montarDia(UI.agora));
+  S.idioma = "en-US"; C = {};
+  const hEn = viewHoje(d, vis, 910);
+  ok("tela inicial renderiza em inglês", hEn.includes("Today's progress") || hEn.includes("Water"));
+  S.idioma = "pt-BR";
+}
+
+grupo("13. Exportação CSV");
+{
+  cenario();
+  const csv = montarCSV(30);
+  const linhas = csv.split("\r\n");
+  igual("uma linha por dia mais o cabeçalho", linhas.length, 31);
+  ok("usa ponto e vírgula", linhas[0].split(";").length === 10);
+  ok("cabeçalho nomeia as colunas", linhas[0].startsWith("Data;Dia"));
+  ok("sem valor inválido", !/undefined|NaN/.test(csv));
+
+  igual("campo com ponto e vírgula é protegido", csvCampo('a;b'), '"a;b"');
+  igual("aspas são duplicadas", csvCampo('diz "oi"'), '"diz ""oi"""');
+  igual("campo simples fica cru", csvCampo("simples"), "simples");
+  igual("nulo vira vazio", csvCampo(null), "");
+}
+
+grupo("14. Notificações");
+{
+  cenario();
+  ok("função de notificação existe", typeof notificar === "function");
+  ok("detecta permissão ausente", podeNotificar() === false);
+  ok("não quebra sem permissão", notificar("t","c") === false);
+  ok("agendamento não roda sem permissão", agendarAvisos() === 0);
+  S.alertas = false;
+  ok("respeita o desligamento nos ajustes", notificar("t","c") === false);
+  S.alertas = true;
+}
+
 /* ================================================================ 7. PERSISTÊNCIA */
 grupo("7. Persistência");
 (async function () {
@@ -325,6 +547,47 @@ grupo("7. Persistência");
     const lido2 = await Persistencia.carregar(padrao());
     ok("registro corrompido não derruba a leitura",
        Object.keys(lido2.S.dias).length >= Object.keys(estado.dias).length);
+
+    /* campos novos da 1.2 sobrevivem ao ciclo de gravação e leitura */
+    cenario();
+    const e2 = JSON.parse(JSON.stringify(S));
+    e2.idioma = "en-US";
+    e2.pomo = { ciclos:[{ data:k(0), ts:1, fase:"foco", min:25 }], foco:30, curto:6, longo:20, ate:3 };
+    e2.metas2[0].categoria = "leitura";
+    e2.metas2[0].prioridade = "alta";
+    e2.metas2[0].prazo = k(-10);
+    e2.metas2[0].obs = "observação de teste";
+    e2.eventos = [{ id:"ev", data:k(0), hora:600, titulo:"Repetido", rec:"s" }];
+    const n2 = [{ id:"nx", txt:"[ ] a", tag:"Cálculo", ts:1, pri:"alta", prazo:k(-3), rec:"d" }];
+    await Persistencia.salvarEstado(e2, true);
+    await Persistencia.salvarNotas(n2, true);
+    const v2 = await Persistencia.carregar(padrao());
+    igual("idioma persistido", v2.S.idioma, "en-US");
+    igual("configuração do pomodoro persistida", v2.S.pomo.foco, 30);
+    igual("ciclos persistidos", v2.S.pomo.ciclos.length, 1);
+    igual("categoria da meta persistida", v2.S.metas2[0].categoria, "leitura");
+    igual("prioridade da meta persistida", v2.S.metas2[0].prioridade, "alta");
+    igual("observação da meta persistida", v2.S.metas2[0].obs, "observação de teste");
+    igual("recorrência do evento persistida", v2.S.eventos[0].rec, "s");
+    igual("prioridade da nota persistida", v2.N[0].pri, "alta");
+    igual("prazo da nota persistido", v2.N[0].prazo, k(-3));
+    igual("recorrência da nota persistida", v2.N[0].rec, "d");
+
+    /* compatibilidade: estado da 1.1, sem os campos novos, carrega inteiro */
+    const antigo = padrao();
+    delete antigo.pomo; delete antigo.idioma; delete antigo.backupAuto;
+    antigo.dias[k(0)] = { feitos:{ d1:true }, minutos:{}, prot:0, agua:0, refs:{} };
+    await Persistencia.salvarEstado(antigo, true);
+    const v3 = await Persistencia.carregar(padrao());
+    ok("estado da 1.1 carrega sem erro", !!v3.S && typeof v3.S.dias === "object");
+    ok("campos novos ganham valor padrão", !!v3.S.pomo && !!v3.S.idioma);
+
+    const bkp = await Persistencia.backupAutomatico(e2, n2);
+    ok("backup automático grava", bkp === true);
+    const bkpLido = await Persistencia.lerBackupAutomatico();
+    ok("backup automático é legível", !!bkpLido && bkpLido.dados.length > 100);
+    const rep = await Persistencia.backupAutomatico(e2, n2);
+    ok("backup automático não repete no mesmo dia", rep === false);
 
     const diag = await Persistencia.diagnostico();
     ok("todas as 11 stores existem", Object.keys(diag.stores).length === 11);

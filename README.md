@@ -4,7 +4,7 @@ Aplicativo pessoal de rotina para estudo, treino e alimentação.
 Roda inteiramente no aparelho: sem servidor, sem login, sem conta,
 sem enviar nada para lugar nenhum.
 
-**Versão 1.1** — Foundation Update
+**Versão 1.2** — Amadurecimento funcional
 
 ---
 
@@ -36,7 +36,7 @@ Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md).
 node testes.js
 ```
 
-88 asserções cobrindo integridade estrutural, funções de domínio,
+176 asserções cobrindo integridade estrutural, funções de domínio,
 renderização das telas, exportação e persistência. Sem dependências.
 
 ## Estrutura
@@ -50,6 +50,8 @@ renderização das telas, exportação e persistência. Sem dependências.
 | `testes.js` | Suíte automatizada |
 | `RITMO_ANALYSIS.md` | Análise técnica do projeto |
 | `RITMO_ROADMAP.md` | Planejamento das próximas versões |
+| `CHANGELOG.md` | Histórico de versões |
+| `USER_GUIDE.md` | Guia de uso do aplicativo |
 
 ## Privacidade
 
