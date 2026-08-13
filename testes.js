@@ -63,6 +63,89 @@ function montarIDB() {
   };
 }
 
+
+/* ---------------------------------------------------------------- DOM falso
+   Só o suficiente para exercitar o diff: nós, atributos, texto e filhos.
+   Sem isto o VDOM ficaria sem teste, que é justamente a peça mais nova. */
+function montarDOM(){
+  function Texto(v){ this.nodeType=3; this.nodeValue=v; this.parentNode=null; }
+  Texto.prototype.cloneNode=function(){ return new Texto(this.nodeValue); };
+
+  function El(tag){
+    this.nodeType=1; this.nodeName=tag.toUpperCase(); this.childNodes=[];
+    this._attrs=new Map(); this.parentNode=null; this.value="";
+  }
+  Object.defineProperty(El.prototype,"attributes",{ get(){
+    const out=[]; this._attrs.forEach((v,k)=>out.push({name:k,value:v}));
+    out.length=out.length; return out;
+  }});
+  El.prototype.getAttribute=function(n){ return this._attrs.has(n)?this._attrs.get(n):null; };
+  El.prototype.setAttribute=function(n,v){ this._attrs.set(n,String(v));
+    if(n==="value") this.value=String(v); };
+  El.prototype.removeAttribute=function(n){ this._attrs.delete(n); };
+  El.prototype.hasAttribute=function(n){ return this._attrs.has(n); };
+  El.prototype.appendChild=function(no){
+    no.parentNode=this; no.isConnected=true; this.childNodes.push(no); return no; };
+  El.prototype.removeChild=function(no){
+    const i=this.childNodes.indexOf(no);
+    if(i>=0){ this.childNodes.splice(i,1); no.parentNode=null; no.isConnected=false; }
+    return no;
+  };
+  El.prototype.replaceChild=function(novo,velho){
+    const i=this.childNodes.indexOf(velho);
+    if(i>=0){ novo.parentNode=this; this.childNodes[i]=novo; }
+    return velho;
+  };
+  Object.defineProperty(El.prototype,"lastChild",{ get(){
+    return this.childNodes[this.childNodes.length-1]||null; }});
+  El.prototype.cloneNode=function(){
+    const c=new El(this.nodeName);
+    this._attrs.forEach((v,k)=>c._attrs.set(k,v));
+    c.value=this.value;
+    for(const f of this.childNodes) c.appendChild(f.cloneNode(true));
+    return c;
+  };
+  /* Parser mínimo: tags simples, atributos com aspas duplas e texto. */
+  Object.defineProperty(El.prototype,"innerHTML",{
+    get(){ return serializar(this); },
+    set(html){ this.childNodes.length=0; analisar(html,this); }
+  });
+  El.prototype.textoTotal=function(){
+    let t="";
+    for(const f of this.childNodes) t += f.nodeType===3 ? f.nodeValue : f.textoTotal();
+    return t;
+  };
+  function serializar(el){
+    let out="";
+    for(const f of el.childNodes){
+      if(f.nodeType===3){ out+=f.nodeValue; continue; }
+      let at="";
+      f._attrs.forEach((v,k)=>{ at+=" "+k+'="'+v+'"'; });
+      out+="<"+f.nodeName.toLowerCase()+at+">"+serializar(f)+"</"+f.nodeName.toLowerCase()+">";
+    }
+    return out;
+  }
+  function analisar(html,pai){
+    const re=/<(\/?)([a-z0-9]+)((?:\s+[\w:-]+="[^"]*")*)\s*(\/?)>/gi;
+    let pos=0, atual=pai, m;
+    const pilha=[];
+    while((m=re.exec(html))){
+      const texto=html.slice(pos,m.index);
+      if(texto) atual.appendChild(new Texto(texto));
+      pos=re.lastIndex;
+      if(m[1]){ atual=pilha.pop()||pai; continue; }
+      const el=new El(m[2]);
+      const ra=/([\w:-]+)="([^"]*)"/g; let a;
+      while((a=ra.exec(m[3]||""))) el.setAttribute(a[1],a[2]);
+      atual.appendChild(el);
+      if(!m[4] && !/^(br|img|input|hr|meta|link)$/i.test(m[2])){ pilha.push(atual); atual=el; }
+    }
+    const resto=html.slice(pos);
+    if(resto) atual.appendChild(new Texto(resto));
+  }
+  return { criar:(t)=>new El(t), El, Texto };
+}
+
 /* ---------------------------------------------------------------- ambiente */
 const html = fs.readFileSync(ARQ, "utf8");
 const js  = html.slice(html.indexOf("<script>") + 8, html.lastIndexOf("</script>"));
@@ -95,6 +178,9 @@ function ts(off,hh,mm){ const d=new Date(BASE); d.setDate(d.getDate()-off);
   d.setHours(hh,mm,0,0); return d.getTime(); }
 
 function cenario(){
+  /* Os testes montam o estado na mão, sem passar pelo Store. Invalidar a
+     memoização aqui reproduz o que salvar() faz no app de verdade. */
+  if (typeof Memo !== "undefined") Memo.invalidar();
   UI.agora = new Date(BASE);
   S = padrao(); N = []; C = {};
   UI.plano=null; UI.planoSem=null; UI.diaTodo=false; UI.foco="tudo"; UI.per=30;
@@ -512,6 +598,349 @@ grupo("14. Notificações");
   S.alertas = false;
   ok("respeita o desligamento nos ajustes", notificar("t","c") === false);
   S.alertas = true;
+}
+
+
+/* ================================================================ 15. NÚCLEO 1.3 */
+grupo("15. Event Bus");
+{
+  Bus.limpar();
+  let recebido = null, contador = 0;
+  const parar = Bus.ouvir("teste", d => { recebido = d; contador++; });
+  igual("entrega para um ouvinte", Bus.emitir("teste", { a: 1 }), 1);
+  igual("dados chegam íntegros", recebido, { a: 1 });
+  igual("conta os assinantes", Bus.quantos("teste"), 1);
+
+  Bus.ouvir("teste", () => contador++);
+  Bus.emitir("teste", {});
+  igual("entrega para todos", contador, 3);
+
+  parar();
+  igual("cancelar assinatura remove só um", Bus.quantos("teste"), 1);
+
+  Bus.ouvir("falha", () => { throw new Error("proposital"); });
+  let sobreviveu = false;
+  Bus.ouvir("falha", () => { sobreviveu = true; });
+  Bus.emitir("falha", {});
+  ok("ouvinte com defeito não derruba os outros", sobreviveu);
+
+  igual("evento sem ouvinte não quebra", Bus.emitir("ninguem", {}), 0);
+  ok("histórico é registrado", Bus.ultimos().length > 0);
+  ok("os nomes canônicos existem",
+     ["metaAtualizada","eventoCriado","pomodoroTick","idiomaMudou","temaMudou","backupConcluido"]
+       .every(k => typeof EV[k] === "string"));
+  Bus.limpar();
+}
+
+grupo("16. Scheduler");
+{
+  let execucoes = 0;
+  const tarefa = () => execucoes++;
+  Agenda.noFrame(tarefa);
+  Agenda.noFrame(tarefa);
+  Agenda.noFrame(tarefa);
+  ok("pedidos repetidos são agrupados", Agenda.pendentes().quadro === 1);
+  Agenda.esvaziar();
+  igual("a tarefa roda uma vez só", execucoes, 1);
+
+  let a = 0, b = 0;
+  Agenda.noFrame(() => a++);
+  Agenda.noFrame(() => b++);
+  Agenda.esvaziar();
+  ok("tarefas distintas rodam todas", a === 1 && b === 1);
+
+  let ocioso = 0;
+  Agenda.quandoOcioso(() => ocioso++);
+  Agenda.esvaziar();
+  igual("fila ociosa é processada", ocioso, 1);
+
+  let seguiu = false;
+  Agenda.noFrame(() => { throw new Error("proposital"); });
+  Agenda.noFrame(() => { seguiu = true; });
+  Agenda.esvaziar();
+  ok("tarefa com defeito não trava a fila", seguiu);
+  ok("métricas são expostas", typeof Agenda.metricas().frames === "number");
+}
+
+grupo("17. Virtual DOM");
+{
+  const dom = montarDOM();
+  const original = global.document;
+  global.document = { createElement: dom.criar, activeElement: null };
+
+  /* texto */
+  let raiz = dom.criar("div");
+  raiz.innerHTML = "<p>antigo</p>";
+  const pAntes = raiz.childNodes[0];
+  VDOM.aplicar(raiz, "<p>novo</p>");
+  igual("texto é atualizado", raiz.childNodes[0].textoTotal(), "novo");
+  ok("o mesmo nó é reaproveitado", raiz.childNodes[0] === pAntes);
+
+  /* atributo */
+  raiz = dom.criar("div");
+  raiz.innerHTML = '<div class="a" id="x"></div>';
+  const dAntes = raiz.childNodes[0];
+  VDOM.aplicar(raiz, '<div class="b" id="x"></div>');
+  igual("atributo alterado é corrigido", raiz.childNodes[0].getAttribute("class"), "b");
+  ok("nó preservado ao trocar atributo", raiz.childNodes[0] === dAntes);
+
+  raiz = dom.criar("div");
+  raiz.innerHTML = '<div class="a" data-x="1"></div>';
+  VDOM.aplicar(raiz, '<div class="a"></div>');
+  ok("atributo removido some", raiz.childNodes[0].getAttribute("data-x") === null);
+
+  /* crescimento e encolhimento de lista */
+  raiz = dom.criar("div");
+  raiz.innerHTML = "<li>1</li><li>2</li>";
+  VDOM.aplicar(raiz, "<li>1</li><li>2</li><li>3</li>");
+  igual("lista cresce", raiz.childNodes.length, 3);
+  VDOM.aplicar(raiz, "<li>1</li>");
+  igual("lista encolhe", raiz.childNodes.length, 1);
+
+  /* chaves: item removido do meio não recria os vizinhos */
+  raiz = dom.criar("div");
+  raiz.innerHTML = '<li data-k="a">A</li><li data-k="b">B</li><li data-k="c">C</li>';
+  const noC = raiz.childNodes[2];
+  VDOM.aplicar(raiz, '<li data-k="a">A</li><li data-k="c">C</li>');
+  igual("lista com chave encolhe certo", raiz.childNodes.length, 2);
+  igual("o item certo permanece", raiz.childNodes[1].getAttribute("data-k"), "c");
+
+  ok("nós de tags diferentes não são iguais",
+     !VDOM.mesmoNo(dom.criar("div"), dom.criar("span")));
+  const k1 = dom.criar("li"); k1.setAttribute("data-k", "x");
+  const k2 = dom.criar("li"); k2.setAttribute("data-k", "y");
+  ok("chaves diferentes não são o mesmo nó", !VDOM.mesmoNo(k1, k2));
+  k2.setAttribute("data-k", "x");
+  ok("chaves iguais são o mesmo nó", VDOM.mesmoNo(k1, k2));
+
+  /* campo em foco não é sobrescrito */
+  raiz = dom.criar("div");
+  raiz.innerHTML = '<input data-f="q" value="antigo">';
+  const campo = raiz.childNodes[0];
+  campo.value = "o que o usuário digitou";
+  global.document.activeElement = campo;
+  VDOM.aplicar(raiz, '<input data-f="q" value="outro">');
+  igual("campo focado preserva o que foi digitado", campo.value, "o que o usuário digitou");
+  global.document.activeElement = null;
+  VDOM.aplicar(raiz, '<input data-f="q" value="definitivo">');
+  igual("campo sem foco recebe o valor novo", campo.value, "definitivo");
+
+  /* economia real: HTML igual não gera alteração */
+  raiz = dom.criar("div");
+  const grande = Array.from({length:40}, (_,i)=>`<li data-k="i${i}">item ${i}</li>`).join("");
+  raiz.innerHTML = grande;
+  VDOM.zerar();
+  VDOM.aplicar(raiz, grande);
+  const m = VDOM.metricas();
+  igual("HTML idêntico não cria nós", m.nosCriados, 0);
+  igual("HTML idêntico não remove nós", m.nosRemovidos, 0);
+  igual("HTML idêntico não mexe em texto", m.textos, 0);
+
+  /* mudar um item de 40 toca só nele */
+  VDOM.zerar();
+  const alterado = grande.replace("item 20", "item vinte");
+  VDOM.aplicar(raiz, alterado);
+  const m2 = VDOM.metricas();
+  igual("uma alteração mexe em um texto só", m2.textos, 1);
+  igual("e não recria nenhum nó", m2.nosCriados, 0);
+
+  ok("sem DOM disponível devolve -1", VDOM.aplicar(null, "<p>x</p>") === -1);
+  global.document = original;
+}
+
+grupo("18. Store e memoização");
+{
+  Bus.limpar();
+  const v0 = Store.versao();
+  let avisado = 0;
+  Store.assinar(() => avisado++);
+  let mutou = false;
+  Store.commit("teste", () => { mutou = true; });
+  ok("a mutação roda", mutou);
+  ok("a versão avança", Store.versao() > v0);
+  igual("assinantes são avisados", avisado, 1);
+
+  let viaBus = 0;
+  Bus.ouvir("estadoMudou", () => viaBus++);
+  Store.commit("outro", () => {});
+  igual("commit emite estadoMudou", viaBus, 1);
+
+  const vAntes = Store.versao();
+  ok("commit com defeito não avança a versão",
+     Store.commit("ruim", () => { throw new Error("proposital"); }) === false
+     && Store.versao() === vAntes);
+
+  Store.marcarSujo();
+  ok("marcarSujo avança a versão", Store.versao() > vAntes);
+
+  /* memoização */
+  Memo.invalidar(); Memo.zerar();
+  let calculos = 0;
+  const calc = () => { calculos++; return "valor"; };
+  igual("primeiro acesso calcula", Memo.obter("k", calc), "valor");
+  Memo.obter("k", calc);
+  Memo.obter("k", calc);
+  igual("acessos seguintes usam o cache", calculos, 1);
+  igual("as métricas contam os acertos", Memo.metricas().acertos, 2);
+
+  Store.marcarSujo();
+  Memo.obter("k", calc);
+  igual("mudança de estado invalida o cache", calculos, 2);
+  Bus.limpar();
+}
+
+grupo("19. Integração: render sem reconstruir");
+{
+  const dom = montarDOM();
+  const original = global.document;
+  const app = dom.criar("div");
+  global.document = {
+    createElement: dom.criar,
+    getElementById: (id) => id === "app" ? app : null,
+    querySelector: () => null,
+    addEventListener(){}, activeElement: null,
+    body: { setAttribute(){} }, documentElement: { setAttribute(){} }, hidden: false
+  };
+
+  cenario();
+  UI.aba = "hoje"; UI.ultimoHTML = null; Memo.invalidar();
+  render();
+  ok("a tela é montada", app.childNodes.length > 0);
+  const nosIniciais = app.childNodes.length;
+
+  VDOM.zerar();
+  render();
+  const m = VDOM.metricas();
+  igual("render repetido não cria nós", m.nosCriados, 0);
+  igual("render repetido não remove nós", m.nosRemovidos, 0);
+
+  /* Marcar um bloco muda o HTML, mas não pode recriar a árvore. */
+  const min = UI.agora.getHours()*60 + UI.agora.getMinutes();
+  const bl = montarDia(UI.agora).filter(b => b.k !== "base" && b.t > min)[0]
+          || montarDia(UI.agora).filter(b => b.k !== "base")[0];
+  const htmlAntes = UI.ultimoHTML;
+  VDOM.zerar();
+  const f = Object.assign({}, dia().feitos); f[bl.id] = Date.now();
+  S.dias[hojeKey()] = Object.assign(dia(), { feitos: f });
+  Memo.invalidar();
+  render();
+  ok("o HTML muda ao marcar um bloco", UI.ultimoHTML !== htmlAntes);
+  const m2 = VDOM.metricas();
+  ok("marcar um bloco não recria a tela", m2.nosCriados < nosIniciais,
+     "criou " + m2.nosCriados + " de " + nosIniciais);
+
+  global.document = original;
+}
+
+
+grupo("20. Pomodoro: timers e retomada");
+{
+  /* Instrumenta os timers para contar quantos ficam vivos. */
+  const intervaloOriginal = global.setInterval;
+  const limparOriginal = global.clearInterval;
+  let vivos = new Set(), proximo = 1, criados = 0;
+  global.setInterval = () => { criados++; const id = proximo++; vivos.add(id); return id; };
+  global.clearInterval = (id) => { if(id) vivos.delete(id); };
+
+  cenario();
+  UI.rodando = false; UI.timer = null;
+
+  iniciarPomo();
+  igual("iniciar cria um timer", vivos.size, 1);
+
+  /* O bug: dois toques em "começar" deixavam dois intervalos descontando
+     o mesmo contador, e o pomodoro corria em dobro. */
+  iniciarPomo();
+  igual("iniciar duas vezes não duplica o timer", vivos.size, 1);
+
+  iniciarPomo(); iniciarPomo(); iniciarPomo();
+  igual("cinco toques seguidos, um timer só", vivos.size, 1);
+
+  pararPomo();
+  igual("parar remove o timer", vivos.size, 0);
+  ok("parar zera a referência", UI.timer === null);
+  pararPomo();
+  igual("parar duas vezes não quebra", vivos.size, 0);
+
+  /* Retomada pelo relógio do sistema: setInterval não roda em segundo
+     plano no celular, então os ticks perdidos precisam ser recuperados. */
+  UI.rodando = false;
+  ok("nada a retomar quando parado", retomarPomo() === false);
+
+  iniciarPomo();
+  UI.seg = 1500;
+  UI.pomoSegNoInicio = 1500;
+  UI.pomoIniciadoEm = Date.now() - 60000;      /* um minuto atrás */
+  ok("retomada detecta a diferença", retomarPomo() === true);
+  ok("desconta os segundos perdidos", UI.seg >= 1435 && UI.seg <= 1441,
+     "ficou em " + UI.seg);
+
+  UI.pomoSegNoInicio = 30;
+  UI.pomoIniciadoEm = Date.now() - 90000;      /* a fase acabou enquanto fechado */
+  retomarPomo();
+  igual("fase vencida em segundo plano zera o contador", UI.seg, 0);
+
+  pararPomo();
+  ok("parar limpa a âncora de tempo", UI.pomoIniciadoEm === null);
+
+  global.setInterval = intervaloOriginal;
+  global.clearInterval = limparOriginal;
+}
+
+grupo("21. Cache de nós do DOM");
+{
+  const dom = montarDOM();
+  const original = global.document;
+  let consultas = 0;
+  const alvo = dom.criar("div");
+  alvo.setAttribute("id", "reloj");
+  const pai = dom.criar("div");
+  pai.appendChild(alvo);
+
+  global.document = {
+    createElement: dom.criar,
+    getElementById: (id) => { consultas++; return id === "reloj" ? alvo : null; },
+    activeElement: null
+  };
+  Nos.limpar();
+
+  const a = Nos.porId("reloj");
+  const b = Nos.porId("reloj");
+  const c = Nos.porId("reloj");
+  ok("devolve sempre o mesmo nó", a === b && b === c && a === alvo);
+  igual("consulta o DOM uma vez só", consultas, 1);
+
+  /* Nó tirado da árvore não pode continuar sendo servido pelo cache. */
+  pai.removeChild(alvo);
+  consultas = 0;
+  Nos.porId("reloj");
+  igual("nó removido força nova consulta", consultas, 1);
+
+  Nos.limpar();
+  consultas = 0;
+  Nos.porId("reloj");
+  igual("limpar invalida o cache", consultas, 1);
+
+  igual("id inexistente devolve null", Nos.porId("naoexiste"), null);
+  global.document = original;
+}
+
+grupo("22. Robustez do render");
+{
+  const original = global.document;
+  global.document = {
+    getElementById: () => null,          /* contêiner ausente */
+    querySelector: () => null,
+    createElement: () => ({ style:{}, innerHTML:"" }),
+    addEventListener(){}, activeElement: null,
+    body:{ setAttribute(){} }, documentElement:{ setAttribute(){} }, hidden:false
+  };
+  cenario();
+  UI.ultimoHTML = null;
+  let quebrou = false;
+  try { render(); } catch(e){ quebrou = true; }
+  ok("render sem contêiner não lança exceção", !quebrou);
+  global.document = original;
 }
 
 /* ================================================================ 7. PERSISTÊNCIA */

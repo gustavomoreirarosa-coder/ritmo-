@@ -5,6 +5,71 @@ As versões seguem o [RITMO_ROADMAP.md](RITMO_ROADMAP.md).
 
 ---
 
+## [1.3.0] — 2026-08-04 — Foundation Architecture
+
+Versão de arquitetura e desempenho. **Nenhuma funcionalidade nova, nenhuma
+mudança visual.** Compatível com dados da 1.0, 1.1 e 1.2.
+
+### Adicionado
+
+**Núcleo (cinco módulos independentes, sem framework)**
+- `Bus` — eventos com nomes canônicos, assinatura cancelável e isolamento
+  de falhas entre ouvintes
+- `Agenda` — escalonador com `requestAnimationFrame` para trabalho visual e
+  `requestIdleCallback` para trabalho pesado
+- `VDOM` — diferença entre o DOM atual e o HTML novo, com identidade por
+  `data-k` e proteção de campos em foco
+- `Store` — dono do estado; toda alteração vira evento e agenda um render
+- `Memo` — cache de trechos caros, invalidado pela versão do Store
+- `Nos` — cache de elementos consultados a cada tick, validado por
+  `isConnected` para nunca servir um nó que saiu da árvore
+
+**Renderização**
+- Atualização incremental: só o que mudou chega à tela
+- Caminho híbrido escolhido por medição — substituição na troca de aba,
+  diff na atualização da mesma aba
+- Chaves de identidade em blocos, notas, metas, eventos e dias do calendário
+
+### Melhorado
+
+| Caminho real | 1.2 | 1.3 |
+|---|---:|---:|
+| Marcar 8 blocos — mutações no DOM | 56 | 28 |
+| 20 renders do relógio — mutações | 7 | 0 |
+| Digitar na busca — mutações | 35 | 4 |
+| Digitar na busca — foco preservado | não | **sim** |
+
+- Chamadas diretas de `render()` em `acao()`: 108 → 17
+- Tela de estatísticas memoizada: recalcula só quando o estado muda
+- Timer do Pomodoro escreve direto nos nós, sem passar por render
+
+### Corrigido
+
+- **Pomodoro criava timers duplicados.** Dois toques em "começar" sem pausar
+  deixavam dois intervalos descontando o mesmo contador — o cronômetro corria
+  em dobro. Reproduzido em teste, corrigido com guarda no início.
+- **Pomodoro perdia tempo em segundo plano.** `setInterval` não roda com a
+  aba oculta no celular; ao voltar, o contador estava congelado. Agora o
+  tempo é reancorado pelo relógio do sistema.
+- **Render quebrava sem o contêiner na página**, derrubando a ação inteira
+  do usuário em vez de simplesmente não desenhar.
+- **Campo em foco podia ter o texto sobrescrito** durante um render. Agora
+  nem o atributo `value` é tocado enquanto alguém digita.
+- **Memoização podia servir dado velho**: nem toda ação passa por `commit()`,
+  então `salvar()` passou a marcar o estado como sujo.
+- **Diff com falha deixava tela pela metade**: agora volta ao caminho seguro
+  e registra o erro.
+
+### Testes
+
+- 176 → **243 asserções**
+- DOM simulado próprio (nós, atributos, texto, filhos, parser mínimo) para
+  exercitar o diff sem navegador
+- Cobertura nova: Bus, Agenda, VDOM, Store, Memo, cache de nós, timers do
+  Pomodoro, retomada em segundo plano e robustez do render
+
+---
+
 ## [1.2.0] — 2026-08-04
 
 Versão de amadurecimento: fecha as lacunas funcionais que sobraram da 1.1,

@@ -1668,7 +1668,332 @@ function t(chave){
   return d[chave]!==undefined ? d[chave] : (IDIOMAS["pt-BR"][chave]!==undefined ? IDIOMAS["pt-BR"][chave] : chave);
 }
 
+/* =====================================================================
+   NÚCLEO — Ritmo 1.3 "Foundation Architecture"
+   Cinco módulos independentes, sem framework e sem dependência externa:
+     Bus     publicação e assinatura de eventos
+     Agenda  escalonador de trabalho (quadro e tempo ocioso)
+     VDOM    diferença entre o DOM atual e o HTML novo
+     Store   dono do estado: toda alteração passa por aqui
+     Memo    cache de trechos caros, invalidado pela versão do Store
+   Nenhum conhece a interface, e a interface só conhece o Store. É isso
+   que permite trocar qualquer peça isoladamente.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- Bus */
+var Bus = (function(){
+  var ouvintes = Object.create(null);
+  var historico = [];
+
+  return {
+    /* Assina um evento. Devolve a função que cancela a assinatura —
+       sem isso, listeners duplicados se acumulam a cada re-registro. */
+    ouvir(evento, fn){
+      (ouvintes[evento] = ouvintes[evento] || []).push(fn);
+      return () => this.parar(evento, fn);
+    },
+    parar(evento, fn){
+      const lista = ouvintes[evento];
+      if(!lista) return false;
+      const i = lista.indexOf(fn);
+      if(i < 0) return false;
+      lista.splice(i, 1);
+      return true;
+    },
+    /* Um ouvinte com defeito não pode derrubar os outros. */
+    emitir(evento, dados){
+      historico.push({ evento, ts: Date.now() });
+      if(historico.length > 60) historico.shift();
+      const lista = ouvintes[evento];
+      if(!lista || !lista.length) return 0;
+      let entregues = 0;
+      for(const fn of lista.slice()){
+        try { fn(dados, evento); entregues++; }
+        catch(e){ console.error("[Bus] ouvinte de", evento, "falhou:", e.message); }
+      }
+      return entregues;
+    },
+    quantos(evento){ return (ouvintes[evento] || []).length; },
+    eventos(){ return Object.keys(ouvintes); },
+    ultimos(){ return historico.slice(); },
+    limpar(){ ouvintes = Object.create(null); }
+  };
+})();
+
+/* Nomes canônicos: erro de digitação vira erro de leitura, e não um
+   evento silencioso que nunca dispara. */
+var EV = {
+  estadoMudou:     "estadoMudou",
+  metaAtualizada:  "goalUpdated",
+  eventoCriado:    "eventCreated",
+  calendarioMudou: "calendarChanged",
+  pomodoroTick:    "pomodoroTick",
+  pomodoroFase:    "pomodoroPhase",
+  idiomaMudou:     "languageChanged",
+  temaMudou:       "themeChanged",
+  backupConcluido: "backupFinished",
+  blocoMarcado:    "blockToggled",
+  notaSalva:       "noteSaved",
+  renderConcluido: "renderDone"
+};
+
+/* ---------------------------------------------------------------- Agenda */
+var Agenda = (function(){
+  const temRAF  = typeof requestAnimationFrame === "function";
+  const temIdle = typeof requestIdleCallback === "function";
+  let pendenteFrame = null;
+  const filaFrame = [];
+  const filaOciosa = [];
+  let processandoOcioso = false;
+  const metricas = { frames: 0, ociosos: 0, coalescidos: 0 };
+
+  function correrFrame(){
+    pendenteFrame = null;
+    const tarefas = filaFrame.splice(0, filaFrame.length);
+    metricas.frames++;
+    for(const t of tarefas){
+      try { t(); } catch(e){ console.error("[Agenda] tarefa de quadro falhou:", e.message); }
+    }
+  }
+  function correrOcioso(prazo){
+    processandoOcioso = false;
+    /* Enquanto sobrar tempo no quadro, esvazia a fila. O que não couber
+       volta para a próxima janela ociosa: a interface nunca trava. */
+    while(filaOciosa.length){
+      const sobra = prazo && prazo.timeRemaining ? prazo.timeRemaining() : 8;
+      if(sobra <= 1) break;
+      const t = filaOciosa.shift();
+      try { t(); metricas.ociosos++; }
+      catch(e){ console.error("[Agenda] tarefa ociosa falhou:", e.message); }
+    }
+    if(filaOciosa.length) agendarOcioso();
+  }
+  function agendarOcioso(){
+    if(processandoOcioso) return;
+    processandoOcioso = true;
+    if(temIdle) requestIdleCallback(correrOcioso, { timeout: 900 });
+    else setTimeout(function(){ correrOcioso(null); }, 40);
+  }
+
+  return {
+    /* Trabalho visual: tudo pedido no mesmo quadro vira uma execução só. */
+    noFrame(fn){
+      if(filaFrame.indexOf(fn) >= 0){ metricas.coalescidos++; return false; }
+      filaFrame.push(fn);
+      if(pendenteFrame){ metricas.coalescidos++; return false; }
+      pendenteFrame = temRAF ? requestAnimationFrame(correrFrame) : setTimeout(correrFrame, 16);
+      return true;
+    },
+    /* Trabalho pesado que pode esperar: gráficos, agregações, backup. */
+    quandoOcioso(fn){ filaOciosa.push(fn); agendarOcioso(); return true; },
+    pendentes(){ return { quadro: filaFrame.length, ocioso: filaOciosa.length }; },
+    metricas(){ return Object.assign({}, metricas); },
+    /* Usado pelos testes: executa tudo agora, sem esperar o navegador. */
+    esvaziar(){
+      pendenteFrame = null;
+      correrFrame();
+      while(filaOciosa.length){
+        const t = filaOciosa.shift();
+        try { t(); } catch(e){}
+      }
+    }
+  };
+})();
+
+/* ---------------------------------------------------------------- VDOM */
+var VDOM = (function(){
+  const metricas = { patches: 0, nosCriados: 0, nosRemovidos: 0,
+                     nosAtualizados: 0, atributos: 0, textos: 0, iguais: 0 };
+
+  /* Dois nós representam a mesma coisa? Havendo chave, ela decide; senão
+     valem tipo e tag. É o que evita recriar uma lista inteira quando um
+     item some do meio dela. */
+  function mesmoNo(a, b){
+    if(!a || !b) return false;
+    if(a.nodeType !== b.nodeType) return false;
+    if(a.nodeType === 3) return true;
+    if(a.nodeName !== b.nodeName) return false;
+    const ka = a.getAttribute ? a.getAttribute("data-k") : null;
+    const kb = b.getAttribute ? b.getAttribute("data-k") : null;
+    if(ka !== null || kb !== null) return ka === kb;
+    return true;
+  }
+
+  function copiarAtributos(alvo, fonte, protegerValor){
+    const antigos = alvo.attributes, novos = fonte.attributes;
+    for(let i = antigos.length - 1; i >= 0; i--){
+      const nome = antigos[i].name;
+      if(protegerValor && (nome === "value" || nome === "checked")) continue;
+      if(!fonte.hasAttribute(nome)){ alvo.removeAttribute(nome); metricas.atributos++; }
+    }
+    for(let i = 0; i < novos.length; i++){
+      const nome = novos[i].name, valor = novos[i].value;
+      /* Campo em foco: nem o atributo é tocado. O que a pessoa está
+         digitando é a verdade, não o que a view acha que deveria estar. */
+      if(protegerValor && (nome === "value" || nome === "checked")) continue;
+      if(alvo.getAttribute(nome) !== valor){ alvo.setAttribute(nome, valor); metricas.atributos++; }
+    }
+  }
+
+  /* Campos de formulário guardam estado que não está no HTML. Preservar
+     valor e foco é o que faz o usuário nunca perder o que digitou. */
+  function preservarCampo(alvo, fonte){
+    const tag = alvo.nodeName;
+    if(tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") return;
+    const focado = (typeof document !== "undefined" && document.activeElement === alvo);
+    if(focado) return;                      /* enquanto digita, não encoste */
+    const novoValor = fonte.getAttribute ? fonte.getAttribute("value") : null;
+    if(novoValor !== null && alvo.value !== novoValor) alvo.value = novoValor;
+  }
+
+  function aplicarNo(alvo, fonte){
+    if(alvo.nodeType === 3){
+      if(alvo.nodeValue !== fonte.nodeValue){ alvo.nodeValue = fonte.nodeValue; metricas.textos++; }
+      else metricas.iguais++;
+      return;
+    }
+    const focado = (typeof document !== "undefined" && document.activeElement === alvo);
+    copiarAtributos(alvo, fonte, focado);
+    preservarCampo(alvo, fonte);
+    metricas.nosAtualizados++;
+    aplicarFilhos(alvo, fonte);
+  }
+
+  function aplicarFilhos(alvo, fonte){
+    const fa = alvo.childNodes, fb = fonte.childNodes;
+    let i = 0;
+    while(i < fb.length){
+      const a = fa[i], b = fb[i];
+      if(!a){ alvo.appendChild(b.cloneNode(true)); metricas.nosCriados++; }
+      else if(mesmoNo(a, b)) aplicarNo(a, b);
+      else { alvo.replaceChild(b.cloneNode(true), a); metricas.nosCriados++; metricas.nosRemovidos++; }
+      i++;
+    }
+    while(fa.length > fb.length){ alvo.removeChild(alvo.lastChild); metricas.nosRemovidos++; }
+  }
+
+  return {
+    /* Leva `destino` a ficar igual a `html`, tocando só no que difere.
+       Devolve quantas alterações reais foram aplicadas. */
+    aplicar(destino, html){
+      /* Só age onde existe um DOM de verdade. Fora do navegador — nos
+         testes, por exemplo — devolve -1 e quem chamou usa innerHTML. */
+      if(!destino || !destino.childNodes || typeof document === "undefined"
+         || !document.createElement) return -1;
+      let molde;
+      try {
+        molde = document.createElement("div");
+        molde.innerHTML = html;
+        if(!molde.childNodes) return -1;
+      } catch(e){ return -1; }
+      const antes = metricas.nosCriados + metricas.nosRemovidos +
+                    metricas.atributos + metricas.textos;
+      try { aplicarFilhos(destino, molde); }
+      catch(e){ console.error("[VDOM] diff falhou, refazendo a árvore:", e.message);
+                destino.innerHTML = html; return -1; }
+      metricas.patches++;
+      return (metricas.nosCriados + metricas.nosRemovidos +
+              metricas.atributos + metricas.textos) - antes;
+    },
+    metricas(){ return Object.assign({}, metricas); },
+    zerar(){ Object.keys(metricas).forEach(function(k){ metricas[k] = 0; }); },
+    mesmoNo: mesmoNo,
+    aplicarFilhos: aplicarFilhos
+  };
+})();
+
+/* ---------------------------------------------------------------- Nós
+   Cache dos elementos consultados a cada tick. getElementById é barato,
+   mas chamá-lo uma vez por segundo para os mesmos dois nós é trabalho
+   que dá para não fazer. O cache é limpo quando a árvore é substituída. */
+var Nos = (function(){
+  let cache = Object.create(null);
+  return {
+    porId(id){
+      const guardado = cache[id];
+      /* Ter pai não basta: o nó pode estar num galho já descartado.
+         `isConnected` responde se ele ainda pertence ao documento vivo. */
+      if(guardado){
+        const vivo = (guardado.isConnected !== undefined)
+          ? guardado.isConnected
+          : !!guardado.parentNode;
+        if(vivo) return guardado;
+        delete cache[id];
+      }
+      if(typeof document === "undefined" || !document.getElementById) return null;
+      const el = document.getElementById(id);
+      if(el) cache[id] = el;
+      return el;
+    },
+    limpar(){ cache = Object.create(null); }
+  };
+})();
+
+/* ---------------------------------------------------------------- Store */
+var Store = (function(){
+  let versao = 0;
+  const assinantes = [];
+  const metricas = { commits: 0, rendersPedidos: 0, rendersFeitos: 0 };
+
+  return {
+    versao(){ return versao; },
+    /* Nem toda mutação passa por commit() — algumas ações alteram S e
+       chamam salvar() direto. Este marcador garante que a memoização
+       nunca sirva um valor velho por causa disso. */
+    marcarSujo(){ versao++; return versao; },
+    /* Toda alteração de estado entra por aqui: o nome vira evento no Bus,
+       a versão sobe (invalidando a memoização) e um render é agendado. */
+    commit(nome, mutacao, dados){
+      try { if(typeof mutacao === "function") mutacao(); }
+      catch(e){ console.error("[Store] commit", nome, "falhou:", e.message); return false; }
+      versao++;
+      metricas.commits++;
+      Bus.emitir(nome, dados);
+      Bus.emitir(EV.estadoMudou, { origem: nome, versao: versao });
+      for(const fn of assinantes.slice()){
+        try { fn(nome, versao); } catch(e){ console.error("[Store] assinante:", e.message); }
+      }
+      this.pedirRender();
+      return true;
+    },
+    assinar(fn){
+      assinantes.push(fn);
+      return function(){ const i = assinantes.indexOf(fn); if(i >= 0) assinantes.splice(i, 1); };
+    },
+    /* Vários pedidos no mesmo quadro viram um render só. */
+    pedirRender(){
+      metricas.rendersPedidos++;
+      Agenda.noFrame(function(){ metricas.rendersFeitos++; render(); });
+    },
+    metricas(){ return Object.assign({}, metricas); }
+  };
+})();
+
+/* ---------------------------------------------------------------- Memo */
+var Memo = (function(){
+  let cache = Object.create(null);
+  let versaoCache = -1;
+  const metricas = { acertos: 0, faltas: 0 };
+
+  return {
+    /* Um gráfico de 90 dias não precisa ser remontado porque você marcou
+       um copo de água — mas precisa quando o estado realmente mudou. */
+    obter(chave, calcular){
+      const v = Store.versao();
+      if(v !== versaoCache){ cache = Object.create(null); versaoCache = v; }
+      if(chave in cache){ metricas.acertos++; return cache[chave]; }
+      metricas.faltas++;
+      cache[chave] = calcular();
+      return cache[chave];
+    },
+    invalidar(){ cache = Object.create(null); versaoCache = -1; },
+    metricas(){ return Object.assign({}, metricas); },
+    zerar(){ metricas.acertos = 0; metricas.faltas = 0; }
+  };
+})();
+
 /* ================= helpers ================= */
+
 function pad(n){ return String(n).padStart(2,"0"); }
 function hhmm(m){ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+":"+pad(m%60); }
 function chave(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
@@ -2171,13 +2496,15 @@ var N = [];
 var UI = {
   aba:"hoje", ajustes:false, sec:null, tipo:"semana",
   materia:null, seg:1500, fase:"foco", rodando:false, pausa:false, timer:null,
+  pomoIniciadoEm:null, pomoSegNoInicio:0,
   reg:{}, novaProva:{materia:null,data:""},
   draft:"", tag:null, dv:false, editando:null, filtro:"Tudo", busca:"",
   notaPri:"", notaPrazo:"", notaRec:"",
   backup:"", msg:"", agora:new Date(), alerta:null, ultimoBloco:null, plano:null,
   mesRef:null, diaSel:null, novoEv:{hora:"",titulo:"",rec:""}, per:30, foco:"tudo",
   vistaCal:"mes", semanaRef:null,
-  ultimoHTML:null, pulso:null, diaTodo:false, planoSem:null, materiaTocada:false,
+  ultimoHTML:null, pulso:null, diaTodo:false,
+  abaRenderizada:null, ajustesRenderizado:false, planoSem:null, materiaTocada:false,
   metaForm:false, novaMeta:{titulo:"",escopo:"mes",fonte:"estudo_h",alvo:"",
     categoria:"estudos",prioridade:"normal",prazo:"",obs:""},
   expPer:30, expMsg:"", expFalhou:false, confirmaReset:false, temAtualizacao:false, pwaMsg:""
@@ -2192,6 +2519,7 @@ var timerSalvar=null, ultimoPayload=null;
 /* Marcar cinco blocos seguidos disparava cinco gravações do estado inteiro.
    Agrupa em uma só, e descarta a escrita se o conteúdo não mudou. */
 function salvar(){
+  Store.marcarSujo();          /* invalida trechos memoizados */
   if(timerSalvar) clearTimeout(timerSalvar);
   timerSalvar=setTimeout(gravar,350);
 }
@@ -2208,6 +2536,7 @@ async function gravar(){
   }
 }
 async function salvarNotas(){
+  Store.marcarSujo();
   try{
     await Persistencia.salvarNotas(N);
     tentNotas=0;
@@ -2218,8 +2547,12 @@ async function salvarNotas(){
   }
 }
 function mudarDia(patch){
-  S.dias[hojeKey()] = Object.assign(dia(), patch);
-  salvar(); render();
+  /* Passa pelo Store: evento no Bus, versão nova (invalida a memoização)
+     e um único render agendado, ainda que várias mudanças ocorram juntas. */
+  Store.commit(EV.estadoMudou, function(){
+    S.dias[hojeKey()] = Object.assign(dia(), patch);
+    salvar();
+  }, {tipo:"dia", chave:hojeKey(), campos:Object.keys(patch)});
 }
 
 /* janela do remédio */
@@ -3831,6 +4164,12 @@ function variacao(atual,antes){
 }
 
 /* ---------- ETAPA 3 · gráficos ---------- */
+/* Marcador de conteúdo adiado: ocupa a altura final para não haver salto
+   de layout, e é preenchido quando o navegador estiver ocioso. */
+function espacoGrafico(id,alt){
+  return '<div class="graf-adiado" data-graf="'+id+'" style="height:'+(alt||96)+'px"></div>';
+}
+
 function grafLinha(vals,cor,alt){
   var n=vals.length; if(!n) return "";
   var max=1; vals.forEach(function(v){ max=Math.max(max,v); });
@@ -3931,7 +4270,9 @@ function itemBloco(b,feito,estado,interativo,marcas,extras){
   var classes="bloco"+(estado?" "+estado:"")+(feito?" feito":"")
     +((marcas&&prioDe(b)===0)?" leve":"")
     +((marcas&&UI.pulso===b.id)?" pop":"");
-  return '<li class="'+classes+'" style="--c:'+CORES[b.k]+'"'
+  /* data-k dá identidade ao nó: o diff reaproveita a linha certa mesmo
+     quando um bloco some do meio da lista. */
+  return '<li class="'+classes+'" data-k="bl-'+escA(b.id)+'" style="--c:'+CORES[b.k]+'"'
     +(interativo?' data-a="marcar:'+escA(b.id)+'"':'')+'>'
     +'<span class="bl-hora">'+hhmm(b.t)+'</span>'
     +'<span class="bl-pino">'+icone(ICON[b.k],17)+'</span>'
@@ -4011,17 +4352,50 @@ function render(){
       +'<span class="navic">'+icone(a[2],21)+'</span>'+a[1]+'</button>';
   }).join("")+'</nav>';
 
-  /* O relógio dispara um render a cada 20s. Se o resultado for igual ao
-     que já está na tela, escrever no DOM só causaria trabalho de layout,
-     perda de posição de rolagem e reinício de animações. */
-  if(html===UI.ultimoHTML) return;
+  /* Se o HTML é idêntico ao da tela, não há o que fazer. */
+  if(html===UI.ultimoHTML){ Bus.emitir(EV.renderConcluido,{alterados:0,igual:true}); return; }
   UI.ultimoHTML=html;
-  document.getElementById("app").innerHTML=html;
-  UI.pulso=null;                  /* a animação de confirmação toca uma vez só */
-  if(fid){
-    var alvo=document.querySelector('[data-f="'+fid+'"]');
-    if(alvo){ alvo.focus(); try{ alvo.setSelectionRange(sel,sel); }catch(e){} }
+
+  var app=document.getElementById("app");
+  /* Sem o contêiner não há o que desenhar. Antes isso lançava exceção e
+     derrubava a ação inteira do usuário. */
+  if(!app){ Bus.emitir(EV.renderConcluido,{alterados:-1,semDOM:true}); return; }
+
+  /* Duas situações, dois caminhos — medidos, não supostos:
+
+     Troca de aba: o conteúdo é outro do começo ao fim. Comparar nó a nó
+     custa mais do que substituir (47 ms contra 33 ms em teste), e ainda
+     impediria a animação de entrada, que depende de elementos novos.
+     Aqui, substituir é mais rápido E mais correto.
+
+     Atualização dentro da mesma aba: só uma fração muda. O diff preserva
+     foco, seleção, rolagem e animações em curso, e sai 34% mais barato. */
+  var trocouAba = (UI.abaRenderizada !== UI.aba) || (UI.ajustesRenderizado !== !!UI.ajustes);
+  var alterados;
+  if(trocouAba){
+    app.innerHTML=html;
+    Nos.limpar();                 /* a árvore anterior deixou de existir */
+    alterados=-2;                 /* -2 = substituição deliberada */
+  } else {
+    alterados=VDOM.aplicar(app,html);
+    if(alterados<0){              /* ambiente sem DOM: caminho antigo */
+      app.innerHTML=html;
+    }
   }
+  UI.abaRenderizada=UI.aba;
+  UI.ajustesRenderizado=!!UI.ajustes;
+  UI.pulso=null;                  /* a animação de confirmação toca uma vez só */
+
+  /* Restauração de foco só é necessária quando o elemento foi realmente
+     substituído — com o diff, quase nunca. */
+  if(fid && document.activeElement!==foco){
+    var alvo=document.querySelector('[data-f="'+fid+'"]');
+    if(alvo && alvo!==document.activeElement){
+      alvo.focus();
+      try{ alvo.setSelectionRange(sel,sel); }catch(e){}
+    }
+  }
+  Bus.emitir(EV.renderConcluido,{alterados:alterados});
 }
 
 /* ---- hoje ---- */
@@ -4581,7 +4955,7 @@ function viewNotas(){
       var q=chave(new Date())===chave(dd)?"hoje "+pad(dd.getHours())+":"+pad(dd.getMinutes())
         :pad(dd.getDate())+"/"+pad(dd.getMonth()+1)+" "+pad(dd.getHours())+":"+pad(dd.getMinutes());
       var ab=n.duvida&&!n.resolvida;
-      return '<li class="nota'+(n.fix?" fix":"")+(ab?" duvida":"")+'" style="--c:'+(ab?"#FF5C7A":corTag(n.tag))+'">'
+      return '<li class="nota'+(n.fix?" fix":"")+(ab?" duvida":"")+'" data-k="nt-'+escA(n.id)+'" style="--c:'+(ab?"#FF5C7A":corTag(n.tag))+'">'
         +'<div class="nota-top"><span class="nota-tag">'+(ab?"⍰ ":"")+esc(n.tag)+'</span>'
         +(n.pri?'<span class="selo pri-'+esc(n.pri)+'">'+esc(n.pri)+'</span>':'')
         +(function(){
@@ -4674,7 +5048,7 @@ function viewMes(){
     if(temProva) pontos+='<i class="pt pv"></i>';
     if(temEv) pontos+='<i class="pt cp"></i>';
 
-    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" com-prova":"")+'" data-a="dsel:'+escA(k)+'">'
+    h+='<button class="mes-dia'+(k===hojeK?" hoje":"")+(k===UI.diaSel?" sel":"")+(temProva?" com-prova":"")+'" data-k="dia-'+k+'" data-a="dsel:'+escA(k)+'">'
       +'<span class="mes-num">'+dnum+'</span>'
       +'<span class="mes-anel" style="opacity:'+(0.08+pct*0.44).toFixed(3)+'"></span>'
       +'<span class="mes-pts">'+pontos+'</span></button>';
@@ -4714,7 +5088,7 @@ function viewMes(){
   if(evs.length){
     h+='<div class="evs">'+evs.map(function(e){
       var rec=RECORRENCIAS.filter(function(r){ return r[0]===(e.rec||""); })[0];
-      return '<div class="ev"><b>'+(e.hora!=null?hhmm(e.hora):"dia todo")+'</b>'
+      return '<div class="ev" data-k="ev-'+escA(e.id)+'"><b>'+(e.hora!=null?hhmm(e.hora):"dia todo")+'</b>'
         +'<span>'+esc(e.titulo)
         +(e.rec?'<i class="ev-rec">'+rec[1].toLowerCase()+'</i>':'')+'</span>'
         +'<button data-a="ev-edit:'+escA(e.id)+'" aria-label="editar">'+icone("lista",13)+'</button>'
@@ -4801,7 +5175,15 @@ function relLinha(rot,valor,dif){
 }
 
 function viewDados(){
+  /* A tela de estatísticas é a mais cara do app: agrega até 90 dias e
+     desenha vários gráficos. Memoizada pela combinação filtro+período+
+     versão do estado, ela só é recalculada quando algo de fato mudou. */
   var n=UI.per||30, foco=UI.foco||"tudo";
+  return Memo.obter("dados:"+foco+":"+n+":"+(UI.metaForm?1:0)+":"+(UI.pwaMsg||"").length
+      +":"+(S.metas2||[]).length+":"+N.length,
+    function(){ return viewDadosCalc(n,foco); });
+}
+function viewDadosCalc(n,foco){
   var atual=serieDias(n), antes=serieDias(n,n);
   var mostra=function(x){ return foco==="tudo"||foco===x; };
 
@@ -4878,7 +5260,7 @@ function viewDados(){
         var P=progressoMeta(g);
         var cor=P.estado==="feita"?"var(--verde)":P.estado==="atrasada"?"var(--ambar)":"var(--roxo)";
         var barra=Math.min(100,P.pct);
-        var x='<div class="meta-c '+P.estado.replace(" ","-")+'">'
+        var x='<div class="meta-c '+P.estado.replace(" ","-")+'" data-k="mt-'+escA(g.id)+'">'
           +'<div class="meta-top"><div><b>'+esc(g.titulo)+'</b>'
           +'<em>'+({dia:"meta de hoje",semana:"meta da semana",mes:"meta do mês",ano:"meta do ano"}[g.escopo]||"meta")
           +' · '+FONTES[g.fonte].lab+'</em>'
@@ -5351,6 +5733,8 @@ function horaDe(qual){
 }
 
 /* ================= eventos ================= */
+/* Delegação: um listener para o documento inteiro, registrado uma única
+   vez. Sem isso, cada render teria de religar centenas de handlers. */
 document.addEventListener("click",function(ev){
   var el=ev.target.closest("[data-a]");
   if(!el) return;
@@ -5363,7 +5747,7 @@ document.addEventListener("input",function(ev){
   var t=ev.target, ds=t.dataset;
   if(ds.ex){ UI.reg[ds.ex]=UI.reg[ds.ex]||{}; UI.reg[ds.ex][ds.campo]=t.value; return; }
   if(ds.f==="draft"){ UI.draft=t.value; return; }
-  if(ds.f==="busca"){ UI.busca=t.value; render(); return; }
+  if(ds.f==="busca"){ UI.busca=t.value; Store.pedirRender(); return; }
   if(ds.f==="npri"){ UI.notaPri=t.value; return; }
   if(ds.f==="nprazo"){ UI.notaPrazo=t.value; return; }
   if(ds.f==="nrec"){ UI.notaRec=t.value; return; }
@@ -5432,26 +5816,26 @@ document.addEventListener("change",function(ev){
 
 function acao(cmd,arg){
   var d=dia();
-  if(cmd==="tab"){ UI.aba=arg; render(); return; }
+  if(cmd==="tab"){ UI.aba=arg; Store.pedirRender(); return; }
   if(cmd==="mes"){
     if(!UI.mesRef) UI.mesRef=new Date(UI.agora.getFullYear(),UI.agora.getMonth(),1);
     UI.mesRef=new Date(UI.mesRef.getFullYear(),UI.mesRef.getMonth()+Number(arg),1);
-    render(); return;
+    Store.pedirRender(); return;
   }
-  if(cmd==="dsel"){ UI.diaSel=arg; render(); return; }
-  if(cmd==="per"){ UI.per=Number(arg); render(); return; }
-  if(cmd==="foco"){ UI.foco=arg; render(); return; }
-  if(cmd==="cal-vista"){ UI.vistaCal=arg; render(); return; }
+  if(cmd==="dsel"){ UI.diaSel=arg; Store.pedirRender(); return; }
+  if(cmd==="per"){ UI.per=Number(arg); Store.pedirRender(); return; }
+  if(cmd==="foco"){ UI.foco=arg; Store.pedirRender(); return; }
+  if(cmd==="cal-vista"){ UI.vistaCal=arg; Store.pedirRender(); return; }
   if(cmd==="sem"){
     var b=UI.semanaRef?new Date(UI.semanaRef):new Date(UI.agora);
-    b.setDate(b.getDate()+Number(arg)*7); UI.semanaRef=b; render(); return;
+    b.setDate(b.getDate()+Number(arg)*7); UI.semanaRef=b; Store.pedirRender(); return;
   }
-  if(cmd==="sem-dia"){ UI.diaSel=arg; UI.vistaCal="mes"; render(); return; }
+  if(cmd==="sem-dia"){ UI.diaSel=arg; UI.vistaCal="mes"; Store.pedirRender(); return; }
   if(cmd==="ev-edit"){
     var alvo=(S.eventos||[]).filter(function(e){ return String(e.id)===arg; })[0];
     if(alvo){
       UI.novoEv={id:alvo.id, hora:alvo.hora!=null?hhmm(alvo.hora):"", titulo:alvo.titulo, rec:alvo.rec||""};
-      render();
+      Store.pedirRender();
     }
     return;
   }
@@ -5471,32 +5855,32 @@ function acao(cmd,arg){
         titulo:tit,rec:UI.novoEv.rec||""}]);
     }
     UI.novoEv={hora:"",titulo:"",rec:""};
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="ev-del"){
     S.eventos=(S.eventos||[]).filter(function(e){ return String(e.id)!==arg; });
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
-  if(cmd==="ajustes"){ UI.ajustes=true; UI.sec=null; UI.msg=""; render(); return; }
-  if(cmd==="ajustes-fechar"||cmd==="fechar-fundo"){ UI.ajustes=false; UI.sec=null; UI.msg=""; render(); return; }
-  if(cmd==="sec-voltar"){ UI.sec=null; UI.msg=""; render(); return; }
-  if(cmd==="sec"){ UI.sec=arg; UI.msg=""; UI.expMsg=""; render(); return; }
-  if(cmd==="tipo"){ UI.tipo=arg; render(); return; }
-  if(cmd==="alerta-ok"){ UI.alerta=null; render(); return; }
+  if(cmd==="ajustes"){ UI.ajustes=true; UI.sec=null; UI.msg=""; Store.pedirRender(); return; }
+  if(cmd==="ajustes-fechar"||cmd==="fechar-fundo"){ UI.ajustes=false; UI.sec=null; UI.msg=""; Store.pedirRender(); return; }
+  if(cmd==="sec-voltar"){ UI.sec=null; UI.msg=""; Store.pedirRender(); return; }
+  if(cmd==="sec"){ UI.sec=arg; UI.msg=""; UI.expMsg=""; Store.pedirRender(); return; }
+  if(cmd==="tipo"){ UI.tipo=arg; Store.pedirRender(); return; }
+  if(cmd==="alerta-ok"){ UI.alerta=null; Store.pedirRender(); return; }
 
-  if(cmd==="tema"){ S.tema=arg; salvar(); render(); return; }
-  if(cmd==="mat-add"){ S.materias.push("Nova matéria"); salvar(); render(); return; }
+  if(cmd==="tema"){ S.tema=arg; salvar(); Store.pedirRender(); return; }
+  if(cmd==="mat-add"){ S.materias.push("Nova matéria"); salvar(); Store.pedirRender(); return; }
   if(cmd==="mat-del"){
     if(S.materias.length<=1) return;
-    S.materias.splice(Number(arg),1); salvar(); render(); return;
+    S.materias.splice(Number(arg),1); salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-add"){
     S.blocos[UI.tipo].push(B(uid(),720,"Novo bloco","base",30,0,""));
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-del"){
     S.blocos[UI.tipo]=S.blocos[UI.tipo].filter(function(x){ return x.id!==arg; });
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-sobe" || cmd==="bl-desce"){
     var arr=(S.blocos[UI.tipo]||[]).slice().sort(function(x,y){ return x.t-y.t; });
@@ -5504,7 +5888,7 @@ function acao(cmd,arg){
     var alvo=cmd==="bl-sobe"?pos-1:pos+1;
     if(pos<0||alvo<0||alvo>=arr.length) return;
     var tmp=arr[pos].t; arr[pos].t=arr[alvo].t; arr[alvo].t=tmp;
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-dup"){
     var o=(S.blocos[UI.tipo]||[]).filter(function(x){ return x.id===arg; })[0];
@@ -5513,11 +5897,11 @@ function acao(cmd,arg){
     S.blocos[UI.tipo].push(B(uid(),novoT,o.titulo,o.k,o.dur,o.e,o.nota));
     var criado=S.blocos[UI.tipo][S.blocos[UI.tipo].length-1];
     criado.p=prioDe(o);
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-prio"){
     var bp=(S.blocos[UI.tipo]||[]).filter(function(x){ return x.id===arg; })[0];
-    if(bp){ bp.p=(prioDe(bp)+1)%3; salvar(); render(); }
+    if(bp){ bp.p=(prioDe(bp)+1)%3; salvar(); Store.pedirRender(); }
     return;
   }
   if(cmd==="rot-copiar"){
@@ -5526,20 +5910,20 @@ function acao(cmd,arg){
       x.id=uid(); return x;
     });
     UI.msg="Rotina copiada para "+NOME_TEMPLATE[arg]+".";
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bl-ess"){
     var b=S.blocos[UI.tipo].filter(function(x){ return x.id===arg; })[0];
-    if(b){ b.e=!b.e; salvar(); render(); }
+    if(b){ b.e=!b.e; salvar(); Store.pedirRender(); }
     return;
   }
   if(cmd==="restaurar"){
     S.blocos[UI.tipo]=JSON.parse(JSON.stringify(BLOCOS_PADRAO[UI.tipo]));
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
-  if(cmd==="med-toggle"){ S.med.ativo=!S.med.ativo; salvar(); render(); return; }
+  if(cmd==="med-toggle"){ S.med.ativo=!S.med.ativo; salvar(); Store.pedirRender(); return; }
   if(cmd==="med-check"){ mudarDia({med:!d.med}); return; }
-  if(cmd==="alertas-toggle"){ S.alertas=!S.alertas; salvar(); render(); return; }
+  if(cmd==="alertas-toggle"){ S.alertas=!S.alertas; salvar(); Store.pedirRender(); return; }
   if(cmd==="pedir-perm"){
     try{
       if(window.Notification) Notification.requestPermission().then(function(p){
@@ -5548,10 +5932,10 @@ function acao(cmd,arg){
           UI.msg="Notificações liberadas. "+n+" aviso(s) agendado(s) para as próximas horas. "
                 +"Com o app fechado, o celular pode não entregar — mantenha também os lembretes do sistema.";
         } else UI.msg="O navegador não liberou. Use os Lembretes do celular.";
-        render();
+        Store.pedirRender();
       });
-      else { UI.msg="Este navegador não suporta notificação aqui. Use os Lembretes."; render(); }
-    }catch(e){ UI.msg="Não deu pra pedir permissão. Use os Lembretes do celular."; render(); }
+      else { UI.msg="Este navegador não suporta notificação aqui. Use os Lembretes."; Store.pedirRender(); }
+    }catch(e){ UI.msg="Não deu pra pedir permissão. Use os Lembretes do celular."; Store.pedirRender(); }
     return;
   }
   if(cmd==="pwa-instalar"){
@@ -5559,7 +5943,7 @@ function acao(cmd,arg){
       UI.pwaMsg = r==="aceito" ? "Instalado. Procure o ícone do Ritmo na tela de início."
                 : r==="recusado" ? "Instalação cancelada. Dá para tentar de novo quando quiser."
                 : "Este navegador não oferece instalação automática.";
-      render();
+      Store.pedirRender();
     });
     return;
   }
@@ -5570,8 +5954,8 @@ function acao(cmd,arg){
       Object.keys(d.stores||{}).forEach(function(k){ linhas.push("  "+k+": "+d.stores[k]+" registros"); });
       if(!Object.keys(d.stores||{}).length) linhas.push("  (sem IndexedDB neste ambiente)");
       linhas.push("service worker: "+(PWA.temRegistro()?"ativo":"não registrado"));
-      UI.pwaMsg=linhas.join("\n"); render();
-    }).catch(function(e){ UI.pwaMsg="erro: "+e.message; render(); });
+      UI.pwaMsg=linhas.join("\n"); Store.pedirRender();
+    }).catch(function(e){ UI.pwaMsg="erro: "+e.message; Store.pedirRender(); });
     return;
   }
   if(cmd==="exp-csv"){
@@ -5583,14 +5967,14 @@ function acao(cmd,arg){
                       : "O navegador bloqueou o download.";
       UI.expFalhou=!okC;
     }catch(e){ UI.expMsg="Erro ao gerar o CSV: "+e.message; }
-    C={}; render(); return;
+    C={}; Store.pedirRender(); return;
   }
   if(cmd==="exp-aba"){
     UI.expMsg = abrirEmAba() ? "Arquivo aberto em outra aba. Use o menu de compartilhar para salvar."
                              : "O navegador também bloqueou a abertura. Tente pelo Safari ou Chrome, fora do app instalado.";
-    UI.expFalhou=false; render(); return;
+    UI.expFalhou=false; Store.pedirRender(); return;
   }
-  if(cmd==="exp-per"){ UI.expPer=Number(arg); UI.expMsg=""; render(); return; }
+  if(cmd==="exp-per"){ UI.expPer=Number(arg); UI.expMsg=""; Store.pedirRender(); return; }
   if(cmd==="exp-pdf"){
     try{
       var nP=UI.expPer||30;
@@ -5600,7 +5984,7 @@ function acao(cmd,arg){
                       : "O navegador bloqueou o download.";
       UI.expFalhou = !okP;
     }catch(e){ UI.expMsg="Erro ao gerar o PDF: "+e.message; }
-    C={}; render(); return;
+    C={}; Store.pedirRender(); return;
   }
   if(cmd==="exp-xls"){
     try{
@@ -5611,33 +5995,33 @@ function acao(cmd,arg){
                       : "O navegador bloqueou o download.";
       UI.expFalhou = !okX;
     }catch(e){ UI.expMsg="Erro ao gerar a planilha: "+e.message; }
-    C={}; render(); return;
+    C={}; Store.pedirRender(); return;
   }
   if(cmd==="bkp-auto"){
     S.backupAuto=S.backupAuto||{};
     S.backupAuto.ativo=!(S.backupAuto.ativo!==false);
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="bkp-ver"){
     Persistencia.lerBackupAutomatico().then(function(b){
       if(b){ UI.backup=b.dados; UI.msg="Cópia de "+b.quando+" carregada no campo acima. Toque em restaurar para aplicar."; }
       else UI.msg="Ainda não há cópia automática. Ela é gravada alguns segundos após abrir o app.";
-      render();
+      Store.pedirRender();
     });
     return;
   }
-  if(cmd==="reset-pedir"){ UI.confirmaReset=true; render(); return; }
-  if(cmd==="reset-nao"){ UI.confirmaReset=false; render(); return; }
+  if(cmd==="reset-pedir"){ UI.confirmaReset=true; Store.pedirRender(); return; }
+  if(cmd==="reset-nao"){ UI.confirmaReset=false; Store.pedirRender(); return; }
   if(cmd==="reset-ok"){
     UI.confirmaReset=false;
     Persistencia.resetGeral().then(function(){
       S=padrao(); N=[]; UI.ultimoHTML=null; C={};
       UI.msg="Tudo apagado. O app voltou ao estado inicial.";
-      salvar(); salvarNotas(); render();
-    }).catch(function(e){ UI.msg="Não foi possível apagar: "+e.message; render(); });
+      salvar(); salvarNotas(); Store.pedirRender();
+    }).catch(function(e){ UI.msg="Não foi possível apagar: "+e.message; Store.pedirRender(); });
     return;
   }
-  if(cmd==="exportar"){ UI.backup=JSON.stringify({estado:S,notas:N}); UI.msg="Copie o texto acima e guarde numa nota."; render(); return; }
+  if(cmd==="exportar"){ UI.backup=JSON.stringify({estado:S,notas:N}); UI.msg="Copie o texto acima e guarde numa nota."; Store.pedirRender(); return; }
   if(cmd==="importar"){
     try{
       var o=JSON.parse(UI.backup);
@@ -5648,7 +6032,7 @@ function acao(cmd,arg){
       });
       UI.msg="Dados restaurados.";
     }catch(e){ UI.msg="Backup inválido. Cole o conteúdo inteiro, das chaves { até }."; }
-    render(); return;
+    Store.pedirRender(); return;
   }
 
   if(cmd==="marcar"){
@@ -5670,27 +6054,27 @@ function acao(cmd,arg){
       }]);
       salvar();
     }
-    render(); return;
+    Store.pedirRender(); return;
   }
   if(cmd==="meta-del"){
     S.metas2=(S.metas2||[]).filter(function(g){ return g.id!==arg; });
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="meta-inc"){
     var g1=(S.metas2||[]).filter(function(x){ return x.id===arg; })[0];
-    if(g1){ g1.valor=num(g1.valor)+(g1.passo||1); registraHist(g1); salvar(); render(); }
+    if(g1){ g1.valor=num(g1.valor)+(g1.passo||1); registraHist(g1); salvar(); Store.pedirRender(); }
     return;
   }
   if(cmd==="meta-form"){
     UI.metaForm=!UI.metaForm;
     if(UI.metaForm) UI.novaMeta={titulo:"",escopo:"mes",fonte:"estudo_h",alvo:"",
       categoria:"estudos",prioridade:"normal",prazo:"",obs:""};
-    render(); return;
+    Store.pedirRender(); return;
   }
-  if(cmd==="mesc"){ UI.novaMeta.escopo=arg; render(); return; }
+  if(cmd==="mesc"){ UI.novaMeta.escopo=arg; Store.pedirRender(); return; }
   if(cmd==="meta-criar"){
     var t=(UI.novaMeta.titulo||"").trim(), al=num(UI.novaMeta.alvo);
-    if(!t||al<=0){ UI.msg="Dê um nome e um alvo maior que zero."; render(); return; }
+    if(!t||al<=0){ UI.msg="Dê um nome e um alvo maior que zero."; Store.pedirRender(); return; }
     S.metas2=(S.metas2||[]).concat([{
       id:uid("m"), titulo:t, escopo:UI.novaMeta.escopo,
       fonte:UI.novaMeta.fonte, alvo:al, passo:1, valor:0, hist:{},
@@ -5698,12 +6082,12 @@ function acao(cmd,arg){
       prioridade:UI.novaMeta.prioridade||"normal",
       prazo:UI.novaMeta.prazo||"", obs:(UI.novaMeta.obs||"").slice(0,180)
     }]);
-    UI.metaForm=false; salvar(); render(); return;
+    UI.metaForm=false; salvar(); Store.pedirRender(); return;
   }
-  if(cmd==="psem-montar"){ UI.planoSem=planoSemanal(7); UI.aba="estudo"; render(); return; }
-  if(cmd==="psem-nao"){ UI.planoSem=null; render(); return; }
+  if(cmd==="psem-montar"){ UI.planoSem=planoSemanal(7); UI.aba="estudo"; Store.pedirRender(); return; }
+  if(cmd==="psem-nao"){ UI.planoSem=null; Store.pedirRender(); return; }
   if(cmd==="psem-ok"){
-    if(!UI.planoSem){ render(); return; }
+    if(!UI.planoSem){ Store.pedirRender(); return; }
     var novo={};
     /* preserva dias passados já planejados e sobrescreve os próximos */
     Object.keys(S.planoEstudo||{}).forEach(function(k){ if(k<hojeKey()) novo[k]=S.planoEstudo[k]; });
@@ -5712,18 +6096,18 @@ function acao(cmd,arg){
       novo[x.data][x.id]=x.materia;
     });
     S.planoEstudo=novo; UI.planoSem=null; UI.materiaTocada=false;
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="psem-limpar"){
     var manter={};
     Object.keys(S.planoEstudo||{}).forEach(function(k){ if(k<hojeKey()) manter[k]=S.planoEstudo[k]; });
-    S.planoEstudo=manter; UI.planoSem=null; salvar(); render(); return;
+    S.planoEstudo=manter; UI.planoSem=null; salvar(); Store.pedirRender(); return;
   }
-  if(cmd==="ir-metas"){ UI.ajustes=true; UI.sec="metas"; UI.msg=""; render(); return; }
-  if(cmd==="replanejar"){ UI.plano=planoDoDia(); render(); return; }
-  if(cmd==="plano-nao"){ UI.plano=null; render(); return; }
+  if(cmd==="ir-metas"){ UI.ajustes=true; UI.sec="metas"; UI.msg=""; Store.pedirRender(); return; }
+  if(cmd==="replanejar"){ UI.plano=planoDoDia(); Store.pedirRender(); return; }
+  if(cmd==="plano-nao"){ UI.plano=null; Store.pedirRender(); return; }
   if(cmd==="plano-ok"){
-    if(!UI.plano||!UI.plano.mudancas.length){ UI.plano=null; render(); return; }
+    if(!UI.plano||!UI.plano.mudancas.length){ UI.plano=null; Store.pedirRender(); return; }
     var aj=Object.assign({},d.ajuste||{});
     UI.plano.mudancas.forEach(function(m){ aj[m.id]=m.para; });
     UI.plano=null;
@@ -5731,9 +6115,9 @@ function acao(cmd,arg){
     return;
   }
   if(cmd==="plano-undo"){ UI.plano=null; mudarDia({ajuste:null}); return; }
-  if(cmd==="ir-rotina"){ UI.ajustes=true; UI.sec="rotina"; UI.msg=""; render(); return; }
-  if(cmd==="ir-duvidas"){ UI.aba="notas"; UI.filtro="Dúvidas"; render(); return; }
-  if(cmd==="dia-todo"){ UI.diaTodo=!UI.diaTodo; render(); return; }
+  if(cmd==="ir-rotina"){ UI.ajustes=true; UI.sec="rotina"; UI.msg=""; Store.pedirRender(); return; }
+  if(cmd==="ir-duvidas"){ UI.aba="notas"; UI.filtro="Dúvidas"; Store.pedirRender(); return; }
+  if(cmd==="dia-todo"){ UI.diaTodo=!UI.diaTodo; Store.pedirRender(); return; }
   if(cmd==="sobrev"){ mudarDia({sobrevivencia:!d.sobrevivencia}); return; }
   if(cmd==="ref"){
     var r=Object.assign({},d.refs);
@@ -5742,7 +6126,7 @@ function acao(cmd,arg){
   }
   if(cmd==="prot"){ mudarDia({prot:Math.max(0,num(d.prot)+Number(arg))}); return; }
   if(cmd==="agua"){ var n=Number(arg); mudarDia({agua:n<d.agua?n:n+1}); return; }
-  if(cmd==="anotar"){ UI.draft=arg==="1"?TEMPLATE_AULA:""; UI.aba="notas"; render(); return; }
+  if(cmd==="anotar"){ UI.draft=arg==="1"?TEMPLATE_AULA:""; UI.aba="notas"; Store.pedirRender(); return; }
 
   if(cmd==="treino-ok"){
     var t=TREINOS[S.rotacao];
@@ -5755,31 +6139,31 @@ function acao(cmd,arg){
     S.rotacao=(S.rotacao+1)%TREINOS.length;
     UI.reg={};
     S.dias[hojeKey()]=Object.assign(dia(),{treino:t.nome});
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
 
-  if(cmd==="mat"){ UI.materia=arg; UI.materiaTocada=true; render(); return; }
+  if(cmd==="mat"){ UI.materia=arg; UI.materiaTocada=true; Store.pedirRender(); return; }
   if(cmd==="pomo"){ UI.rodando?pararPomo():iniciarPomo(); return; }
-  if(cmd==="pomo-zerar"){ pararPomo(); UI.fase="foco"; UI.pausa=false; UI.seg=segundosDaFase("foco"); render(); return; }
+  if(cmd==="pomo-zerar"){ pararPomo(); UI.fase="foco"; UI.pausa=false; UI.seg=segundosDaFase("foco"); Store.pedirRender(); return; }
   if(cmd==="pomo-fase"){
-    pararPomo(); UI.fase=arg; UI.pausa=(arg!=="foco"); UI.seg=segundosDaFase(arg); render(); return;
+    pararPomo(); UI.fase=arg; UI.pausa=(arg!=="foco"); UI.seg=segundosDaFase(arg); Store.pedirRender(); return;
   }
   if(cmd==="pomo-cfg"){
     var pp=arg.split("|"); S.pomo[pp[0]]=Math.max(1,Math.min(120,num(pp[1])));
     if(!UI.rodando){ UI.seg=segundosDaFase(UI.fase); }
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="prova-add"){
     if(!UI.novaProva.data) return;
     S.provas.push({id:uid("p"),materia:UI.novaProva.materia,data:UI.novaProva.data});
-    UI.novaProva.data=""; salvar(); render(); return;
+    UI.novaProva.data=""; salvar(); Store.pedirRender(); return;
   }
-  if(cmd==="prova-del"){ S.provas=S.provas.filter(function(p){ return String(p.id)!==arg; }); salvar(); render(); return; }
+  if(cmd==="prova-del"){ S.provas=S.provas.filter(function(p){ return String(p.id)!==arg; }); salvar(); Store.pedirRender(); return; }
 
-  if(cmd==="ntag"){ UI.tag=arg; render(); return; }
-  if(cmd==="ndv"){ UI.dv=!UI.dv; render(); return; }
-  if(cmd==="modelo"){ UI.draft=TEMPLATE_AULA; render(); return; }
-  if(cmd==="ncancel"){ UI.editando=null; UI.draft=""; UI.dv=false; render(); return; }
+  if(cmd==="ntag"){ UI.tag=arg; Store.pedirRender(); return; }
+  if(cmd==="ndv"){ UI.dv=!UI.dv; Store.pedirRender(); return; }
+  if(cmd==="modelo"){ UI.draft=TEMPLATE_AULA; Store.pedirRender(); return; }
+  if(cmd==="ncancel"){ UI.editando=null; UI.draft=""; UI.dv=false; Store.pedirRender(); return; }
   if(cmd==="nsalvar"){
     var txt=UI.draft.trim();
     if(!txt) return;
@@ -5794,12 +6178,12 @@ function acao(cmd,arg){
         fix:false,duvida:duv,resolvida:false},extras));
     }
     UI.draft=""; UI.dv=false; UI.notaPri=""; UI.notaPrazo=""; UI.notaRec="";
-    salvarNotas(); render(); return;
+    salvarNotas(); Store.pedirRender(); return;
   }
-  if(cmd==="nfiltro"){ UI.filtro=arg; render(); return; }
-  if(cmd==="ndel"){ N=N.filter(function(n){ return String(n.id)!==arg; }); salvarNotas(); render(); return; }
-  if(cmd==="nfix"){ N=N.map(function(n){ if(String(n.id)===arg) n.fix=!n.fix; return n; }); salvarNotas(); render(); return; }
-  if(cmd==="nres"){ N=N.map(function(n){ if(String(n.id)===arg) n.resolvida=!n.resolvida; return n; }); salvarNotas(); render(); return; }
+  if(cmd==="nfiltro"){ UI.filtro=arg; Store.pedirRender(); return; }
+  if(cmd==="ndel"){ N=N.filter(function(n){ return String(n.id)!==arg; }); salvarNotas(); Store.pedirRender(); return; }
+  if(cmd==="nfix"){ N=N.map(function(n){ if(String(n.id)===arg) n.fix=!n.fix; return n; }); salvarNotas(); Store.pedirRender(); return; }
+  if(cmd==="nres"){ N=N.map(function(n){ if(String(n.id)===arg) n.resolvida=!n.resolvida; return n; }); salvarNotas(); Store.pedirRender(); return; }
   if(cmd==="nchk"){
     var pp=arg.split("|"), nid=pp[0], li=Number(pp[1]);
     N=N.map(function(n){
@@ -5813,27 +6197,27 @@ function acao(cmd,arg){
       n.txt=linhas.join("\n");
       return n;
     });
-    salvarNotas(); render(); return;
+    salvarNotas(); Store.pedirRender(); return;
   }
   if(cmd==="checklist"){
     if(UI.draft.trim()) UI.draft+="\n[ ] ";
     else UI.draft="[ ] ";
-    render(); return;
+    Store.pedirRender(); return;
   }
   if(cmd==="subtarefa"){
     /* subtarefa é um item indentado: a contagem soma junto, a leitura hierarquiza */
     UI.draft = (UI.draft.trim()? UI.draft+"\n" : "") + "   [ ] ";
-    render(); return;
+    Store.pedirRender(); return;
   }
-  if(cmd==="cat-add"){ S.categorias=(S.categorias||[]).concat(["Nova categoria"]); salvar(); render(); return; }
+  if(cmd==="cat-add"){ S.categorias=(S.categorias||[]).concat(["Nova categoria"]); salvar(); Store.pedirRender(); return; }
   if(cmd==="cat-del"){
     S.categorias=(S.categorias||[]).filter(function(x,n){ return n!==Number(arg); });
-    salvar(); render(); return;
+    salvar(); Store.pedirRender(); return;
   }
   if(cmd==="nedit"){
     var alvo=N.filter(function(n){ return String(n.id)===arg; })[0];
     if(alvo){ UI.editando=alvo.id; UI.draft=alvo.txt; UI.tag=alvo.tag; UI.dv=!!alvo.duvida;
-      UI.notaPri=alvo.pri||""; UI.notaPrazo=alvo.prazo||""; UI.notaRec=alvo.rec||""; render(); }
+      UI.notaPri=alvo.pri||""; UI.notaPrazo=alvo.prazo||""; UI.notaRec=alvo.rec||""; Store.pedirRender(); }
     return;
   }
 }
@@ -5860,7 +6244,14 @@ function proximaFase(){
 }
 
 function iniciarPomo(){
-  UI.rodando=true; render();
+  /* Guarda contra timer duplicado: dois intervalos descontando o mesmo
+     contador fariam o pomodoro correr em dobro. Reproduzido em teste com
+     dois toques seguidos em "começar". */
+  if(UI.timer){ clearInterval(UI.timer); UI.timer=null; }
+  UI.rodando=true;
+  UI.pomoIniciadoEm=Date.now();
+  UI.pomoSegNoInicio=UI.seg;
+  render();
   UI.timer=setInterval(function(){
     UI.seg--;
     if(UI.seg<=0){
@@ -5885,18 +6276,46 @@ function iniciarPomo(){
       UI.fase=proximaFase();
       UI.pausa=(UI.fase!=="foco");
       UI.seg=segundosDaFase(UI.fase);
+      UI.pomoIniciadoEm=null;      /* a fase acabou; nada a retomar */
+      Bus.emitir(EV.pomodoroFase,{fase:UI.fase});
       bip(); render(); return;
     }
-    var r=document.getElementById("reloj");
+    Bus.emitir(EV.pomodoroTick,{seg:UI.seg,fase:UI.fase});
+    /* Atualização cirúrgica: o timer escreve direto no nó do relógio e no
+       anel, sem passar por render. Um render por segundo seria desperdício
+       mesmo com diff. */
+    var r=Nos.porId("reloj");
     if(r){
       r.textContent=pad(Math.floor(UI.seg/60))+":"+pad(UI.seg%60);
       var total=segundosDaFase(UI.fase),C=2*Math.PI*74;
-      var anel=document.getElementById("ring");
+      var anel=Nos.porId("ring");
       if(anel) anel.style.strokeDashoffset=C*(UI.seg/total);
     }
   },1000);
 }
-function pararPomo(){ clearInterval(UI.timer); UI.rodando=false; render(); }
+function pararPomo(){
+  if(UI.timer){ clearInterval(UI.timer); UI.timer=null; }
+  UI.rodando=false;
+  UI.pomoIniciadoEm=null;
+  render();
+}
+
+/* setInterval não roda com a aba em segundo plano no celular. Ao voltar,
+   recalculamos pelo relógio do sistema em vez de confiar nos ticks —
+   é a diferença entre um pomodoro correto e um que "congela" no bolso. */
+function retomarPomo(){
+  if(!UI.rodando || !UI.pomoIniciadoEm) return false;
+  var decorrido=Math.floor((Date.now()-UI.pomoIniciadoEm)/1000);
+  var restante=UI.pomoSegNoInicio-decorrido;
+  if(restante===UI.seg) return false;
+  if(restante<=0){
+    /* a fase terminou enquanto o app estava fechado */
+    UI.seg=0;
+    return true;
+  }
+  UI.seg=restante;
+  return true;
+}
 
 var ctxAudio=null;
 function bip(){
@@ -5986,6 +6405,7 @@ function vigiar(){
   if(id && UI.ultimoBloco && id!==UI.ultimoBloco){
     UI.alerta=at.titulo;
     UI.alertaEm=Date.now();
+    Bus.emitir(EV.blocoMarcado,{id:id,titulo:at.titulo,inicio:true});
     bip();
     try{
       if(window.Notification && Notification.permission==="granted")
@@ -6132,7 +6552,12 @@ var PWA = (function(){
   ligarPulso();
   agendarAvisos();
   if(document.addEventListener) document.addEventListener("visibilitychange",function(){
-    if(document.hidden) desligarPulso(); else { ligarPulso(); agendarAvisos(); }
+    if(document.hidden){ desligarPulso(); }
+    else {
+      ligarPulso();
+      agendarAvisos();
+      if(retomarPomo()) Store.pedirRender();
+    }
   });
 })();
 </script>

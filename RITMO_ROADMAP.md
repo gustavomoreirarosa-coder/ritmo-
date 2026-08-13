@@ -39,22 +39,37 @@ Fecha as lacunas que sobraram da 1.1, sem tocar na arquitetura.
 
 ---
 
-## 1.3 — Renderização incremental
+## 1.3 — Foundation Architecture ✅ concluída
 
-**Problema que resolve:** hoje cada toque redesenha a tela inteira. Isso
-impede animar a transição de valores, arrastar blocos com o dedo e manter
-a posição de rolagem estável.
+Arquitetura e desempenho, sem funcionalidade nova.
 
-- [ ] Diff de nós no lugar de `innerHTML`
-- [ ] Barras e anéis animando entre valores
-- [ ] Arrastar blocos na edição da rotina
-- [ ] Meta: render abaixo de 2 ms com 1 ano de histórico
+- Núcleo com Bus, Agenda, VDOM, Store e Memo — sem framework
+- Renderização incremental com caminho híbrido escolhido por medição
+- Mutações no DOM: −50% ao marcar blocos, −89% ao digitar, −100% em repouso
+- Foco e texto preservados durante render
+- Timer duplicado do Pomodoro corrigido; retomada em segundo plano
+- Cache de nós do DOM validado por `isConnected`
+- 176 → 243 testes
 
-**Pré-requisito:** suíte de snapshot cobrindo as 7 telas.
-**Status:** desbloqueado — a suíte de 176 testes já existe.
-**Risco:** alto. É a maior mudança estrutural prevista.
+---
 
-## 1.4 — Faxina técnica
+## 1.4 — Faxina técnica e modularização
+
+Agora que o diff existe e os testes protegem, é seguro mexer na forma.
+
+- [ ] Consolidar as 925 regras de CSS (meta: 81 KB → 55 KB)
+- [ ] `acao` vira mapa de handlers no lugar de ~350 linhas de `if`
+- [ ] `viewDados` dividida por seção
+- [ ] Avaliar módulos ES em arquivos separados, com decisão explícita sobre
+      build e impacto no service worker
+- [ ] Ligar a renderização preguiçosa dos gráficos, que ficou pronta mas
+      não conectada na 1.3
+- [ ] Animar barras e anéis entre valores — agora possível, porque os nós
+      sobrevivem ao render
+
+**Pré-requisito:** cumprido. 226 testes e DOM simulado.
+
+## 1.4 — Faxina técnica (substituída acima)
 
 - [ ] Consolidar as 281 redeclarações de CSS (meta: 72 KB → 50 KB)
 - [ ] `acao` vira mapa de handlers no lugar de 314 linhas de `if`

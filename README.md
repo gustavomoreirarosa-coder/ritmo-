@@ -4,7 +4,7 @@ Aplicativo pessoal de rotina para estudo, treino e alimentação.
 Roda inteiramente no aparelho: sem servidor, sem login, sem conta,
 sem enviar nada para lugar nenhum.
 
-**Versão 1.2** — Amadurecimento funcional
+**Versão 1.3** — Foundation Architecture
 
 ---
 
@@ -36,7 +36,7 @@ Instruções detalhadas em [LEIA-ME.md](LEIA-ME.md).
 node testes.js
 ```
 
-176 asserções cobrindo integridade estrutural, funções de domínio,
+243 asserções cobrindo integridade estrutural, funções de domínio,
 renderização das telas, exportação e persistência. Sem dependências.
 
 ## Estrutura
