@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ritmo</title>
 <meta name="description" content="Assistente pessoal de rotina para estudo, treino e alimentação. Funciona offline e guarda tudo no próprio aparelho.">
-<meta name="theme-color" content="#0E1020">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ritmo">
@@ -19,26 +20,28 @@
 <link rel="apple-touch-startup-image" href="./splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
 <link rel="apple-touch-startup-image" href="./splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-html{background:#0E1020;min-height:100%}
-html[data-tema="claro"]{background:#FBFBFD;color-scheme:light}
-[data-tema="claro"] body{background:var(--ink,#FBFBFD) !important}
-#app{min-height:100vh;background:var(--ink,#0E1020)}
-[data-tema="claro"] #app{background:var(--ink,#F2F4FB)}
-[data-tema="claro"]{
-  --ink:#FBFBFD;--ink2:#FFFFFF;--ink3:#FFFFFF;--linha:#E8E9EF;--linha2:#DCDEE7;
-  --texto:#12131A;--mute:#6C7080;--fraco:#A6AAB8;--borda2:#D2D5DF;
-  --navbg:rgba(251,251,253,.86);--overlaybg:rgba(20,22,34,.32);--sombra:rgba(20,26,54,.14);
-  --roxo:#6355E8;--roxo2:#7C6BFF;--azul:#4E74F0;--laranja:#DD6A2C;
-  --verde:#1E9E86;--ambar:#B8891F;--rosa:#D45585;--vermelho:#DC4A66;
-  --el1:0 1px 1px rgba(20,26,54,.04),0 2px 8px -3px rgba(20,26,54,.07);
-  --el2:0 1px 2px rgba(20,26,54,.05),0 10px 30px -12px rgba(20,26,54,.14);
-  --el3:0 2px 6px rgba(20,26,54,.06),0 24px 56px -24px rgba(20,26,54,.18);
-  --luz:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,0))}
+html{background:#000000;min-height:100%;color-scheme:dark}
+html[data-tema="claro"]{background:#F2F2F7;color-scheme:light}
+html[data-tema="claro"],body[data-tema="claro"]{
+  --ink:#F2F2F7;          /* fundo agrupado do iOS               */
+  --ink2:#FFFFFF;         /* cartão                              */
+  --ink3:#F2F2F7;         /* chip dentro do cartão               */
+  --linha:#E5E5EA;--linha2:#D1D1D6;
+  --texto:#000000;
+  --mute:#6C6C70;
+  --fraco:#AEAEB2;
+  --borda2:#C7C7CC;
+  --navbg:rgba(249,249,251,.78);
+  --overlaybg:rgba(0,0,0,.28);
+  --sombra:rgba(0,0,0,.1);
+  --roxo:#5856D6;--roxo2:#6E6BE8;--azul:#007AFF;--laranja:#F09A0A;
+  --verde:#28A745;--ambar:#C79A00;--rosa:#FF2D55;--vermelho:#FF3B30;--ciano:#32ADE6;
+  --el1:0 0 0 .5px rgba(0,0,0,.04);
+  --el2:0 1px 3px rgba(0,0,0,.06),0 0 0 .5px rgba(0,0,0,.04);
+  --el3:0 10px 34px -12px rgba(0,0,0,.14),0 0 0 .5px rgba(0,0,0,.05);
+  --luz:none}
 [data-tema="claro"] .cel{background:#6355E8}
 [data-tema="claro"] .bfill{background:#6355E8}
 [data-tema="claro"] .mat.on,[data-tema="claro"] .tipo.on,
@@ -55,30 +58,40 @@ html[data-tema="claro"]{background:#FBFBFD;color-scheme:light}
 [data-tema="claro"] .nota,[data-tema="claro"] .ex,
 [data-tema="claro"] .comp,[data-tema="claro"] .prova{box-shadow:0 1px 3px var(--sombra)}
 html,body{
-  /* superfícies: três níveis de elevação, diferença sutil mas perceptível */
-  --ink:#0B0D18;--ink2:#141830;--ink3:#191E3A;--linha:#232945;--linha2:#2E3554;
-  --texto:#F2F4FC;--mute:#8E96B8;--fraco:#5A628C;--borda2:#39415F;
-  --navbg:rgba(11,13,24,.88);--overlaybg:rgba(4,5,12,.66);--sombra:rgba(0,0,0,.55);
-  /* paleta de categorias: matizes vizinhos, saturação contida */
-  --roxo:#7C6BFF;--roxo2:#9587FF;--azul:#6B8AFF;--laranja:#F0803C;
-  --verde:#35B79E;--ambar:#DDB04A;--rosa:#E8709A;--vermelho:#F0637E;
-  /* escala tipográfica */
-  --t-hero:34px;--t-titulo:27px;--t-sub:18px;--t-texto:15px;--t-cap:12px;--t-micro:10px;
-  /* espaçamento 4-8-12-16-24-32-48 */
+  /* ---- superfícies: preto verdadeiro, como o iOS em OLED ---- */
+  --ink:#000000;          /* fundo da janela                    */
+  --ink2:#1C1C1E;         /* cartão                              */
+  --ink3:#2C2C2E;         /* cartão sobre cartão                 */
+  --linha:#2A2A2C;        /* separador quase invisível           */
+  --linha2:#38383A;       /* separador visível                   */
+  --texto:#FFFFFF;
+  --mute:#98989F;         /* rótulo secundário                   */
+  --fraco:#636366;        /* rótulo terciário                    */
+  --borda2:#48484A;
+  --navbg:rgba(20,20,22,.72);
+  --overlaybg:rgba(0,0,0,.5);
+  --sombra:rgba(0,0,0,.6);
+  /* ---- cores de sistema, versão escura ---- */
+  --roxo:#5E5CE6;--roxo2:#7D7AFF;--azul:#0A84FF;--laranja:#FF9F0A;
+  --verde:#30D158;--ambar:#FFD60A;--rosa:#FF375F;--vermelho:#FF453A;--ciano:#64D2FF;
+  /* ---- tipografia: escala do iOS ---- */
+  --t-hero:34px;--t-titulo:28px;--t-sub:20px;--t-corpo:17px;--t-texto:15px;
+  --t-cap:13px;--t-micro:11px;
+  /* ---- espaço ---- */
   --e1:4px;--e2:8px;--e3:12px;--e4:16px;--e5:24px;--e6:32px;--e7:48px;
-  /* raios */
-  --r1:12px;--r2:16px;--r3:20px;--r4:22px;--r5:28px;
-  /* movimento: curva de saída da Apple, sem repique */
+  /* ---- raios: curva contínua do iOS ---- */
+  --r1:10px;--r2:14px;--r3:18px;--r4:22px;--r5:28px;
+  /* ---- movimento ---- */
   --ease:cubic-bezier(.32,.72,0,1);
-  --t:180ms var(--ease);--t2:220ms var(--ease);--tl:250ms var(--ease);
-  /* sombras em camadas, quase imperceptíveis */
-  --el1:0 1px 1px rgba(0,0,0,.16),0 2px 6px -2px rgba(0,0,0,.24);
-  --el2:0 1px 2px rgba(0,0,0,.2),0 8px 28px -12px rgba(0,0,0,.55);
-  --el3:0 2px 4px rgba(0,0,0,.24),0 20px 48px -20px rgba(0,0,0,.6);
-  /* brilho interno que dá volume ao card sem gradiente visível */
-  --luz:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 42%);
+  --mola:cubic-bezier(.34,1.4,.5,1);
+  --t:200ms var(--ease);--t2:260ms var(--ease);--tl:320ms var(--ease);
+  /* ---- elevação: quase imperceptível, como o iOS ---- */
+  --el1:0 0 0 .5px rgba(255,255,255,.06);
+  --el2:0 1px 2px rgba(0,0,0,.4),0 0 0 .5px rgba(255,255,255,.07);
+  --el3:0 8px 30px -10px rgba(0,0,0,.7),0 0 0 .5px rgba(255,255,255,.08);
+  --luz:none;
   color-scheme:dark;
-  margin:0;min-height:100vh;background:var(--ink,#0E1020) !important;color:var(--texto);
+  margin:0;min-height:100vh;background:var(--ink,#000) !important;color:var(--texto);
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;padding-bottom:92px;-webkit-font-smoothing:antialiased}
 .load{padding:80px 24px;color:var(--mute);font-family:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;font-size:13px}
 button,input,select,textarea{font-family:inherit}
@@ -403,7 +416,9 @@ h3.sub{font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,system-ui,sa
 .tema-bola{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:1px solid var(--linha)}
 .tema-bola.escuro{background:#0E1020}
 .tema-bola.claro{background:#F2F4FB}
-.tema-bola.auto{background:linear-gradient(135deg,#0E1020 50%,#F2F4FB 50%)}
+.tema-bola.escuro{background:#000}
+.tema-bola.claro{background:#F2F2F7;border-color:#D1D1D6}
+.tema-bola.sistema{background:linear-gradient(135deg,#000 50%,#F2F2F7 50%)}
 .tema-txt{flex:1}
 .tema-txt b{display:block;font-size:14px;font-weight:600}
 .tema-txt em{display:block;font-style:normal;font-size:11.5px;color:var(--mute);margin-top:2px}
@@ -1179,7 +1194,7 @@ html[data-tema="claro"]{--mute:#5E6373}
 .filtros{gap:var(--e2);padding-bottom:var(--e2);margin-bottom:var(--e5)}
 .filtro-linha{gap:var(--e2);margin:var(--e3) 0 var(--e3)}
 .filtro{padding:8px 13px;font-size:12px;border-radius:99px}
-.filtro.on{background:var(--texto);border-color:var(--texto);color:var(--ink)}
+
 .chip{padding:11px 6px;font-size:13px;font-weight:500}
 
 /* Trilhas de rolagem invisíveis, do jeito que o iOS faz. */
@@ -1396,6 +1411,507 @@ main{padding-left:calc(var(--e5) + env(safe-area-inset-left));
 .perigo span{display:block;font-size:12.5px;line-height:1.55;color:var(--mute);margin-bottom:var(--e3)}
 .btn-perigo{background:var(--vermelho);border:none;color:#fff;border-radius:var(--r2);
   padding:12px 18px;font-size:13.5px;font-weight:600;cursor:pointer}
+
+/* =====================================================================
+   RITMO 1.4 — camada visual
+   Princípio central: menos caixas. O iOS agrupa itens relacionados em
+   UMA superfície com separadores finos, em vez de espalhar vários
+   cartões soltos. É o que faz a tela parecer arrumada sem ficar vazia.
+   ===================================================================== */
+
+/* ---------- base ---------- */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",
+    "Inter",system-ui,"Segoe UI",sans-serif;
+  font-size:var(--t-texto);line-height:1.47;letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background:var(--ink)}
+main{padding:0 var(--e4) var(--e7);max-width:100%}
+
+/* Títulos grandes: peso 700 e aperto óptico, como o Large Title do iOS. */
+.logo,.dash-ola h2,.agora-tit,.mes-nome,.treino-nome,.sheet-top h2,.rg b,.mtr b,
+.meta-num b,.stat b,.prova b,.sd-cab b{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif}
+.dash-ola h2{font-size:var(--t-hero);font-weight:700;letter-spacing:-.036em;line-height:1.08}
+.agora-tit{font-size:var(--t-titulo);font-weight:700;letter-spacing:-.032em;line-height:1.14}
+.logo{font-size:19px;font-weight:700;letter-spacing:-.028em}
+
+/* Cabeçalho de seção: minúsculo, discreto, muito espaço acima. */
+h3.sub{font-size:var(--t-cap);font-weight:600;letter-spacing:-.008em;
+  text-transform:none;color:var(--mute);margin:var(--e6) 0 var(--e2);padding:0 var(--e1)}
+.eyebrow{font-size:var(--t-micro);letter-spacing:.02em;text-transform:none;
+  font-weight:500;color:var(--mute)}
+
+/* ---------- superfícies agrupadas ---------- */
+.medidor,.cartao,.meta-c,.rel,.leitura.destaque,.exp-b,.pwa-estado,.sug,.pad,
+.ex,.comp,.prova,.ev,.modelo,.psem-ativo,.lembrete,.ed-bloco,.dash-prox,
+.dash-aviso,.med,.sobrev,.plano,.rg,.anel-c,.mf,.sem-dia,.mtr,.pr,.evo,.nota,
+.menu button,.tema-op,.spark,.perigo{
+  background:var(--ink2);background-image:none;
+  border:none;box-shadow:var(--el1);border-radius:var(--r4)}
+.cartao,.meta-c,.rel,.leitura.destaque,.medidor,.exp-b,.pwa-estado,.perigo{
+  padding:var(--e4) var(--e4);margin-bottom:var(--e3)}
+.agora{border:none;box-shadow:var(--el2);border-radius:var(--r5);
+  background:var(--ink2);background-image:none;padding:var(--e5) var(--e4) var(--e4)}
+.veredito{border-radius:var(--r4);border:none;box-shadow:var(--el1)}
+
+/* Lista agrupada: uma superfície, filhos separados por hairline. */
+.timeline,.sugs,.provas,.evs,.notas,.exs,.prs,.modelos,.metas-faixa,.semana,.lista-ed{
+  background:transparent}
+.timeline{background:var(--ink2);border-radius:var(--r4);overflow:hidden;
+  box-shadow:var(--el1);margin-bottom:var(--e5);padding:0}
+.bloco{border-bottom:.5px solid var(--linha);padding:var(--e3) var(--e4);
+  margin:0;border-radius:0;min-height:56px}
+.bloco:last-child{border-bottom:none}
+.bloco.atual{background:color-mix(in srgb,var(--c) 10%,transparent);
+  border-left:none;padding-left:var(--e4)}
+.bloco:active{background:var(--ink3)}
+
+/* ---------- tab bar ---------- */
+nav{display:flex;justify-content:space-around;align-items:stretch;
+  background:var(--navbg);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  backdrop-filter:saturate(180%) blur(24px);
+  border-top:.5px solid var(--linha2);
+  padding:var(--e2) var(--e1) max(var(--e1),env(safe-area-inset-bottom));
+  grid-template-columns:none}
+.navbtn{flex:1;gap:3px;padding:6px 2px 4px;border-radius:var(--r2);
+  font-size:10px;font-weight:500;letter-spacing:-.005em;color:var(--fraco);
+  min-height:48px;position:relative;background:none}
+.navbtn .navic{font-size:0;transition:transform 260ms var(--mola),color var(--t)}
+.navbtn.on{color:var(--roxo)}
+.navbtn.on .navic{transform:scale(1.06)}
+.navbtn::after{display:none}          /* a barrinha some: o iOS usa cor */
+.navbtn:active .navic{transform:scale(.88)}
+.navbtn:active{background:none;transform:none}
+
+/* ---------- botões ---------- */
+.agora-btn,.btn-grande,.btn-salvar,.btn-perigo{
+  border-radius:var(--r2);padding:15px var(--e4);font-size:var(--t-corpo);
+  font-weight:600;letter-spacing:-.014em;border:none;box-shadow:none}
+.btn-grande.roxo,.btn-salvar{background:var(--roxo);color:#fff}
+.btn-ghost,.btn-ghost-mini,.sug-btn,.mini-b,.chip,.filtro,.ref,.tipo,.mat,.sec,
+.ess-btn,.pfase,.modelo{border-radius:var(--r2);border:none;background:var(--ink2)}
+.btn-ghost{padding:15px;color:var(--roxo);font-weight:500;font-size:var(--t-corpo);
+  box-shadow:var(--el1)}
+.btn-ghost:hover{border:none;background:var(--ink3);color:var(--roxo)}
+button:active:not(:disabled){transform:scale(.97);opacity:.7}
+button{transition:transform 160ms var(--ease),opacity 160ms var(--ease),
+  background 200ms var(--ease),color 200ms var(--ease)}
+button:focus-visible{outline:2.5px solid var(--roxo);outline-offset:2px}
+
+/* Chip: pílula discreta, cheia quando ativa — padrão do iOS. */
+.filtro,.chip,.mat,.tipo,.ref,.tag{
+  padding:7px 14px;border-radius:999px;font-size:var(--t-cap);font-weight:500;
+  background:var(--ink2);color:var(--mute);box-shadow:var(--el1);white-space:nowrap}
+.filtro.on,.chip.on,.mat.on,.tipo.on{background:var(--roxo);color:#fff;font-weight:600}
+.filtro.dv.on{background:var(--vermelho)}
+.filtro.fv.on{background:var(--ambar);color:#000}
+.ref.on{background:var(--ambar);color:#000;font-weight:600}
+
+/* ---------- campos ---------- */
+.in,.in-larga,.in-texto,.in-sel,.in-data,.in-hora,.in-dur,.in-cat,.busca,.backup,
+.comp-txt{background:var(--ink2);border:none;border-radius:var(--r2);
+  color:var(--texto);font-size:var(--t-corpo);box-shadow:var(--el1)}
+.in-texto,.in-larga{padding:13px var(--e3)}
+.in:focus,.in-larga:focus,.in-texto:focus,.busca:focus,.comp-txt:focus{
+  box-shadow:0 0 0 2.5px color-mix(in srgb,var(--roxo) 45%,transparent)}
+
+/* ---------- indicadores ---------- */
+.dash-resumo,.aneis{gap:var(--e2)}
+.mtr,.anel-c{padding:var(--e4) var(--e2);border-radius:var(--r3)}
+.mtr b{font-size:24px;font-weight:700;letter-spacing:-.036em}
+.mtr span{font-size:var(--t-micro);color:var(--mute);text-transform:none;letter-spacing:-.004em}
+.ptrack,.mtr-tr,.btrack{background:var(--linha2);border-radius:999px}
+.pfill,.mtr-fl,.bfill{border-radius:999px}
+
+/* ---------- painel modal ---------- */
+.sheet{background:var(--ink);border:none;border-radius:var(--r5) var(--r5) 0 0;
+  box-shadow:var(--el3);padding:0 var(--e4) calc(var(--e7) + env(safe-area-inset-bottom))}
+.sheet-top{background:var(--ink);border-bottom:.5px solid var(--linha);
+  padding:var(--e5) 0 var(--e3)}
+.sheet-top h2{font-size:var(--t-sub);font-weight:600;letter-spacing:-.022em}
+.fechar,.voltar{background:var(--ink3);border:none;color:var(--mute);
+  width:30px;height:30px;border-radius:999px}
+.menu button{border-radius:0;box-shadow:none;background:transparent;
+  border-bottom:.5px solid var(--linha)}
+.menu{background:var(--ink2);border-radius:var(--r4);overflow:hidden;
+  box-shadow:var(--el1);margin:var(--e3) 0 var(--e4)}
+.menu li{margin:0}
+.menu li:last-child button{border-bottom:none}
+.menu-ic{background:transparent;border:none;width:30px;height:30px;color:var(--roxo)}
+.menu button{grid-template-columns:30px 1fr 14px}
+
+/* ---------- movimento ---------- */
+main.entrar>*{animation:aparecer 380ms var(--ease) both}
+@keyframes aparecer{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sheet{animation:subirSheet 380ms var(--ease) both}
+@keyframes subirSheet{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.bloco.pop .bl-check{animation:pop 320ms var(--mola) both}
+
+/* ---------- iPad e desktop ---------- */
+@media (min-width:600px){
+  main{max-width:640px;margin:0 auto;padding:0 var(--e5) var(--e7)}
+  .top{max-width:640px;margin:0 auto;padding:var(--e5) var(--e5) var(--e3)}
+  .dash-ola h2{font-size:38px}
+  .agora-tit{font-size:32px}
+}
+@media (min-width:900px){
+  main{max-width:700px}
+  .top{max-width:700px}
+  nav{max-width:520px;left:50%;transform:translateX(-50%);
+    border-radius:var(--r4) var(--r4) 0 0;border:.5px solid var(--linha2);border-bottom:none}
+  .aneis{grid-template-columns:repeat(5,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  main.entrar>*,.sheet{animation:none}
+  *{transition-duration:1ms!important}
+}
+
+/* ---------- editor de anotação ---------- */
+.editor{background:var(--ink2);border-radius:var(--r4);box-shadow:var(--el1);
+  overflow:hidden;margin-bottom:var(--e5)}
+.editor.editando{box-shadow:0 0 0 2px var(--roxo),var(--el1)}
+.ed-titulo{width:100%;background:transparent;border:none;box-shadow:none;
+  padding:var(--e4) var(--e4) var(--e2);color:var(--texto);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  font-size:20px;font-weight:600;letter-spacing:-.024em;outline:none}
+.ed-titulo::placeholder{color:var(--fraco);font-weight:600}
+.ed-corpo{width:100%;background:transparent;border:none;box-shadow:none;resize:none;
+  padding:0 var(--e4) var(--e4);color:var(--texto);font-size:var(--t-corpo);
+  line-height:1.5;outline:none;font-family:inherit}
+.ed-corpo::placeholder{color:var(--fraco)}
+.ed-titulo:focus,.ed-corpo:focus{box-shadow:none}
+
+.ed-campos{border-top:.5px solid var(--linha)}
+.linha-campo{display:flex;align-items:center;justify-content:space-between;gap:var(--e3);
+  padding:11px var(--e4);border-bottom:.5px solid var(--linha);width:100%;
+  background:transparent;border-left:none;border-right:none;border-top:none;
+  color:var(--texto);font-size:var(--t-texto);text-align:left;cursor:pointer;
+  border-radius:0;box-shadow:none;min-height:46px}
+.linha-campo:last-child{border-bottom:none}
+.linha-campo>span{display:flex;align-items:center;gap:var(--e2);color:var(--texto);
+  font-size:var(--t-texto);flex-shrink:0}
+.linha-campo>span svg{color:var(--mute)}
+.linha-campo select,.linha-campo input{background:transparent;border:none;box-shadow:none;
+  color:var(--mute);font-size:var(--t-texto);text-align:right;padding:0;outline:none;
+  max-width:56%;font-family:inherit}
+.linha-campo select:focus,.linha-campo input:focus{box-shadow:none;color:var(--roxo)}
+.linha-toque:active{background:var(--ink3)}
+
+/* interruptor no padrão iOS */
+.chave{width:44px;height:26px;border-radius:999px;background:var(--linha2);
+  display:block;position:relative;flex-shrink:0;transition:background 240ms var(--ease)}
+.chave b{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);
+  transition:transform 260ms var(--mola)}
+.chave.on{background:var(--verde)}
+.chave.on b{transform:translateX(18px)}
+
+.ed-insere{display:flex;gap:var(--e2);padding:var(--e3) var(--e4);
+  border-top:.5px solid var(--linha);flex-wrap:wrap}
+.ed-insere button{display:flex;align-items:center;gap:6px;background:var(--ink3);
+  border:none;border-radius:999px;padding:7px 12px;color:var(--roxo);
+  font-size:var(--t-cap);font-weight:500;cursor:pointer;box-shadow:none}
+.ed-acoes{display:flex;justify-content:space-between;align-items:center;gap:var(--e2);
+  padding:var(--e3) var(--e4) var(--e4);border-top:.5px solid var(--linha)}
+.ed-acoes .btn-salvar{padding:12px 26px;font-size:var(--t-texto)}
+.btn-texto{background:none;border:none;color:var(--roxo);font-size:var(--t-corpo);
+  cursor:pointer;padding:8px 4px;box-shadow:none}
+
+/* ---------- busca ---------- */
+.campo-busca{display:flex;align-items:center;gap:var(--e2);background:var(--ink2);
+  border-radius:var(--r2);padding:0 var(--e3);margin-bottom:var(--e3);
+  box-shadow:var(--el1);transition:box-shadow 200ms var(--ease)}
+.campo-busca:focus-within{box-shadow:0 0 0 2.5px color-mix(in srgb,var(--roxo) 45%,transparent)}
+.cb-ic{display:flex;color:var(--fraco);flex-shrink:0}
+.campo-busca:focus-within .cb-ic{color:var(--roxo)}
+.cb-in{flex:1;background:transparent;border:none;box-shadow:none;outline:none;
+  padding:13px 0;color:var(--texto);font-size:var(--t-corpo);min-width:0}
+.cb-in::placeholder{color:var(--fraco)}
+.cb-in:focus{box-shadow:none}
+.cb-x{background:var(--linha2);border:none;color:var(--ink2);width:20px;height:20px;
+  border-radius:50%;font-size:10px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;box-shadow:none}
+
+.filtros{display:flex;gap:7px;overflow-x:auto;padding:2px 0 var(--e2);
+  margin-bottom:var(--e3)}
+.filtro i{font-style:normal;font-size:10px;opacity:.65;margin-left:5px}
+
+/* ---------- item de anotação ---------- */
+.notas{display:flex;flex-direction:column;gap:var(--e2);list-style:none;padding:0;margin:0}
+.nota{border-radius:var(--r4);border-left:none;padding:var(--e4);
+  background:var(--ink2);box-shadow:var(--el1);
+  animation:notaEntra 320ms var(--ease) both}
+@keyframes notaEntra{from{opacity:0;transform:translateY(4px) scale(.995)}to{opacity:1;transform:none}}
+.nota.fix{box-shadow:inset 3px 0 0 var(--ambar),var(--el1)}
+.nota.duvida{box-shadow:inset 3px 0 0 var(--vermelho),var(--el1)}
+.nt-topo{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:var(--e2)}
+.nt-cat{font-size:var(--t-micro);font-weight:600;color:var(--c);letter-spacing:-.002em}
+.nt-data{margin-left:auto;font-size:var(--t-micro);color:var(--fraco)}
+.nt-tit{display:block;width:100%;text-align:left;background:none;border:none;
+  box-shadow:none;padding:0;color:var(--texto);font-size:var(--t-corpo);
+  font-weight:600;letter-spacing:-.018em;line-height:1.32;cursor:pointer}
+.nota .nota-txt,.nota .chk-lista{margin-top:6px}
+.nota .nota-txt{font-size:var(--t-texto);color:var(--mute);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nt-prog{display:flex;align-items:center;gap:var(--e2);margin-top:var(--e3)}
+.nt-prog .ptrack{flex:1;height:4px}
+.nt-prog span{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;color:var(--fraco)}
+.nt-acoes{display:flex;align-items:center;gap:var(--e1);margin-top:var(--e3);
+  padding-top:var(--e2);border-top:.5px solid var(--linha)}
+.nt-b{display:flex;align-items:center;gap:5px;background:none;border:none;box-shadow:none;
+  color:var(--mute);font-size:var(--t-cap);padding:7px 10px;border-radius:var(--r1);
+  cursor:pointer;font-weight:500}
+.nt-b .est{font-size:14px;line-height:1;transition:transform 300ms var(--mola)}
+.nt-b.on{color:var(--ambar)}
+.nt-b.on .est{transform:scale(1.2)}
+.nt-b.ok{color:var(--verde)}
+.nt-b:active{background:var(--ink3)}
+.nt-mais{margin-left:auto;font-size:17px;letter-spacing:.08em;padding:5px 12px;line-height:1}
+.nt-menu{margin-top:var(--e2);background:var(--ink3);border-radius:var(--r2);
+  overflow:hidden;animation:menuAbre 220ms var(--ease) both}
+@keyframes menuAbre{from{opacity:0;transform:scaleY(.9);transform-origin:top}to{opacity:1;transform:none}}
+.nt-menu button{display:block;width:100%;text-align:left;background:none;border:none;
+  box-shadow:none;border-bottom:.5px solid var(--linha);padding:13px var(--e4);
+  color:var(--roxo);font-size:var(--t-texto);cursor:pointer;border-radius:0}
+.nt-menu button:last-child{border-bottom:none;color:var(--mute)}
+.nt-menu .perigo-txt{color:var(--vermelho)}
+.selo.dv{color:var(--vermelho)}
+.selo{border:none;background:var(--ink3);padding:3px 7px;border-radius:6px;
+  font-size:9.5px;letter-spacing:0;text-transform:none;font-weight:600}
+.chk-box{border-color:var(--borda2);border-radius:50%;width:20px;height:20px}
+.chk.on .chk-box{background:var(--verde);border-color:var(--verde)}
+
+/* ---------- cartão de hoje ---------- */
+.hoje-card{background:var(--ink2);border-radius:var(--r4);box-shadow:var(--el1);
+  overflow:hidden;margin-bottom:var(--e4)}
+.hc-linha{display:flex;padding:var(--e4) var(--e2) var(--e3)}
+.hc-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  position:relative}
+.hc-item+.hc-item::before{content:"";position:absolute;left:0;top:15%;height:70%;
+  width:.5px;background:var(--linha)}
+.hc-ic{display:flex}
+.hc-item b{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  font-size:22px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:3px}
+.hc-lab{font-size:var(--t-micro);color:var(--mute)}
+.hc-prog{padding:var(--e3) var(--e4) var(--e4);border-top:.5px solid var(--linha)}
+.hc-topo{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+.hc-topo span{font-size:var(--t-cap);color:var(--mute)}
+.hc-topo b{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;
+  font-size:var(--t-sub);font-weight:700;letter-spacing:-.028em}
+.hc-prog .ptrack{height:8px}
+.hc-prog .pfill{background:linear-gradient(90deg,var(--roxo),var(--azul))}
+.hc-pe{display:block;margin-top:8px;font-size:var(--t-micro);color:var(--fraco)}
+
+/* card AGORA com hierarquia mais forte */
+.agora-tag{font-size:var(--t-micro);letter-spacing:.06em;font-weight:600;
+  text-transform:uppercase;color:var(--c);display:flex;align-items:center;gap:6px}
+.agora-meta{font-size:var(--t-cap);color:var(--mute);font-family:inherit;
+  font-variant-numeric:tabular-nums}
+.agora-falta{color:var(--c);font-weight:500}
+.agora-nota{font-size:var(--t-texto);color:var(--mute);line-height:1.45}
+.agora-acoes{gap:var(--e2);margin-top:var(--e4)}
+.agora-nota-btn{border:none;background:var(--ink3);color:var(--roxo);
+  border-radius:var(--r2);padding:15px var(--e4);font-size:var(--t-corpo);font-weight:500}
+.agora-btn{background:var(--c);color:#fff}
+.agora-btn.done{background:var(--ink3);color:var(--verde)}
+.agora-bar{height:2.5px;background:var(--c);opacity:.85}
+
+.dash-prox{background:var(--ink2);border:none;border-left:none;border-radius:var(--r4);
+  padding:var(--e3) var(--e4);box-shadow:var(--el1);margin-bottom:var(--e5)}
+.prox-txt em{font-size:var(--t-micro);letter-spacing:0;text-transform:none;color:var(--mute)}
+.prox-txt b{font-size:var(--t-corpo);font-weight:500;letter-spacing:-.016em}
+.prox-em{font-size:var(--t-cap);color:var(--fraco);font-family:inherit}
+
+/* anéis mais leves */
+.anel-c{background:var(--ink2);gap:6px;padding:var(--e4) 4px var(--e3);min-height:112px}
+.anel-r{font-size:var(--t-cap);font-weight:600;letter-spacing:-.01em}
+.anel-d{font-size:10px;color:var(--fraco)}
+.anel i{font-size:12px;font-weight:600}
+
+/* assistente */
+.dash-aviso,.sug{border-radius:var(--r4);padding:var(--e4);background:var(--ink2)}
+.dash-aviso.urgente,.sug.urgente{background:color-mix(in srgb,var(--vermelho) 12%,var(--ink2))}
+.dash-aviso.atencao,.sug.atencao{background:color-mix(in srgb,var(--ambar) 10%,var(--ink2))}
+.voz{font-size:var(--t-micro);letter-spacing:0;text-transform:none;font-weight:600;color:var(--mute)}
+.dash-aviso p,.sug-txt p{font-size:var(--t-texto);line-height:1.45;color:var(--mute)}
+.sug-txt b{font-size:var(--t-texto);font-weight:600;letter-spacing:-.014em}
+.sug-btn{background:var(--ink3);color:var(--roxo);border:none;border-radius:999px;
+  padding:8px 14px;font-size:var(--t-cap);font-weight:500;margin-top:var(--e3)}
+.explica{font-size:var(--t-cap);line-height:1.5;color:var(--mute);border-left:none;
+  padding:0 var(--e1);max-width:60ch}
+.ver-dia{border:none;background:var(--ink2);color:var(--roxo);box-shadow:var(--el1);
+  border-radius:var(--r2);padding:14px;font-size:var(--t-texto);font-weight:500;
+  margin:0 0 var(--e5)}
+.vazio{border:none;background:var(--ink2);border-radius:var(--r4);color:var(--mute);
+  font-size:var(--t-texto);padding:var(--e6) var(--e4);box-shadow:var(--el1)}
+.sobrev{padding:var(--e4)}
+.sobrev strong{font-size:var(--t-corpo);font-weight:600;letter-spacing:-.016em}
+.sobrev em{font-size:var(--t-cap);color:var(--mute)}
+.med{padding:var(--e4)}
+
+/* ---------- anéis em faixa ---------- */
+.aneis{display:flex;gap:var(--e2);overflow-x:auto;scrollbar-width:none;
+  padding:2px 0 var(--e2);margin-bottom:var(--e5);
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
+.aneis::-webkit-scrollbar{display:none}
+.anel-c{flex:0 0 92px;min-height:118px}
+@media (min-width:600px){
+  .aneis{-webkit-mask-image:none;mask-image:none;justify-content:space-between}
+  .anel-c{flex:1}
+}
+/* topo mais leve */
+.top{padding:calc(var(--e5) + env(safe-area-inset-top)) var(--e4) var(--e2);
+  align-items:center}
+.clock{background:var(--ink2);border:none;box-shadow:var(--el1);color:var(--mute);
+  font-size:var(--t-cap);padding:7px 12px;border-radius:999px}
+.gear{background:var(--ink2);border:none;box-shadow:var(--el1);color:var(--roxo);
+  width:34px;height:34px;border-radius:999px}
+.dash-ola{margin:var(--e3) 0 var(--e4)}
+.ola-data{font-size:var(--t-cap);color:var(--mute);font-weight:400}
+
+/* rótulos em caixa alta são pesados: o iOS usa frase normal */
+.rg span,.meta-linhas em,.mtr span,.rel-aj-tit,.rel-top .eyebrow,.grafo-cap,
+.veredito .eyebrow,.psem-dia,.plano-top span{text-transform:none;letter-spacing:-.004em;
+  font-family:inherit;font-size:var(--t-micro);color:var(--mute)}
+.rg b{font-size:30px;letter-spacing:-.036em}
+.rg i{font-size:var(--t-cap);color:var(--mute)}
+.rg,.mtr{padding:var(--e4)}
+.rel-top b{font-size:var(--t-sub);font-weight:600;letter-spacing:-.022em}
+.aj-n{background:var(--roxo)}
+.aj-txt b{font-size:var(--t-texto);font-weight:600}
+.aj-txt em{font-size:var(--t-cap)}
+.rel-item{background:var(--ink3);border:none;border-radius:var(--r2);padding:11px var(--e3)}
+
+/* ---------- acertos finais do tema claro ---------- */
+[data-tema="claro"] .filtro.on,[data-tema="claro"] .chip.on,
+[data-tema="claro"] .mat.on,[data-tema="claro"] .tipo.on{background:var(--roxo);color:#fff}
+[data-tema="claro"] .filtro.fv.on{background:var(--ambar);color:#fff}
+[data-tema="claro"] .ref.on{background:var(--ambar);color:#fff}
+[data-tema="claro"] .navbtn{color:#8E8E93}
+[data-tema="claro"] .navbtn.on{color:var(--roxo)}
+[data-tema="claro"] .chave{background:#E5E5EA}
+[data-tema="claro"] .cb-x{background:#C7C7CC;color:#fff}
+[data-tema="claro"] .selo{background:#F2F2F7}
+[data-tema="claro"] .agora-nota-btn{background:#F2F2F7}
+[data-tema="claro"] .lt,[data-tema="claro"] .dash-aviso p,
+[data-tema="claro"] .sug-txt p{color:#3C3C43}
+</style>
+
+<style id="ritmo-1-4-1-apple">
+/* RITMO 1.4.1 — Apple-inspired visual pass
+   Visual-only layer: no state, events, storage or business logic touched. */
+:root{
+  --apple-blue:#007AFF;
+  --apple-purple:#5856D6;
+  --apple-green:#34C759;
+  --apple-orange:#FF9500;
+  --apple-red:#FF3B30;
+  --apple-fill:rgba(120,120,128,.16);
+}
+html,body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;letter-spacing:-.012em}
+body{background:var(--ink)!important}
+button,input,select,textarea{font-family:inherit}
+
+/* Header: quieter and closer to iOS large-title hierarchy. */
+.top{padding-top:calc(18px + env(safe-area-inset-top));padding-bottom:8px}
+.logo{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif!important;
+  font-size:22px!important;font-weight:700!important;letter-spacing:-.035em!important;color:var(--texto)}
+.clock{font-size:13px!important;background:var(--ink2)!important;color:var(--mute)!important;
+  box-shadow:none!important;padding:7px 11px!important}
+.gear{background:var(--apple-fill)!important;color:var(--mute)!important;box-shadow:none!important}
+.gear:hover{color:var(--texto)!important;background:var(--ink3)!important}
+
+main{padding-left:20px!important;padding-right:20px!important;padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}
+.dash-ola{margin-top:10px!important;margin-bottom:22px!important}
+.dash-ola h2{font-size:36px!important;line-height:1.06!important;letter-spacing:-.045em!important;font-weight:700!important}
+.dash-ola p{font-size:15px!important;color:var(--mute)!important;margin-top:7px!important}
+
+/* Make the primary card feel like a native grouped surface, not a web card. */
+.agora{border-radius:24px!important;padding:24px 20px 20px!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 .5px rgba(128,128,128,.10)!important}
+.agora-tag{font-size:12px!important;letter-spacing:.01em!important;text-transform:none!important;font-weight:600!important}
+.agora-tit{font-size:30px!important;line-height:1.08!important;letter-spacing:-.038em!important;margin-top:5px!important}
+.agora-meta{font-family:inherit!important;font-size:14px!important;color:var(--mute)!important}
+.agora-nota{font-size:15px!important;line-height:1.45!important}
+.agora-acoes{margin-top:18px!important}
+.agora-btn{min-height:48px!important;border-radius:14px!important;font-size:16px!important;font-weight:600!important}
+.agora-nota-btn{min-height:48px!important;border-radius:14px!important;background:var(--ink3)!important;font-size:15px!important}
+
+/* Grouped list surfaces. */
+.dash-prox,.dash-aviso,.hoje-card,.timeline,.aneis,.medidor,.editor,.vazio{border-radius:20px!important}
+.dash-prox{padding:15px 17px!important;background:var(--ink2)!important;box-shadow:none!important}
+.dash-prox:active{background:var(--ink3)!important}
+
+.dash-resumo{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+.mtr{min-height:108px!important;text-align:left!important;padding:17px!important;border-radius:18px!important}
+.mtr b{font-size:28px!important}
+.mtr span{font-size:13px!important;margin-top:7px!important}
+.mtr-tr{height:4px!important}
+
+h3.sub{font-size:17px!important;font-weight:600!important;letter-spacing:-.02em!important;color:var(--texto)!important;
+  margin-top:30px!important;margin-bottom:11px!important}
+
+/* Notes: make them look like iOS grouped content. */
+.editor{border-radius:20px!important;box-shadow:0 0 0 .5px rgba(128,128,128,.12)!important}
+.ed-titulo{font-size:22px!important;padding:20px 18px 9px!important}
+.ed-corpo{font-size:17px!important;padding:0 18px 18px!important;line-height:1.5!important}
+.linha-campo{padding:14px 18px!important;min-height:50px!important}
+.ed-insere{padding:11px 14px!important;gap:7px!important}
+.ed-insere button{background:var(--apple-fill)!important;border:0!important;border-radius:999px!important;padding:8px 12px!important}
+.ed-acoes{padding:12px 18px 15px!important}
+.btn-salvar{min-height:46px!important;border-radius:13px!important;background:var(--apple-blue)!important}
+
+.campo-busca{height:46px!important;border-radius:13px!important;background:var(--apple-fill)!important;box-shadow:none!important}
+.cb-in{font-size:17px!important}
+.cb-x{background:var(--mute)!important;color:var(--ink2)!important}
+.filtros{gap:8px!important;padding-bottom:9px!important}
+.filtro{height:34px!important;padding:7px 14px!important;border:0!important;background:var(--apple-fill)!important;box-shadow:none!important}
+.filtro.on{background:var(--apple-blue)!important;color:#fff!important}
+.filtro.dv.on{background:var(--apple-red)!important}
+.filtro.fv.on{background:var(--apple-orange)!important;color:#fff!important}
+
+.notas{gap:10px!important}
+.nota{border-radius:19px!important;padding:17px!important;border:0!important;box-shadow:0 0 0 .5px rgba(128,128,128,.10)!important}
+.nota.fix{box-shadow:inset 3px 0 0 var(--apple-orange),0 0 0 .5px rgba(128,128,128,.10)!important}
+.nota.duvida{box-shadow:inset 3px 0 0 var(--apple-red),0 0 0 .5px rgba(128,128,128,.10)!important}
+.nt-cat{font-size:12px!important;font-weight:600!important}
+.nt-data{font-size:12px!important}
+.nt-tit{font-size:18px!important;line-height:1.25!important;font-weight:600!important}
+.nota .nota-txt{font-size:15px!important;line-height:1.48!important}
+.nt-acoes{margin-top:14px!important;padding-top:9px!important}
+.nt-b{font-size:13px!important;padding:8px 9px!important}
+.nt-mais{font-size:20px!important}
+
+/* Bottom tab bar: glass, quiet, native proportions. */
+nav{height:calc(78px + env(safe-area-inset-bottom))!important;padding:7px 5px max(7px,env(safe-area-inset-bottom))!important;
+  background:rgba(28,28,30,.82)!important;border-top:.5px solid rgba(255,255,255,.12)!important;
+  -webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important}
+[data-tema="claro"] nav{background:rgba(249,249,251,.86)!important;border-top-color:rgba(60,60,67,.18)!important}
+.navbtn{min-height:58px!important;border-radius:14px!important;font-size:10px!important;color:var(--fraco)!important}
+.navbtn.on{color:var(--apple-blue)!important;background:rgba(0,122,255,.08)!important}
+.navbtn .navic{font-size:0!important}
+.navbtn.on .navic{transform:scale(1.1)!important}
+
+/* Sheets / settings. */
+.overlay{background:rgba(0,0,0,.42)!important;backdrop-filter:blur(18px)!important}
+.sheet{border-radius:28px 28px 0 0!important}
+.fechar,.voltar{background:var(--apple-fill)!important}
+
+/* Light mode: cleaner grouped surfaces. */
+[data-tema="claro"] .mtr,[data-tema="claro"] .nota,[data-tema="claro"] .editor,[data-tema="claro"] .agora,
+[data-tema="claro"] .hoje-card,[data-tema="claro"] .dash-prox,[data-tema="claro"] .dash-aviso,
+[data-tema="claro"] .medidor,[data-tema="claro"] .vazio{box-shadow:0 1px 3px rgba(0,0,0,.07),0 0 0 .5px rgba(60,60,67,.08)!important}
+[data-tema="claro"] .filtro{background:rgba(118,118,128,.12)!important;color:#3c3c43!important}
+[data-tema="claro"] .filtro.on{background:var(--apple-blue)!important;color:#fff!important}
+
+@media (min-width:600px){
+  .dash-ola h2{font-size:42px!important}
+  .dash-resumo{grid-template-columns:repeat(4,1fr)!important}
+}
 </style>
 </head>
 <body>
@@ -1461,7 +1977,7 @@ function renderTexto(n){
     +(total?feitos/total*100:0)+'%"></div></div><span class="pnum">'+feitos+'/'+total+'</span></div>';
 }
 
-function corTag(t){ return t==="Ideias"?"#FF7A45":t==="Geral"?"#6E7899":"#7C6BFF"; }
+function corTag(t){ return t==="Ideias"?"var(--laranja)":t==="Geral"?"#6E7899":"var(--roxo)"; }
 function tags(){ return S.materias.concat(S.categorias||["Ideias","Geral"]); }
 
 var TREINOS = [
@@ -1517,7 +2033,7 @@ var REFEICOES=["Café","Almoço","Lanche","Jantar"];
    ganha um matiz vizinho: diferenciam entre si sem brigar com a marca. */
 var CORES={estudo:"var(--azul)",treino:"var(--laranja)",aula:"var(--roxo2)",
            dieta:"var(--ambar)",base:"var(--fraco)"};
-var CORES_HEX={estudo:"#6B8AFF",treino:"#F0803C",aula:"#9587FF",dieta:"#DDB04A",base:"#5A628C"};
+var CORES_HEX={estudo:"#0A84FF",treino:"#FF9F0A",aula:"#5E5CE6",dieta:"#FFD60A",base:"#636366"};
 var NOME_CAT={estudo:"Estudo",treino:"Treino",aula:"Aula",dieta:"Comida",base:"Base"};
 var ICON={estudo:"estudo",treino:"treino",aula:"aula",dieta:"dieta",base:"base"};
 var NOMES_DIA=["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
@@ -1611,6 +2127,8 @@ var TRACOS={
   agua:'<path d="M12 3.2c3.2 3.6 5.5 6.4 5.5 9.3A5.5 5.5 0 0 1 6.5 12.5c0-2.9 2.3-5.7 5.5-9.3Z"/>',
   meta:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
   raio:'<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6l1-8Z"/>',
+  lupa:'<circle cx="10.5" cy="10.5" r="6.8"/><path d="M15.6 15.6 21 21"/>',
+  duvida:'<circle cx="12" cy="12" r="9"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.4 3.4c-.5.2-.7.7-.7 1.2v.6"/><circle cx="12" cy="17.6" r="1" fill="currentColor" stroke="none"/>',
   fogo:'<path d="M12 21.5c3.6 0 6.5-2.8 6.5-6.3 0-4.4-4-6.4-4-10.7-2 1.2-3.4 3.2-3.4 5.4 0 1.3-1 2-1.8 1.2-.6-.6-.9-1.5-.9-2.4-1.7 1.6-2.9 3.9-2.9 6.5 0 3.5 2.9 6.3 6.5 6.3Z"/>',
   /* seções dos ajustes */
   lista:'<path d="M8.5 6.5h12M8.5 12h12M8.5 17.5h12"/><circle cx="4" cy="6.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="17.5" r="1.2" fill="currentColor" stroke="none"/>',
@@ -2499,7 +3017,7 @@ var UI = {
   pomoIniciadoEm:null, pomoSegNoInicio:0,
   reg:{}, novaProva:{materia:null,data:""},
   draft:"", tag:null, dv:false, editando:null, filtro:"Tudo", busca:"",
-  notaPri:"", notaPrazo:"", notaRec:"",
+  notaPri:"", notaPrazo:"", notaRec:"", notaTitulo:"", notaMenu:null,
   backup:"", msg:"", agora:new Date(), alerta:null, ultimoBloco:null, plano:null,
   mesRef:null, diaSel:null, novoEv:{hora:"",titulo:"",rec:""}, per:30, foco:"tudo",
   vistaCal:"mes", semanaRef:null,
@@ -2704,7 +3222,7 @@ PDF.prototype.paragrafo=function(t,tam,hex,larg){
 PDF.prototype.titulo=function(t){
   this.espaco(46);
   this.y-=12;
-  this.texto(t,this.L,this.y,13,true,"#7C6BFF");
+  this.texto(t,this.L,this.y,13,true,"var(--roxo)");
   this.y-=6;
   this.linha(this.L,this.y,this.R,this.y,"#E4E6F0",0.8);
   this.y-=16;
@@ -2731,7 +3249,7 @@ PDF.prototype.barras=function(dados,cor){
     self.texto(d[0],self.L,self.y,8.5,false,"#333333");
     var x0=self.L+150, larg=self.R-60-x0;
     self.ret(x0,self.y-2,larg,7,"#EDEFF6");
-    self.ret(x0,self.y-2,Math.max(1,larg*(d[1]/max)),7,cor||"#7C6BFF");
+    self.ret(x0,self.y-2,Math.max(1,larg*(d[1]/max)),7,cor||"var(--roxo)");
     self.texto(d[2],self.R-52,self.y,8.5,false,"#77809E");
     self.y-=17;
   });
@@ -2739,7 +3257,7 @@ PDF.prototype.barras=function(dados,cor){
 };
 /* Frases da leitura automática, com marcador colorido. */
 PDF.prototype.frases=function(fs){
-  var cores={bom:"#2BB3A3",atencao:"#D99A18",neutro:"#8A93B8"};
+  var cores={bom:"var(--verde)",atencao:"#D99A18",neutro:"#8A93B8"};
   var self=this;
   fs.forEach(function(f){
     self.espaco(24);
@@ -2823,10 +3341,10 @@ function montarRelatorio(n){
   /* resumo geral */
   doc.titulo("Resumo geral");
   doc.indicadores([
-    [Math.round(pct/(nReg||1)*100)+"%","conclusao da rotina","#7C6BFF"],
-    [(somaMinT/60).toFixed(1)+"h","estudo no periodo","#7C6BFF"],
-    [String(treinos),"treinos","#FF7A45"],
-    [seq.atual+"d","sequencia atual","#2BB3A3"]
+    [Math.round(pct/(nReg||1)*100)+"%","conclusao da rotina","var(--roxo)"],
+    [(somaMinT/60).toFixed(1)+"h","estudo no periodo","var(--roxo)"],
+    [String(treinos),"treinos","var(--laranja)"],
+    [seq.atual+"d","sequencia atual","var(--verde)"]
   ]);
 
   /* produtividade */
@@ -2837,7 +3355,7 @@ function montarRelatorio(n){
   [["manha","Manha (5h-11h)"],["tarde","Tarde (12h-17h)"],["noite","Noite (18h-23h)"]].forEach(function(x){
     if(T[x[0]].t>0) tb.push([x[1], (T[x[0]].taxa||0)*100, Math.round((T[x[0]].taxa||0)*100)+"%"]);
   });
-  if(tb.length) doc.barras(tb,"#7C6BFF");
+  if(tb.length) doc.barras(tb,"var(--roxo)");
   var ds=porDiaSemana(28);
   doc.barras(ds.map(function(v,i){
     return [NOMES_DIA[i].charAt(0).toUpperCase()+NOMES_DIA[i].slice(1), v*100, Math.round(v*100)+"%"];
@@ -2849,17 +3367,17 @@ function montarRelatorio(n){
   var pm=porMateria(n);
   doc.barras(S.materias.map(function(m){
     return [m, num(pm[m]), fmtMin(num(pm[m]))];
-  }),"#7C6BFF");
+  }),"var(--roxo)");
 
   /* treino */
   doc.titulo("Treino");
   C={}; doc.frases(leitura("treino",n));
   var tp=treinoPerdidos(n), vol=volumeTreino(n);
   doc.indicadores([
-    [String(tp.feitos||treinos),"realizados","#FF7A45"],
+    [String(tp.feitos||treinos),"realizados","var(--laranja)"],
     [String(tp.perdidos),"perdidos","#E05A72"],
-    [Math.round((tp.taxa||0)*100)+"%","aproveitamento","#2BB3A3"],
-    [Math.round(vol.vol/1000)+"t","volume","#FF7A45"]
+    [Math.round((tp.taxa||0)*100)+"%","aproveitamento","var(--verde)"],
+    [Math.round(vol.vol/1000)+"t","volume","var(--laranja)"]
   ]);
   var evo=Object.keys(S.cargas||{}).filter(function(x){ return (S.cargas[x]||[]).length>=2; });
   if(evo.length){
@@ -2875,10 +3393,10 @@ function montarRelatorio(n){
   C={}; doc.frases(leitura("comida",n));
   var cp=consistencia("prot",n), ca=consistencia("agua",n);
   doc.indicadores([
-    [Math.round((cp.taxa||0)*100)+"%","proteina na meta","#E0B23C"],
-    [Math.round((ca.taxa||0)*100)+"%","agua na meta","#2BB3A3"],
-    [(nP?Math.round(prot/nP):0)+"g","media diaria","#E0B23C"],
-    [cp.melhor+"d","melhor sequencia","#E0B23C"]
+    [Math.round((cp.taxa||0)*100)+"%","proteina na meta","var(--ambar)"],
+    [Math.round((ca.taxa||0)*100)+"%","agua na meta","var(--verde)"],
+    [(nP?Math.round(prot/nP):0)+"g","media diaria","var(--ambar)"],
+    [cp.melhor+"d","melhor sequencia","var(--ambar)"]
   ]);
 
   /* rotina */
@@ -2896,7 +3414,7 @@ function montarRelatorio(n){
     doc.barras(S.metas2.map(function(g){
       var P=progressoMeta(g);
       return [g.titulo.slice(0,30), Math.min(100,P.pct), Math.round(P.pct)+"%"];
-    }),"#2BB3A3");
+    }),"var(--verde)");
     S.metas2.forEach(function(g){
       var P=progressoMeta(g);
       doc.espaco(16);
@@ -2916,7 +3434,7 @@ function montarRelatorio(n){
       var sm=0; serieDias(7,w*7).forEach(function(x){ sm+=x.min; });
       ls.push([w===0?"semana atual":"ha "+w+" semana"+(w>1?"s":""), sm/60, (sm/60).toFixed(1)+"h"]);
     }
-    doc.barras(ls,"#7C6BFF");
+    doc.barras(ls,"var(--roxo)");
   } else {
     doc.paragrafo("Ainda nao ha semanas completas suficientes para comparar a evolucao.",9,"#77809E");
   }
@@ -2951,7 +3469,7 @@ function montarPlanilha(n){
   var x='<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" '
     +'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles>'
     +'<Style ss:ID="cab"><Font ss:Bold="1" ss:Color="#FFFFFF"/>'
-    +'<Interior ss:Color="#7C6BFF" ss:Pattern="Solid"/></Style></Styles>';
+    +'<Interior ss:Color="var(--roxo)" ss:Pattern="Solid"/></Style></Styles>';
 
   /* rotina */
   x+=aba("Rotina",["Data","Dia da semana","Blocos feitos","Blocos previstos","Conclusão %","Sobrevivência"],
@@ -4294,7 +4812,15 @@ function fmtMin(v){ return v>=60 ? (v/60).toFixed(1)+"h" : v+"m"; }
 
 /* ================= render ================= */
 function aplicarTema(){
-  var t=(S.tema==="claro") ? "claro" : "escuro";
+  /* Três modos. O "sistema" acompanha o aparelho e reage se ele mudar
+     de tema enquanto o app está aberto. */
+  var escolha=S.tema||"escuro", t;
+  if(escolha==="sistema"){
+    var claro=false;
+    try{ claro=window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches; }
+    catch(e){}
+    t=claro?"claro":"escuro";
+  } else t=(escolha==="claro")?"claro":"escuro";
   document.body.setAttribute("data-tema", t);
   if(document.documentElement) document.documentElement.setAttribute("data-tema", t);
 }
@@ -4329,8 +4855,7 @@ function render(){
           + '<button data-a="alerta-ok">ok</button></div>';
   }
   html += '<header class="top"><div>'
-   + '<div class="eyebrow">'+NOMES_DIA[UI.agora.getDay()]+' · '+pad(UI.agora.getDate())+'/'+pad(UI.agora.getMonth()+1)+'</div>'
-   + '<h1 class="logo">RITMO</h1></div>'
+   + '<h1 class="logo">Ritmo</h1></div>'
    + '<div class="top-dir"><span class="clock">'+hhmm(min)+'</span>'
    + '<button class="gear" data-a="ajustes" aria-label="Ajustes">'+icone("ajustes",17)+'</button></div></header><main>';
 
@@ -4423,9 +4948,33 @@ function viewHoje(d,vis,min){
    + '<h2>'+saudacao()+(S.nome?', '+esc(S.nome):'')+'</h2>'
    + '</section>';
 
-  h+='<div class="dia-barra"><div class="db-topo">'
-   + '<span>'+pct+'% '+t("diaConcluido")+'</span><b>'+feitos+'/'+vis.length+'</b></div>'
-   + '<div class="ptrack"><div class="pfill" style="width:'+pct+'%"></div></div></div>';
+  /* Cartão de resumo: o que o dia tem, em números, e quanto já andou.
+     Substitui a barra solta — a mesma informação, com contexto. */
+  var qtdAulas=vis.filter(function(b){ return b.k==="aula"; }).length;
+  var qtdEstudo=vis.filter(function(b){ return b.k==="estudo"; }).length;
+  var qtdTreino=vis.filter(function(b){ return b.k==="treino"; }).length;
+  var hojeK=hojeKey();
+  var qtdNotas=N.filter(function(x){ return chave(new Date(x.ts))===hojeK; }).length;
+  var resumoItens=[
+    ["estudo","Estudos",qtdEstudo,"var(--azul)"],
+    ["treino","Treinos",qtdTreino,"var(--laranja)"],
+    ["aula","Aulas",qtdAulas,"var(--roxo)"],
+    ["notas","Anotações",qtdNotas,"var(--verde)"]
+  ].filter(function(x){ return x[2]>0; });
+
+  h+='<section class="hoje-card">'
+   + '<div class="hc-linha">'
+   + resumoItens.map(function(x){
+       return '<div class="hc-item"><span class="hc-ic" style="color:'+x[3]+'">'
+         + icone(x[0]==="notas"?"notas":ICON[x[0]],17)+'</span>'
+         + '<b>'+x[2]+'</b><span class="hc-lab">'+x[1]+'</span></div>';
+     }).join("")
+   + '</div>'
+   + '<div class="hc-prog"><div class="hc-topo"><span>Concluído hoje</span>'
+   + '<b>'+pct+'%</b></div>'
+   + '<div class="ptrack"><div class="pfill" style="width:'+pct+'%"></div></div>'
+   + '<span class="hc-pe">'+feitos+' de '+vis.length+' blocos concluídos</span></div>'
+   + '</section>';
 
   /* ---------- 2. o que faço agora ---------- */
   h+='<section class="agora" style="--c:'+cor+'">';
@@ -4864,7 +5413,7 @@ function viewEstudo(d){
       + metrica(pausas+'','pausas', Math.min(1,pausas/100), 'var(--verde)')
       + '</div>'
       + '<div class="cartao"><div class="cartao-top"><span>Ciclos por dia · 14 dias</span></div>'
-      + grafBarras(serie14, labs, '#6B8AFF', 62)
+      + grafBarras(serie14, labs, 'var(--azul)', 62)
       + '<div class="cartao-pe">média de <b>'+(serie14.reduce(function(a,b){return a+b;},0)/14).toFixed(1)
       + '</b> ciclos por dia</div></div>';
   }
@@ -4889,41 +5438,79 @@ function viewEstudo(d){
 }
 
 /* ---- notas ---- */
+/* Editor em três blocos: o texto respira sozinho no topo, os atributos
+   ficam agrupados abaixo como uma lista do iOS, e as ações fecham o
+   cartão. Nenhuma ação mudou de nome — só de lugar e de peso visual. */
 function viewNotas(){
-  var h='<div class="comp'+(UI.editando?" editando":"")+'">'
-    +'<textarea class="comp-txt" data-f="draft" rows="'+(UI.draft.split("\n").length>3?8:3)+'" placeholder="O que ficou na cabeça agora?">'+esc(UI.draft)+'</textarea>'
-    +'<div class="comp-tags">'+tags().map(function(t){
-        return '<button class="tag'+(t===UI.tag?" on":"")+'" style="--c:'+corTag(t)+'" data-a="ntag:'+escA(t)+'">'+esc(t)+'</button>';
-      }).join("")+'</div>'
-    +'<div class="comp-extras">'
-    +'<select class="in-cat" data-f="npri" aria-label="prioridade">'
-    +PRI_NOTA.map(function(x){
-        return '<option value="'+x[0]+'"'+((UI.notaPri||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
-      }).join("")+'</select>'
-    +'<input class="in-hora" type="date" data-f="nprazo" value="'+escA(UI.notaPrazo||"")+'" aria-label="prazo">'
-    +'<select class="in-cat" data-f="nrec" aria-label="recorrência">'
-    +RECORRENCIAS.map(function(x){
-        return '<option value="'+x[0]+'"'+((UI.notaRec||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
-      }).join("")+'</select></div>'
-    +'<div class="comp-acoes"><div class="comp-esq">'
-    +'<button class="btn-mini" data-a="modelo">modelo da aula</button>'
-    +'<button class="btn-mini" data-a="checklist">+ checklist</button>'
-    +'<button class="btn-mini" data-a="subtarefa">+ subtarefa</button></div><div class="comp-dir">'
-    +'<button class="btn-dv'+(UI.dv?" on":"")+'" data-a="ndv">⍰ dúvida</button>'
-    +(UI.editando?'<button class="btn-ghost-mini" data-a="ncancel">cancelar</button>':'')
-    +'<button class="btn-salvar" data-a="nsalvar">'+(UI.editando?"atualizar":"salvar")+'</button></div></div></div>';
+  var editando=!!UI.editando;
+  var h="";
 
-  h+='<input class="busca" data-f="busca" value="'+esc(UI.busca)+'" placeholder="Buscar nas anotações">';
+  /* ---------- Nova anotação ---------- */
+  h+='<h3 class="sub">'+(editando?"Editar anotação":"Nova anotação")+'</h3>';
+  h+='<div class="editor'+(editando?" editando":"")+'">';
+
+  h+='<input class="ed-titulo" data-f="ntitulo" placeholder="Título"'
+   + ' value="'+escA(UI.notaTitulo||"")+'" aria-label="Título da anotação">';
+  h+='<textarea class="ed-corpo" data-f="draft" rows="'+(UI.draft.split("\n").length>4?9:4)
+   + '" placeholder="Escreva aqui…" aria-label="Conteúdo">'+esc(UI.draft)+'</textarea>';
+
+  /* atributos em lista agrupada */
+  h+='<div class="ed-campos">';
+  h+='<label class="linha-campo"><span>'+icone("estudo",16)+'Categoria</span>'
+   + '<select data-f="ntagsel" aria-label="Categoria">'
+   + tags().map(function(x){
+       return '<option value="'+escA(x)+'"'+(x===UI.tag?" selected":"")+'>'+esc(x)+'</option>';
+     }).join("")+'</select></label>';
+  h+='<label class="linha-campo"><span>'+icone("raio",16)+'Prioridade</span>'
+   + '<select data-f="npri" aria-label="Prioridade">'
+   + PRI_NOTA.map(function(x){
+       return '<option value="'+x[0]+'"'+((UI.notaPri||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
+     }).join("")+'</select></label>';
+  h+='<label class="linha-campo"><span>'+icone("calendario",16)+'Prazo</span>'
+   + '<input type="date" data-f="nprazo" value="'+escA(UI.notaPrazo||"")+'" aria-label="Prazo"></label>';
+  h+='<label class="linha-campo"><span>'+icone("base",16)+'Repetição</span>'
+   + '<select data-f="nrec" aria-label="Repetição">'
+   + RECORRENCIAS.map(function(x){
+       return '<option value="'+x[0]+'"'+((UI.notaRec||"")===x[0]?" selected":"")+'>'+x[1]+'</option>';
+     }).join("")+'</select></label>';
+  h+='<button class="linha-campo linha-toque'+(UI.dv?" ativa":"")+'" data-a="ndv">'
+   + '<span>'+icone("duvida",16)+'Marcar como dúvida</span>'
+   + '<i class="chave'+(UI.dv?" on":"")+'"><b></b></i></button>';
+  h+='</div>';
+
+  /* inserções rápidas */
+  h+='<div class="ed-insere">'
+   + '<button data-a="checklist">'+icone("check",15)+'Checklist</button>'
+   + '<button data-a="subtarefa">'+icone("seta",15)+'Subtarefa</button>'
+   + '<button data-a="modelo">'+icone("notas",15)+'Modelo da aula</button>'
+   + '</div>';
+
+  h+='<div class="ed-acoes">'
+   + (editando?'<button class="btn-texto" data-a="ncancel">Cancelar</button>':'<span></span>')
+   + '<button class="btn-salvar" data-a="nsalvar">'+(editando?"Atualizar":"Salvar")+'</button>'
+   + '</div></div>';
+
+  /* ---------- Busca ---------- */
+  h+='<h3 class="sub">Suas anotações</h3>';
+  h+='<div class="campo-busca'+(UI.busca?" com-texto":"")+'">'
+   + '<span class="cb-ic">'+icone("lupa",17)+'</span>'
+   + '<input class="cb-in" data-f="busca" value="'+escA(UI.busca)+'"'
+   + ' placeholder="Buscar em anotações" aria-label="Buscar">'
+   + (UI.busca?'<button class="cb-x" data-a="nbusca-limpar" aria-label="Limpar busca">✕</button>':'')
+   + '</div>';
+
+  /* ---------- Filtros ---------- */
   var abertas=N.filter(function(n){ return n.duvida&&!n.resolvida; }).length;
   var favs=N.filter(function(n){ return n.fix; }).length;
-  h+='<div class="filtros">'+["Tudo","Dúvidas","Favoritas"].concat(tags()).map(function(t){
-      var c=t==="Tudo"?"":t==="Dúvidas"?abertas:t==="Favoritas"?favs
-            :N.filter(function(n){return n.tag===t;}).length;
-      return '<button class="filtro'+(t===UI.filtro?" on":"")
-        +(t==="Dúvidas"?" dv":"")+(t==="Favoritas"?" fv":"")+'" data-a="nfiltro:'+escA(t)+'">'
-        +esc(t)+(c?'<i>'+c+'</i>':'')+'</button>';
+  h+='<div class="filtros">'+["Tudo","Dúvidas","Favoritas"].concat(tags()).map(function(x){
+      var c = x==="Tudo" ? "" : x==="Dúvidas" ? abertas : x==="Favoritas" ? favs
+            : N.filter(function(n){ return n.tag===x; }).length;
+      return '<button class="filtro'+(x===UI.filtro?" on":"")
+        +(x==="Dúvidas"?" dv":"")+(x==="Favoritas"?" fv":"")+'" data-a="nfiltro:'+escA(x)+'">'
+        +esc(x)+(c?'<i>'+c+'</i>':'')+'</button>';
     }).join("")+'</div>';
 
+  /* ---------- Lista ---------- */
   var lista=N.filter(function(n){
       if(UI.filtro==="Tudo") return true;
       if(UI.filtro==="Dúvidas") return n.duvida&&!n.resolvida;
@@ -4932,47 +5519,72 @@ function viewNotas(){
     }).filter(function(n){
       var q=UI.busca.toLowerCase().trim();
       if(!q) return true;
-      return n.txt.toLowerCase().indexOf(q)>=0 || (n.tag||"").toLowerCase().indexOf(q)>=0;
-    })
-     .sort(function(a,b){
-       /* fixadas primeiro; depois prazo mais próximo; depois prioridade; depois recentes */
-       var f=(b.fix?1:0)-(a.fix?1:0); if(f) return f;
-       var pa=a.prazo?diasAte(a.prazo):9999, pb=b.prazo?diasAte(b.prazo):9999;
-       if(pa!==pb) return pa-pb;
-       var ord={alta:0,media:1,baixa:2,"":3};
-       var oa=ord[a.pri||""], ob=ord[b.pri||""];
-       if(oa!==ob) return oa-ob;
-       return b.ts-a.ts;
-     });
+      return n.txt.toLowerCase().indexOf(q)>=0
+        || (n.titulo||"").toLowerCase().indexOf(q)>=0
+        || (n.tag||"").toLowerCase().indexOf(q)>=0;
+    }).sort(function(a,b){
+      var f=(b.fix?1:0)-(a.fix?1:0); if(f) return f;
+      var pa=a.prazo?diasAte(a.prazo):9999, pb=b.prazo?diasAte(b.prazo):9999;
+      if(pa!==pb) return pa-pb;
+      var ord={alta:0,media:1,baixa:2,"":3};
+      var oa=ord[a.pri||""], ob=ord[b.pri||""];
+      if(oa!==ob) return oa-ob;
+      return b.ts-a.ts;
+    });
 
   if(!lista.length){
     h+='<div class="vazio">'+(N.length===0
-      ?"Nenhuma anotação ainda. A primeira boa hora é logo depois da aula, enquanto o quadro ainda está fresco."
-      :"Nada com esse filtro.")+'</div>';
-  } else {
-    h+='<ul class="notas">'+lista.map(function(n){
-      var dd=new Date(n.ts);
-      var q=chave(new Date())===chave(dd)?"hoje "+pad(dd.getHours())+":"+pad(dd.getMinutes())
-        :pad(dd.getDate())+"/"+pad(dd.getMonth()+1)+" "+pad(dd.getHours())+":"+pad(dd.getMinutes());
-      var ab=n.duvida&&!n.resolvida;
-      return '<li class="nota'+(n.fix?" fix":"")+(ab?" duvida":"")+'" data-k="nt-'+escA(n.id)+'" style="--c:'+(ab?"#FF5C7A":corTag(n.tag))+'">'
-        +'<div class="nota-top"><span class="nota-tag">'+(ab?"⍰ ":"")+esc(n.tag)+'</span>'
-        +(n.pri?'<span class="selo pri-'+esc(n.pri)+'">'+esc(n.pri)+'</span>':'')
-        +(function(){
-            var pz=prazoNota(n);
-            if(!pz) return '';
-            var lab = pz.vencida?"venceu": pz.hoje?"hoje": pz.dias===1?"amanhã":"em "+pz.dias+"d";
-            return '<span class="selo prazo'+(pz.vencida?" venceu":pz.perto?" perto":"")+'">'+lab+'</span>';
-          })()
-        +(n.rec?'<span class="selo rec">repete</span>':'')
-        +'<span class="nota-data">'+q+'</span>'
-        +'<button class="nota-ic" data-a="nfix:'+n.id+'">'+(n.fix?"★":"☆")+'</button>'
-        +'<button class="nota-ic apagar" data-a="ndel:'+n.id+'">✕</button></div>'
-        +renderTexto(n)
-        +(n.duvida?'<button class="resolver'+(n.resolvida?" on":"")+'" data-a="nres:'+n.id+'">'
-          +(n.resolvida?"✓ entendido":"marcar como entendido")+'</button>':'')+'</li>';
-    }).join("")+'</ul>';
+      ? "Nenhuma anotação ainda. A melhor hora para a primeira é logo depois da aula, com o quadro ainda fresco."
+      : "Nada encontrado com esse filtro.")+'</div>';
+    return h;
   }
+
+  h+='<ul class="notas">'+lista.map(function(n){
+    var dd=new Date(n.ts);
+    var quando = chave(new Date())===chave(dd)
+      ? "Hoje, "+pad(dd.getHours())+":"+pad(dd.getMinutes())
+      : pad(dd.getDate())+"/"+pad(dd.getMonth()+1)+" · "+pad(dd.getHours())+":"+pad(dd.getMinutes());
+    var aberta=n.duvida&&!n.resolvida;
+    var prog=progressoNota(n);
+    var pz=prazoNota(n);
+    var linhas=String(n.txt||"").split("\n");
+    var titulo = n.titulo || linhas[0].replace(/^\s*\[[ x]?\]\s*/i,"") || "Sem título";
+    var menuAberto = String(UI.notaMenu||"")===String(n.id);
+
+    var x='<li class="nota'+(n.fix?" fix":"")+(aberta?" duvida":"")
+      +'" data-k="nt-'+escA(n.id)+'" style="--c:'+(aberta?"var(--vermelho)":corTag(n.tag))+'">';
+
+    x+='<div class="nt-topo">'
+      +'<span class="nt-cat">'+esc(n.tag)+'</span>'
+      +(n.pri?'<span class="selo pri-'+esc(n.pri)+'">'+esc(n.pri)+'</span>':'')
+      +(pz?'<span class="selo prazo'+(pz.vencida?" venceu":pz.perto?" perto":"")+'">'
+         +(pz.vencida?"venceu":pz.hoje?"hoje":pz.dias===1?"amanhã":"em "+pz.dias+"d")+'</span>':'')
+      +(n.rec?'<span class="selo rec">repete</span>':'')
+      +(aberta?'<span class="selo dv">dúvida</span>':'')
+      +'<span class="nt-data">'+quando+'</span></div>';
+
+    x+='<button class="nt-tit" data-a="nedit:'+escA(n.id)+'">'+esc(corta(titulo,72))+'</button>';
+    x+=renderTexto(n);
+
+    /* Ações discretas: favoritar, concluir e "mais". Excluir mora dentro
+       de "mais" para não ficar a um toque de distância por acidente. */
+    x+='<div class="nt-acoes">'
+      +'<button class="nt-b'+(n.fix?" on":"")+'" data-a="nfix:'+escA(n.id)+'" aria-label="Favoritar">'
+      +'<span class="est">'+(n.fix?"★":"☆")+'</span>Favorito</button>'
+      +(n.duvida?'<button class="nt-b'+(n.resolvida?" ok":"")+'" data-a="nres:'+escA(n.id)+'" aria-label="Concluir">'
+        +'<span class="est">'+(n.resolvida?"✓":"○")+'</span>'+(n.resolvida?"Entendido":"Concluir")+'</button>':'')
+      +'<button class="nt-b nt-mais" data-a="nmais:'+escA(n.id)+'" aria-label="Mais opções"'
+      +' aria-expanded="'+(menuAberto?"true":"false")+'">⋯</button>'
+      +'</div>';
+
+    if(menuAberto){
+      x+='<div class="nt-menu">'
+        +'<button data-a="nedit:'+escA(n.id)+'">Editar anotação</button>'
+        +'<button class="perigo-txt" data-a="ndel:'+escA(n.id)+'">Excluir</button>'
+        +'<button data-a="nmais:">Cancelar</button></div>';
+    }
+    return x+'</li>';
+  }).join("")+'</ul>';
   return h;
 }
 
@@ -5401,7 +6013,7 @@ function viewDadosCalc(n,foco){
       + '</div>'
       +'<div class="cartao"><div class="cartao-top"><span>Minutos por dia</span>'
       + delta(variacao(somaMin,aMin))+'</div>'
-      + grafLinha(atual.map(function(x){ return x.min; }), '#7C6BFF', 100)
+      + grafLinha(atual.map(function(x){ return x.min; }), 'var(--roxo)', 100)
       + '<div class="cartao-pe"><b>'+(somaMin/60).toFixed(1)+'h</b> no período · média de '
       + Math.round(somaMin/n)+' min/dia</div></div>';
 
@@ -5433,7 +6045,7 @@ function viewDadosCalc(n,foco){
       + '</div>'
       +'<div class="cartao"><div class="cartao-top"><span>Volume por semana (t)</span>'
       + delta(variacao(treinos,aTreinos))+'</div>'
-      + grafBarras(volSem,labSem,'#FF7A45',64)
+      + grafBarras(volSem,labSem,'var(--laranja)',64)
       + '<div class="cartao-pe"><b>'+treinos+'</b> treinos em '+n+' dias</div></div>';
 
     var evo=Object.keys(S.cargas||{}).filter(function(x){ return (S.cargas[x]||[]).length>=2; });
@@ -5463,10 +6075,10 @@ function viewDadosCalc(n,foco){
       + '</div>'
       +'<div class="cartao"><div class="cartao-top"><span>Proteína por dia (g)</span>'
       + delta(variacao(mediaP, aNP?Math.round(aProt/aNP):0))+'</div>'
-      + grafLinha(atual.map(function(x){ return x.prot; }), '#E0B23C', 92)
+      + grafLinha(atual.map(function(x){ return x.prot; }), 'var(--ambar)', 92)
       + '<div class="cartao-pe">média de <b>'+mediaP+' g</b> · meta '+metaProt()+' g</div></div>'
       +'<div class="cartao"><div class="cartao-top"><span>Água por dia (copos)</span></div>'
-      + grafBarras(atual.slice(-14).map(function(x){ return x.agua; }), null, '#2BB3A3', 54)
+      + grafBarras(atual.slice(-14).map(function(x){ return x.agua; }), null, 'var(--verde)', 54)
       + '<div class="cartao-pe">média de <b>'+mediaA+' copos</b> · meta '+metaAgua()+'</div></div>';
   }
 
@@ -5539,8 +6151,9 @@ function viewAjustes(){
   }
 
   if(UI.sec==="aparencia"){
-    var temas=[["escuro","Escuro","O padrão. Melhor pra usar à noite."],
-               ["claro","Claro","Fundo branco, pra sol na tela."]];
+    var temas=[["escuro","Escuro","Preto verdadeiro. Melhor à noite e em tela OLED."],
+               ["claro","Claro","Fundo claro, para ambientes iluminados."],
+               ["sistema","Sistema","Acompanha o tema do aparelho."]];
     h+=temas.map(function(t){
       var on=(S.tema||"escuro")===t[0];
       return '<button class="tema-op'+(on?" on":"")+'" data-a="tema:'+escA(t[0])+'">'
@@ -5749,6 +6362,8 @@ document.addEventListener("input",function(ev){
   if(ds.f==="draft"){ UI.draft=t.value; return; }
   if(ds.f==="busca"){ UI.busca=t.value; Store.pedirRender(); return; }
   if(ds.f==="npri"){ UI.notaPri=t.value; return; }
+  if(ds.f==="ntitulo"){ UI.notaTitulo=t.value; return; }
+  if(ds.f==="ntagsel"){ UI.tag=t.value; return; }
   if(ds.f==="nprazo"){ UI.notaPrazo=t.value; return; }
   if(ds.f==="nrec"){ UI.notaRec=t.value; return; }
   if(ds.f==="bkp"){ UI.backup=t.value; return; }
@@ -5809,6 +6424,7 @@ document.addEventListener("change",function(ev){
   if(ds.f==="mcat"){ UI.novaMeta.categoria=ev.target.value; }
   if(ds.f==="mpri"){ UI.novaMeta.prioridade=ev.target.value; }
   if(ds.f==="npri"){ UI.notaPri=ev.target.value; }
+  if(ds.f==="ntagsel"){ UI.tag=ev.target.value; }
   if(ds.f==="nrec"){ UI.notaRec=ev.target.value; }
   if(ds.f==="evrec"){ UI.novoEv.rec=ev.target.value; }
   if(ds.bl && ds.campo==="k") render();
@@ -6161,14 +6777,19 @@ function acao(cmd,arg){
   if(cmd==="prova-del"){ S.provas=S.provas.filter(function(p){ return String(p.id)!==arg; }); salvar(); Store.pedirRender(); return; }
 
   if(cmd==="ntag"){ UI.tag=arg; Store.pedirRender(); return; }
+  if(cmd==="nmais"){ UI.notaMenu=(String(UI.notaMenu||"")===String(arg))?null:arg; Store.pedirRender(); return; }
+  if(cmd==="nbusca-limpar"){ UI.busca=""; Store.pedirRender(); return; }
   if(cmd==="ndv"){ UI.dv=!UI.dv; Store.pedirRender(); return; }
   if(cmd==="modelo"){ UI.draft=TEMPLATE_AULA; Store.pedirRender(); return; }
-  if(cmd==="ncancel"){ UI.editando=null; UI.draft=""; UI.dv=false; Store.pedirRender(); return; }
+  if(cmd==="ncancel"){ UI.editando=null; UI.draft=""; UI.dv=false; UI.notaTitulo="";
+    UI.notaPri=""; UI.notaPrazo=""; UI.notaRec=""; Store.pedirRender(); return; }
   if(cmd==="nsalvar"){
     var txt=UI.draft.trim();
-    if(!txt) return;
+    if(!txt && !(UI.notaTitulo||"").trim()) return;
+    if(!txt) txt=(UI.notaTitulo||"").trim();
     var duv=UI.dv||temDuvida(txt);
-    var extras={pri:UI.notaPri||"", prazo:UI.notaPrazo||"", rec:UI.notaRec||""};
+    var extras={pri:UI.notaPri||"", prazo:UI.notaPrazo||"", rec:UI.notaRec||"",
+                titulo:(UI.notaTitulo||"").slice(0,90)};
     if(UI.editando){
       N=N.map(function(n){ return String(n.id)===String(UI.editando)
         ? Object.assign(n,{txt:txt,tag:UI.tag,duvida:duv},extras) : n; });
@@ -6177,11 +6798,11 @@ function acao(cmd,arg){
       N.unshift(Object.assign({id:uid("n"),txt:txt,tag:UI.tag,ts:Date.now(),
         fix:false,duvida:duv,resolvida:false},extras));
     }
-    UI.draft=""; UI.dv=false; UI.notaPri=""; UI.notaPrazo=""; UI.notaRec="";
+    UI.draft=""; UI.dv=false; UI.notaPri=""; UI.notaPrazo=""; UI.notaRec=""; UI.notaTitulo="";
     salvarNotas(); Store.pedirRender(); return;
   }
   if(cmd==="nfiltro"){ UI.filtro=arg; Store.pedirRender(); return; }
-  if(cmd==="ndel"){ N=N.filter(function(n){ return String(n.id)!==arg; }); salvarNotas(); Store.pedirRender(); return; }
+  if(cmd==="ndel"){ UI.notaMenu=null; N=N.filter(function(n){ return String(n.id)!==arg; }); salvarNotas(); Store.pedirRender(); return; }
   if(cmd==="nfix"){ N=N.map(function(n){ if(String(n.id)===arg) n.fix=!n.fix; return n; }); salvarNotas(); Store.pedirRender(); return; }
   if(cmd==="nres"){ N=N.map(function(n){ if(String(n.id)===arg) n.resolvida=!n.resolvida; return n; }); salvarNotas(); Store.pedirRender(); return; }
   if(cmd==="nchk"){
@@ -6217,7 +6838,8 @@ function acao(cmd,arg){
   if(cmd==="nedit"){
     var alvo=N.filter(function(n){ return String(n.id)===arg; })[0];
     if(alvo){ UI.editando=alvo.id; UI.draft=alvo.txt; UI.tag=alvo.tag; UI.dv=!!alvo.duvida;
-      UI.notaPri=alvo.pri||""; UI.notaPrazo=alvo.prazo||""; UI.notaRec=alvo.rec||""; Store.pedirRender(); }
+      UI.notaPri=alvo.pri||""; UI.notaPrazo=alvo.prazo||""; UI.notaRec=alvo.rec||"";
+      UI.notaTitulo=alvo.titulo||""; UI.notaMenu=null; Store.pedirRender(); }
     return;
   }
 }

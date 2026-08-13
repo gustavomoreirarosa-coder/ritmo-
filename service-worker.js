@@ -4,7 +4,7 @@
    O cache antigo é apagado na ativação; os dados do usuário vivem no
    IndexedDB e NUNCA são tocados por este arquivo.
    ===================================================================== */
-const VERSAO = 'ritmo-v1.3.0';
+const VERSAO = 'ritmo-v1.4.1';
 const CACHE_ESTATICO = `${VERSAO}-estatico`;
 const CACHE_DINAMICO = `${VERSAO}-dinamico`;
 const CACHE_FONTES   = `${VERSAO}-fontes`;

@@ -53,7 +53,21 @@ Arquitetura e desempenho, sem funcionalidade nova.
 
 ---
 
-## 1.4 — Faxina técnica e modularização
+## 1.4 — Visual Refresh ✅ concluída
+
+Atualização visual completa, a pedido — a faxina técnica foi adiada.
+
+- Design system sobre as cores de sistema do iOS; roxo como destaque
+- Tela de Notas reestruturada: editor, busca e ações discretas
+- Tab bar nativa, cartão de resumo no Hoje, modo Sistema de volta
+- 243 → 266 testes
+
+---
+
+## 1.5 — Faxina técnica (adiada da 1.4)
+
+**A dívida cresceu:** o CSS foi de 925 para 1.151 regras, ainda em camadas
+sobrepostas. Quanto mais tempo passar, mais caro fica consolidar.
 
 Agora que o diff existe e os testes protegem, é seguro mexer na forma.
 
@@ -77,7 +91,7 @@ Agora que o diff existe e os testes protegem, é seguro mexer na forma.
 - [ ] Nenhuma função acima de 150 linhas
 - [ ] Fontes embutidas, sem depender de rede na primeira visita
 
-## 1.5 — Acessibilidade
+## 1.6 — Acessibilidade
 
 - [ ] Landmarks e `role` nas listas
 - [ ] `aria-live` nos avisos do assistente
@@ -85,7 +99,7 @@ Agora que o diff existe e os testes protegem, é seguro mexer na forma.
 - [ ] Teste real com VoiceOver e TalkBack
 - [ ] Contraste auditado em ambos os temas
 
-## 1.6 — Sono e hábitos
+## 1.7 — Sono e hábitos
 
 Primeiras funcionalidades novas desde a 1.0. Fecham os dois anéis que
 hoje não existem por falta de dado.

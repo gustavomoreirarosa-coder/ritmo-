@@ -238,11 +238,21 @@ grupo("1. Integridade estrutural");
 
   /* Regressão conhecida: um modificador com o mesmo nome de outra regra
      herda os estilos dela. Já aconteceu três vezes (.pt.ev, .meta-nota.alerta,
-     .mes-dia.prova). Este teste impede a quarta. */
-  const modificadores = new Set([...css.matchAll(/\.([a-z][\w-]*)\.([a-z][\w-]*)\{/g)].map(m=>m[2]));
-  const regrasProprias = new Set([...css.matchAll(/\n\.([a-z][\w-]*)\{/g)].map(m=>m[1]));
-  const colisoes = [...modificadores].filter(m => regrasProprias.has(m));
-  ok("nenhum modificador CSS colide com regra própria", colisoes.length===0, colisoes.join(", "));
+     .mes-dia.prova) — a nota da meta chegou a virar banner fixo no topo.
+
+     Só interessa quando a regra homônima define estrutura (posição, caixa
+     ou espaçamento); modificadores de cor e estado são o uso normal e
+     esperado, como em .bloco.feito. */
+  const modificadores = new Set(
+    [...css.matchAll(/\.([a-z][\w-]*)\.([a-z][\w-]*)\s*\{/g)].map(m => m[2]));
+  const estrutural = /(^|;|\{)\s*(position|display|padding|inset|top|left|right|bottom|width|height)\s*:/;
+  const perigosas = new Map();
+  for (const m of css.matchAll(/(?:^|\n|\})\s*\.([a-z][\w-]*)\s*\{([^}]*)\}/g)) {
+    if (estrutural.test(m[2])) perigosas.set(m[1], true);
+  }
+  const colisoes = [...modificadores].filter(m => perigosas.has(m));
+  ok("nenhum modificador CSS herda estrutura de regra homônima",
+     colisoes.length === 0, colisoes.join(", "));
 }
 
 /* ================================================================ 2. BUGS DA 1.1 */
@@ -941,6 +951,91 @@ grupo("22. Robustez do render");
   try { render(); } catch(e){ quebrou = true; }
   ok("render sem contêiner não lança exceção", !quebrou);
   global.document = original;
+}
+
+
+grupo("23. Ritmo 1.4: tela de notas");
+{
+  cenario();
+  N = [{ id:"n1", titulo:"Limites", txt:"[ ] a\n[x] b", tag:"Cálculo", ts:Date.now(),
+         fix:true, duvida:false, resolvida:false, pri:"alta", prazo:k(-1), rec:"s" },
+       { id:"n2", titulo:"", txt:"não entendi", tag:"Cálculo", ts:Date.now()-1e6,
+         fix:false, duvida:true, resolvida:false }];
+  C = {}; Memo.invalidar();
+  const h = viewNotas();
+
+  ok("editor tem campo de título", h.includes('data-f="ntitulo"'));
+  ok("editor tem categoria", h.includes('data-f="ntagsel"'));
+  ok("editor tem prioridade", h.includes('data-f="npri"'));
+  ok("editor tem prazo", h.includes('data-f="nprazo"'));
+  ok("editor tem repetição", h.includes('data-f="nrec"'));
+  ok("editor tem interruptor de dúvida", h.includes('data-a="ndv"') && h.includes("chave"));
+  ok("editor tem checklist e subtarefa",
+     h.includes('data-a="checklist"') && h.includes('data-a="subtarefa"'));
+  ok("editor tem salvar", h.includes('data-a="nsalvar"'));
+
+  ok("busca tem ícone de lupa", h.includes("cb-ic") && TRACOS.lupa);
+  ok("busca tem campo", h.includes('data-f="busca"'));
+  ok("filtros continuam completos",
+     ["Tudo","Dúvidas","Favoritas"].every(f => h.includes('nfiltro:'+f)));
+  ok("filtros por matéria continuam", h.includes("nfiltro:C") && h.includes("Ideias"));
+
+  ok("nota mostra título", h.includes("Limites"));
+  ok("nota mostra favoritar", h.includes('nfix:n1'));
+  ok("nota mostra mais opções", h.includes('nmais:n1'));
+  ok("excluir NÃO fica exposto na lista", !h.includes('data-a="ndel:n1"'));
+
+  /* excluir só aparece dentro de "mais opções" */
+  UI.notaMenu = "n1"; C = {}; Memo.invalidar();
+  const h2 = viewNotas();
+  ok("excluir aparece ao abrir mais opções", h2.includes('data-a="ndel:n1"'));
+  UI.notaMenu = null;
+
+  /* título é campo aditivo: nota antiga sem título usa a primeira linha */
+  N = [{ id:"x", txt:"primeira linha aqui\nsegunda", tag:"Geral", ts:Date.now() }];
+  C = {}; Memo.invalidar();
+  ok("nota sem título usa a primeira linha", viewNotas().includes("primeira linha aqui"));
+
+  /* busca continua funcionando pelo título */
+  N = [{ id:"y", titulo:"Termodinâmica", txt:"conteúdo", tag:"Geral", ts:Date.now() }];
+  UI.busca = "termo"; C = {}; Memo.invalidar();
+  ok("busca encontra pelo título", viewNotas().includes("Termodinâmica"));
+  UI.busca = "zzzz"; C = {};
+  ok("busca sem resultado mostra vazio", viewNotas().includes("Nada encontrado"));
+  UI.busca = "";
+}
+
+grupo("24. Ritmo 1.4: temas");
+{
+  cenario();
+  const mediaOriginal = global.window.matchMedia;
+
+  S.tema = "escuro"; aplicarTema();
+  S.tema = "claro"; aplicarTema();
+  ok("os três modos existem no estado", ["escuro","claro","sistema"].every(x => {
+    S.tema = x; let erro = false;
+    try { aplicarTema(); } catch(e){ erro = true; }
+    return !erro;
+  }));
+
+  /* modo sistema acompanha o aparelho */
+  let aplicado = null;
+  const docOriginal = global.document;
+  global.document = {
+    body:{ setAttribute:(k,v)=>{ if(k==="data-tema") aplicado = v; } },
+    documentElement:{ setAttribute(){} }
+  };
+  S.tema = "sistema";
+  global.window.matchMedia = () => ({ matches:true });    /* aparelho no claro */
+  aplicarTema();
+  igual("sistema segue o aparelho no claro", aplicado, "claro");
+  global.window.matchMedia = () => ({ matches:false });   /* aparelho no escuro */
+  aplicarTema();
+  igual("sistema segue o aparelho no escuro", aplicado, "escuro");
+
+  global.document = docOriginal;
+  global.window.matchMedia = mediaOriginal;
+  S.tema = "escuro";
 }
 
 /* ================================================================ 7. PERSISTÊNCIA */

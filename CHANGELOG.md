@@ -5,6 +5,78 @@ As versões seguem o [RITMO_ROADMAP.md](RITMO_ROADMAP.md).
 
 ---
 
+## [1.4.1] — 2026-08-13 — Apple Visual Pass
+
+Atualização visual mais perceptível sobre a 1.4.0, sem alteração de lógica ou dados.
+
+- Tipografia nativa do sistema Apple como prioridade, sem dependência das fontes Google.
+- Cabeçalho e títulos com hierarquia de Large Title do iOS.
+- Cards, editor de notas, busca e filtros redesenhados com superfícies agrupadas.
+- Tab bar com efeito glass, safe area e estado ativo em azul de sistema.
+- Light/Dark mode refinados.
+- Cache do service worker atualizado para garantir que a 1.4.1 seja baixada.
+
+## [1.4.0] — 2026-08-12 — Visual Refresh
+
+Atualização visual completa. **Nenhuma funcionalidade removida, nenhuma lógica
+alterada.** Compatível com dados de todas as versões anteriores.
+
+### Design system
+
+- **Paleta reconstruída** sobre as cores de sistema do iOS. Escuro agora é
+  preto verdadeiro (`#000`), melhor em telas OLED; claro usa o cinza agrupado
+  (`#F2F2F7`) com cartões brancos.
+- **Roxo virou destaque, não fundo.** Antes tingia superfícies inteiras;
+  agora marca ação, aba ativa e progresso. Cada categoria ganhou uma cor de
+  sistema própria — estudo em azul, treino em laranja, aula em índigo.
+- **Tipografia SF Pro** de verdade em aparelhos Apple, com Inter como reserva.
+  Escala do iOS: 34 / 28 / 20 / 17 / 15 / 13 / 11.
+- **Menos caixas.** Itens relacionados agora vivem em uma superfície única com
+  separadores de meio pixel, em vez de vários cartões soltos.
+- **Modo Sistema** de volta, ao lado de Claro e Escuro.
+
+### Tela de Notas — reestruturada
+
+Editor com hierarquia: título, corpo, e os atributos agrupados como uma lista
+do iOS (categoria, prioridade, prazo, repetição, dúvida com interruptor).
+Inserções rápidas de checklist, subtarefa e modelo.
+
+Busca com lupa, botão de limpar e foco destacado. Filtros como chips roláveis.
+
+Cada anotação mostra categoria, título, data, prioridade, prazo e status, com
+ações discretas: **Favorito**, **Concluir** e **⋯**. Excluir mora dentro de
+"mais opções" — deixou de estar a um toque de distância por acidente.
+
+**Campo `titulo` é aditivo:** anotações antigas usam a primeira linha como
+título, sem migração.
+
+### Tela Hoje
+
+Cartão de resumo com a contagem do dia (estudos, treinos, aulas, anotações) e
+o progresso integrado. Anéis viraram faixa rolável — cinco itens não cabiam em
+grade sem sobrar um órfão.
+
+### Tab bar
+
+Redesenhada no padrão nativo: sem barrinha indicadora, o estado ativo é
+comunicado por cor e um leve aumento do ícone.
+
+### Corrigido
+
+- **Tema claro não aplicava** quando o atributo estava só no `<body>`: o
+  seletor tinha ficado preso a `html[data-tema]`.
+- **Barra de progresso duplicada** nas anotações com checklist.
+- Ícone de busca era um alvo, não uma lupa.
+- Chips e filtros ativos sem contraste no tema claro.
+
+### Testes
+
+243 → **266 asserções**, todas passando. Cobertura nova: campos do editor,
+filtros preservados, excluir dentro de "mais opções", título como campo
+aditivo, busca por título e os três modos de tema.
+
+---
+
 ## [1.3.0] — 2026-08-04 — Foundation Architecture
 
 Versão de arquitetura e desempenho. **Nenhuma funcionalidade nova, nenhuma
