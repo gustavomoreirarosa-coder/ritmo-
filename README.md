@@ -57,4 +57,5 @@ renderização das telas, exportação e persistência. Sem dependências.
 
 Os dados ficam em IndexedDB, no próprio aparelho. Nada é sincronizado.
 Desinstalar o app ou limpar os dados do navegador apaga tudo — exporte
-um backup de vez em quando em Ajustes → Backup.
+um backup de vez em quando em Ajustes → Backup. 
+teste de deploy visual 1.4.1
