@@ -238,11 +238,21 @@ grupo("1. Integridade estrutural");
 
   /* Regressão conhecida: um modificador com o mesmo nome de outra regra
      herda os estilos dela. Já aconteceu três vezes (.pt.ev, .meta-nota.alerta,
-     .mes-dia.prova). Este teste impede a quarta. */
-  const modificadores = new Set([...css.matchAll(/\.([a-z][\w-]*)\.([a-z][\w-]*)\{/g)].map(m=>m[2]));
-  const regrasProprias = new Set([...css.matchAll(/\n\.([a-z][\w-]*)\{/g)].map(m=>m[1]));
-  const colisoes = [...modificadores].filter(m => regrasProprias.has(m));
-  ok("nenhum modificador CSS colide com regra própria", colisoes.length===0, colisoes.join(", "));
+     .mes-dia.prova) — a nota da meta chegou a virar banner fixo no topo.
+
+     Só interessa quando a regra homônima define estrutura (posição, caixa
+     ou espaçamento); modificadores de cor e estado são o uso normal e
+     esperado, como em .bloco.feito. */
+  const modificadores = new Set(
+    [...css.matchAll(/\.([a-z][\w-]*)\.([a-z][\w-]*)\s*\{/g)].map(m => m[2]));
+  const estrutural = /(^|;|\{)\s*(position|display|padding|inset|top|left|right|bottom|width|height)\s*:/;
+  const perigosas = new Map();
+  for (const m of css.matchAll(/(?:^|\n|\})\s*\.([a-z][\w-]*)\s*\{([^}]*)\}/g)) {
+    if (estrutural.test(m[2])) perigosas.set(m[1], true);
+  }
+  const colisoes = [...modificadores].filter(m => perigosas.has(m));
+  ok("nenhum modificador CSS herda estrutura de regra homônima",
+     colisoes.length === 0, colisoes.join(", "));
 }
 
 /* ================================================================ 2. BUGS DA 1.1 */
@@ -941,6 +951,284 @@ grupo("22. Robustez do render");
   try { render(); } catch(e){ quebrou = true; }
   ok("render sem contêiner não lança exceção", !quebrou);
   global.document = original;
+}
+
+
+grupo("23. Ritmo 1.4: tela de notas");
+{
+  cenario();
+  N = [{ id:"n1", titulo:"Limites", txt:"[ ] a\n[x] b", tag:"Cálculo", ts:Date.now(),
+         fix:true, duvida:false, resolvida:false, pri:"alta", prazo:k(-1), rec:"s" },
+       { id:"n2", titulo:"", txt:"não entendi", tag:"Cálculo", ts:Date.now()-1e6,
+         fix:false, duvida:true, resolvida:false }];
+  C = {}; Memo.invalidar();
+  const h = viewNotas();
+
+  ok("editor tem campo de título", h.includes('data-f="ntitulo"'));
+  ok("editor tem categoria", h.includes('data-f="ntagsel"'));
+  ok("editor tem prioridade", h.includes('data-f="npri"'));
+  ok("editor tem prazo", h.includes('data-f="nprazo"'));
+  ok("editor tem repetição", h.includes('data-f="nrec"'));
+  ok("editor tem interruptor de dúvida", h.includes('data-a="ndv"') && h.includes("chave"));
+  ok("editor tem checklist e subtarefa",
+     h.includes('data-a="checklist"') && h.includes('data-a="subtarefa"'));
+  ok("editor tem salvar", h.includes('data-a="nsalvar"'));
+
+  ok("busca tem ícone de lupa", h.includes("cb-ic") && TRACOS.lupa);
+  ok("busca tem campo", h.includes('data-f="busca"'));
+  ok("filtros continuam completos",
+     ["Tudo","Dúvidas","Favoritas"].every(f => h.includes('nfiltro:'+f)));
+  ok("filtros por matéria continuam", h.includes("nfiltro:C") && h.includes("Ideias"));
+
+  ok("nota mostra título", h.includes("Limites"));
+  ok("nota mostra favoritar", h.includes('nfix:n1'));
+  ok("nota mostra mais opções", h.includes('nmais:n1'));
+  ok("excluir NÃO fica exposto na lista", !h.includes('data-a="ndel:n1"'));
+
+  /* excluir só aparece dentro de "mais opções" */
+  UI.notaMenu = "n1"; C = {}; Memo.invalidar();
+  const h2 = viewNotas();
+  ok("excluir aparece ao abrir mais opções", h2.includes('data-a="ndel:n1"'));
+  UI.notaMenu = null;
+
+  /* título é campo aditivo: nota antiga sem título usa a primeira linha */
+  N = [{ id:"x", txt:"primeira linha aqui\nsegunda", tag:"Geral", ts:Date.now() }];
+  C = {}; Memo.invalidar();
+  ok("nota sem título usa a primeira linha", viewNotas().includes("primeira linha aqui"));
+
+  /* busca continua funcionando pelo título */
+  N = [{ id:"y", titulo:"Termodinâmica", txt:"conteúdo", tag:"Geral", ts:Date.now() }];
+  UI.busca = "termo"; C = {}; Memo.invalidar();
+  ok("busca encontra pelo título", viewNotas().includes("Termodinâmica"));
+  UI.busca = "zzzz"; C = {};
+  ok("busca sem resultado mostra vazio", viewNotas().includes("Nada encontrado"));
+  UI.busca = "";
+}
+
+grupo("24. Ritmo 1.4: temas");
+{
+  cenario();
+  const mediaOriginal = global.window.matchMedia;
+
+  S.tema = "escuro"; aplicarTema();
+  S.tema = "claro"; aplicarTema();
+  ok("os três modos existem no estado", ["escuro","claro","sistema"].every(x => {
+    S.tema = x; let erro = false;
+    try { aplicarTema(); } catch(e){ erro = true; }
+    return !erro;
+  }));
+
+  /* modo sistema acompanha o aparelho */
+  let aplicado = null;
+  const docOriginal = global.document;
+  global.document = {
+    body:{ setAttribute:(k,v)=>{ if(k==="data-tema") aplicado = v; } },
+    documentElement:{ setAttribute(){} }
+  };
+  S.tema = "sistema";
+  global.window.matchMedia = () => ({ matches:true });    /* aparelho no claro */
+  aplicarTema();
+  igual("sistema segue o aparelho no claro", aplicado, "claro");
+  global.window.matchMedia = () => ({ matches:false });   /* aparelho no escuro */
+  aplicarTema();
+  igual("sistema segue o aparelho no escuro", aplicado, "escuro");
+
+  global.document = docOriginal;
+  global.window.matchMedia = mediaOriginal;
+  S.tema = "escuro";
+}
+
+
+grupo("26. Agenda: compatibilidade do ajuste");
+{
+  cenario();
+  const b0 = S.blocos.semana[0];
+  const blocoOriginal = JSON.parse(JSON.stringify(b0));
+
+  /* formato antigo (replanejador da 1.0): só um número */
+  S.dias[k(0)].ajuste = {}; S.dias[k(0)].ajuste[b0.id] = 999;
+  C = {};
+  let lido = montarDia(UI.agora).filter(x => x.id === b0.id)[0];
+  igual("ajuste antigo (número) ainda muda o horário", lido.t, 999);
+  igual("ajuste antigo preserva a duração do molde", lido.dur, blocoOriginal.dur);
+
+  /* formato novo: objeto parcial {t,dur} */
+  S.dias[k(0)].ajuste[b0.id] = { t: 888, dur: 40 };
+  C = {};
+  lido = montarDia(UI.agora).filter(x => x.id === b0.id)[0];
+  igual("ajuste novo muda o horário", lido.t, 888);
+  igual("ajuste novo muda a duração", lido.dur, 40);
+  igual("ajuste novo preserva o título do molde", lido.titulo, blocoOriginal.titulo);
+  igual("ajuste novo preserva a categoria do molde", lido.k, blocoOriginal.k);
+
+  /* só duração, sem mexer no horário */
+  S.dias[k(0)].ajuste[b0.id] = { dur: 15 };
+  C = {};
+  lido = montarDia(UI.agora).filter(x => x.id === b0.id)[0];
+  igual("ajuste parcial de duração preserva o horário do molde", lido.t, blocoOriginal.t);
+  igual("ajuste parcial muda só a duração", lido.dur, 15);
+
+  igual("o molde compartilhado nunca é tocado", JSON.stringify(S.blocos.semana[0]), JSON.stringify(blocoOriginal));
+}
+
+grupo("27. Agenda: colunas de eventos sobrepostos");
+{
+  const a = { t: 600, dur: 60, titulo: "A" };
+  const b = { t: 620, dur: 30, titulo: "B" };
+  const r1 = distribuirColunas([a, b]);
+  igual("dois itens que se cruzam ganham 2 colunas", r1[0].colunas, 2);
+  ok("colunas diferentes entre si", r1[0]._col !== r1[1]._col);
+
+  const c1 = { t: 480, dur: 30 }, c2 = { t: 480, dur: 30 }, c3 = { t: 480, dur: 30 };
+  const r2 = distribuirColunas([c1, c2, c3]);
+  ok("três itens simultâneos ganham 3 colunas", r2.every(x => x.colunas === 3));
+  igual("as três colunas são todas diferentes", new Set(r2.map(x => x._col)).size, 3);
+
+  const d1 = { t: 480, dur: 30 }, d2 = { t: 600, dur: 30 };
+  const r3 = distribuirColunas([d1, d2]);
+  ok("itens sem sobreposição ficam sozinhos na coluna", r3.every(x => x.colunas === 1));
+
+  const e1 = { t: 480, dur: 60 }, e2 = { t: 500, dur: 20 }, e3 = { t: 530, dur: 30 };
+  const r4 = distribuirColunas([e1, e2, e3]);
+  ok("libera a coluna assim que um item termina",
+     r4.filter(x => x.t === 530 || x.t === 480)[0]._col !== undefined);
+
+  ok("lista vazia não quebra", distribuirColunas([]).length === 0);
+}
+
+grupo("28. Agenda: itens do dia e ações");
+{
+  cenario();
+  UI.diaSel = k(0);
+  const its = itensDaAgenda(diaSelecionado(), k(0));
+  ok("blocos do molde entram na agenda", its.some(x => x.tipo === "bloco"));
+  ok("todo item de bloco tem cor", its.filter(x => x.tipo === "bloco").every(x => !!x.cor));
+
+  S.eventos = [
+    { id: "e1", data: k(0), hora: 600, titulo: "Com hora", rec: "" },
+    { id: "e2", data: k(0), hora: null, titulo: "Dia todo", rec: "" }
+  ];
+  const its2 = itensDaAgenda(diaSelecionado(), k(0));
+  ok("evento com hora entra na grade", its2.some(x => x.tipo === "evento" && x.id === "e1"));
+  ok("evento sem hora NÃO entra na grade", !its2.some(x => x.id === "e2"));
+
+  /* ag-dur-mais/menos: só toca no ajuste do dia, nunca no molde */
+  const bId = S.blocos.semana[1].id;
+  const moldeAntes = JSON.stringify(S.blocos.semana[1]);
+  const durAntes = S.blocos.semana[1].dur;
+  acao("ag-dur-mais", bId);
+  igual("molde intacto após ag-dur-mais", JSON.stringify(S.blocos.semana[1]), moldeAntes);
+  /* C={} reproduz o que o próximo render() real faria antes de reler —
+     sem isto, a leitura bateria no cache de ANTES da mutação. */
+  C = {};
+  let novo = montarDia(diaSelecionado()).filter(x => x.id === bId)[0];
+  igual("duração de hoje aumentou 15min", novo.dur, durAntes + 15);
+
+  /* toque duplo, sem render entre os dois — é o caso que expôs o bug
+     original: a leitura da ação precisa ignorar o cache, não só a
+     verificação do teste. */
+  acao("ag-dur-menos", bId); acao("ag-dur-menos", bId);
+  C = {};
+  novo = montarDia(diaSelecionado()).filter(x => x.id === bId)[0];
+  igual("duração de hoje diminuiu corretamente (toque duplo sem render)", novo.dur, durAntes - 15);
+
+  acao("ag-restaurar", bId);
+  C = {};
+  novo = montarDia(diaSelecionado()).filter(x => x.id === bId)[0];
+  igual("restaurar volta à duração do molde", novo.dur, durAntes);
+
+  /* limites do stepper */
+  for (let i = 0; i < 30; i++) acao("ag-dur-menos", bId);
+  C = {};
+  novo = montarDia(diaSelecionado()).filter(x => x.id === bId)[0];
+  ok("duração nunca fica abaixo do mínimo", novo.dur >= 5);
+  acao("ag-restaurar", bId);
+
+  /* toque duplo real: dois "+15" em sequência, SEM nenhum render entre
+     eles (é o que acontece se o dedo for mais rápido que o quadro de
+     tela). Precisa acumular +30, não travar em +15. */
+  const bId2 = S.blocos.semana[2].id, durAntes2 = S.blocos.semana[2].dur;
+  acao("ag-dur-mais", bId2);
+  acao("ag-dur-mais", bId2);
+  C = {};
+  const novo2 = montarDia(diaSelecionado()).filter(x => x.id === bId2)[0];
+  igual("dois toques rápidos em + acumulam (+30), sem render entre eles", novo2.dur, durAntes2 + 30);
+  acao("ag-restaurar", bId2);
+}
+
+grupo("29. Agenda: navegação de dia");
+{
+  cenario();
+  UI.diaSel = "2026-08-31";
+  acao("dia-nav", "1");
+  igual("avança corretamente através do fim do mês", UI.diaSel, "2026-09-01");
+  acao("dia-nav", "-1");
+  igual("volta corretamente", UI.diaSel, "2026-08-31");
+  UI.diaSel = "algo-errado";
+  acao("dia-hoje", null);
+  igual("dia-hoje volta para o dia de hoje", UI.diaSel, hojeKey());
+}
+
+grupo("30. Agenda: criação rápida (fonte única)");
+{
+  cenario();
+  UI.diaSel = k(0);
+  const totalAntes = (S.eventos || []).length;
+  UI.agendaCriar = { tipo: "estudo", titulo: "Revisar integrais", hora: "14:00", dur: 50 };
+  acao("ag-criar-ok", null);
+  igual("cria exatamente um evento novo", S.eventos.length, totalAntes + 1);
+  const criado = S.eventos[S.eventos.length - 1];
+  igual("título correto", criado.titulo, "Revisar integrais");
+  igual("tipo correto", criado.tipo, "estudo");
+  igual("duração correta", criado.dur, 50);
+  igual("horário convertido para minutos", criado.hora, 14 * 60);
+  ok("sheet de criação fecha sozinha", UI.agendaCriar === null);
+
+  /* o mesmo evento aparece na Agenda E no Mês — mesma fonte, sem duplicar */
+  C = {};
+  const naAgenda = itensDaAgenda(diaSelecionado(), k(0)).some(x => x.titulo === "Revisar integrais");
+  const noMes = eventosDoDia(k(0), diaSelecionado()).some(x => x.titulo === "Revisar integrais");
+  ok("o evento criado aparece na Agenda", naAgenda);
+  ok("o mesmo evento aparece na visão de Mês/Semana", noMes);
+
+  /* editar por dentro da Agenda também é o mesmo caminho de dados */
+  UI.novoEv = { id: criado.id, titulo: "Revisar limites", hora: "15:00", tipo: "estudo", dur: 40, rec: "" };
+  acao("ag-ev-salvar", criado.id);
+  const atualizado = S.eventos.filter(e => String(e.id) === String(criado.id))[0];
+  igual("edição pela Agenda atualiza o mesmo registro", atualizado.titulo, "Revisar limites");
+  igual("não duplicou o evento ao editar", S.eventos.length, totalAntes + 1);
+
+  acao("ag-ev-feito", criado.id);
+  ok("marcar concluído funciona", S.eventos.filter(e => String(e.id) === String(criado.id))[0].feito === true);
+
+  acao("ev-del", criado.id);
+  igual("excluir remove o evento", S.eventos.length, totalAntes);
+}
+
+grupo("31. Agenda: renderização");
+{
+  cenario();
+  UI.diaSel = hojeKey();
+  UI.agendaDetalhe = null; UI.agendaCriar = null;
+  C = {};
+  const h = viewDia();
+  const sujo = /undefined|NaN|Infinity/.test(h);
+  ok("viewDia renderiza sem valor inválido", !sujo);
+  ok("mostra o marcador de agora quando o dia é hoje", h.includes("ag-agora"));
+  ok("tem o cabeçalho com navegação", h.includes('data-a="dia-nav:-1"') && h.includes('data-a="dia-nav:1"'));
+  ok("tem o botão de criação rápida", h.includes('data-a="ag-fab"'));
+
+  UI.diaSel = k(5);
+  C = {};
+  const h2 = viewDia();
+  ok("marcador de agora some em dia que não é hoje", !h2.includes("ag-agora"));
+
+  UI.diaSel = hojeKey();
+  UI.agendaDetalhe = { tipo: "bloco", id: S.blocos.semana[0].id };
+  C = {};
+  const h3 = viewDia();
+  ok("sheet de detalhe do bloco abre", h3.includes("ag-sheet") && h3.includes("Duração"));
+  UI.agendaDetalhe = null;
 }
 
 /* ================================================================ 7. PERSISTÊNCIA */

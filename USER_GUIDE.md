@@ -90,7 +90,29 @@ depois prioridade.
 
 ---
 
-## Calendário
+## Agenda
+
+A aba que era "Mês" virou **Agenda**, com três vistas: Dia, Semana e Mês.
+Dia é a que abre primeiro.
+
+**Vista Dia** mostra o dia inteiro como uma linha do tempo — blocos da
+rotina e compromissos na altura proporcional à duração, como num calendário
+de verdade. A hora atual aparece marcada discretamente na régua da esquerda.
+
+Toque em qualquer bloco ou compromisso para ver detalhes: mudar horário,
+ajustar duração (+/-15 min), marcar como feito, ou — se for um bloco de
+estudo ou treino — abrir direto o Pomodoro ou a tela de Treino.
+
+Toque num espaço vazio da grade, ou no botão roxo flutuante, para criar
+algo rápido: Estudo, Treino, Tarefa ou Compromisso.
+
+Arraste o dedo para os lados para trocar de dia.
+
+Mudar a duração de um bloco pela Agenda vale só para aquele dia — a rotina
+que se repete continua igual. Para mudar todos os dias de uma vez, use
+⚙ → Rotina do dia.
+
+## Calendário (Mês e Semana)
 
 **Mês** mostra a grade com intensidade proporcional aos blocos concluídos.
 Pontos coloridos indicam treino, estudo, prova e compromisso.

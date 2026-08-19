@@ -5,6 +5,135 @@ As versões seguem o [RITMO_ROADMAP.md](RITMO_ROADMAP.md).
 
 ---
 
+## [1.5.0] — 2026-08-17 — Agenda
+
+Nova visão diária estilo Google Calendar, integrada aos dados que já
+existiam — nenhuma fonte de dado duplicada. Compatível com tudo das
+versões anteriores.
+
+### Adicionado
+
+**Aba Mês evoluiu para Agenda**, com alternância Dia | Semana | Mês. Dia é
+o padrão agora, como pedido — Semana e Mês continuam exatamente como eram.
+
+**Vista Dia**
+- Linha do tempo vertical com blocos em altura proporcional à duração
+- Régua de horas adaptativa (cobre 06h–24h, estica se algo passar disso)
+- Eventos sobrepostos dividem a largura em colunas, como no Google Calendar
+- Marcador discreto de "agora": hora em vermelho na régua + linha fina,
+  sem cobrir o título do que está acontecendo
+- Compromissos sem horário e provas aparecem como chips de "dia todo"
+- Arrastar o dedo para os lados troca de dia; toque em "‹ data ›" também
+
+**Interação**
+- Toque num bloco: sheet com horário, duração (+15/–15min), marcar
+  concluído, abrir Pomodoro ou Treino conforme a categoria, anotar, e
+  restaurar o horário/duração originais do dia
+- Toque num compromisso: editar título, horário, duração, categoria,
+  observações; marcar concluído; excluir
+- Toque num espaço vazio da grade: cria algo naquele horário
+- Botão flutuante (+): criação rápida com quatro tipos — Estudo, Treino,
+  Tarefa, Compromisso
+
+### Arquitetura
+
+- `S.dias[k].ajuste` passou a aceitar duração além de horário, mantendo
+  100% de compatibilidade com o formato antigo (só um número)
+- `S.eventos` ganhou `tipo`, `dur`, `obs`, `feito` — todos opcionais e
+  aditivos
+- Criar ou editar um compromisso pela Agenda usa o mesmo caminho de dados
+  do Mês (`ev-add`) — não existem "dois eventos" para a mesma coisa
+- Algoritmo de distribuição de colunas para sobreposição, função pura e
+  testada isoladamente
+
+### Corrigido durante o desenvolvimento
+
+- **Toque duplo no "+15min" não acumulava.** O handler lia a duração atual
+  através de uma função cacheada por render; dois toques antes do próximo
+  quadro de tela liam o mesmo valor velho. Corrigido lendo a fonte direta
+  (molde + ajuste), sem depender do cache — confirmado com um teste que
+  simula exatamente esse toque duplo.
+- Cabeçalho da Agenda capitalizava cada palavra ("3 De Agosto" em vez de
+  "3 de agosto").
+- O marcador "agora" cobria o título do bloco em andamento.
+
+### Testes
+
+266 → **313 asserções**. Cobertura nova: compatibilidade do ajuste (nunca
+altera o molde compartilhado), algoritmo de colunas, ações da Agenda,
+navegação entre dias, criação rápida como fonte única, e o cenário de
+toque duplo sem render entre os toques.
+
+**Não incluído:** arrastar/redimensionar eventos com o dedo. A arquitetura
+desenha via diferença de HTML, não um canvas persistente — arrastar exige
+rastrear o ponteiro continuamente fora do ciclo de render, mudança de
+maior risco. Em vez disso, horário e duração se editam pelo sheet, com
+resposta imediata. Fica registrado para quando a renderização incremental
+avançar mais.
+
+---
+
+## [1.4.0] — 2026-08-12 — Visual Refresh
+
+Atualização visual completa. **Nenhuma funcionalidade removida, nenhuma lógica
+alterada.** Compatível com dados de todas as versões anteriores.
+
+### Design system
+
+- **Paleta reconstruída** sobre as cores de sistema do iOS. Escuro agora é
+  preto verdadeiro (`#000`), melhor em telas OLED; claro usa o cinza agrupado
+  (`#F2F2F7`) com cartões brancos.
+- **Roxo virou destaque, não fundo.** Antes tingia superfícies inteiras;
+  agora marca ação, aba ativa e progresso. Cada categoria ganhou uma cor de
+  sistema própria — estudo em azul, treino em laranja, aula em índigo.
+- **Tipografia SF Pro** de verdade em aparelhos Apple, com Inter como reserva.
+  Escala do iOS: 34 / 28 / 20 / 17 / 15 / 13 / 11.
+- **Menos caixas.** Itens relacionados agora vivem em uma superfície única com
+  separadores de meio pixel, em vez de vários cartões soltos.
+- **Modo Sistema** de volta, ao lado de Claro e Escuro.
+
+### Tela de Notas — reestruturada
+
+Editor com hierarquia: título, corpo, e os atributos agrupados como uma lista
+do iOS (categoria, prioridade, prazo, repetição, dúvida com interruptor).
+Inserções rápidas de checklist, subtarefa e modelo.
+
+Busca com lupa, botão de limpar e foco destacado. Filtros como chips roláveis.
+
+Cada anotação mostra categoria, título, data, prioridade, prazo e status, com
+ações discretas: **Favorito**, **Concluir** e **⋯**. Excluir mora dentro de
+"mais opções" — deixou de estar a um toque de distância por acidente.
+
+**Campo `titulo` é aditivo:** anotações antigas usam a primeira linha como
+título, sem migração.
+
+### Tela Hoje
+
+Cartão de resumo com a contagem do dia (estudos, treinos, aulas, anotações) e
+o progresso integrado. Anéis viraram faixa rolável — cinco itens não cabiam em
+grade sem sobrar um órfão.
+
+### Tab bar
+
+Redesenhada no padrão nativo: sem barrinha indicadora, o estado ativo é
+comunicado por cor e um leve aumento do ícone.
+
+### Corrigido
+
+- **Tema claro não aplicava** quando o atributo estava só no `<body>`: o
+  seletor tinha ficado preso a `html[data-tema]`.
+- **Barra de progresso duplicada** nas anotações com checklist.
+- Ícone de busca era um alvo, não uma lupa.
+- Chips e filtros ativos sem contraste no tema claro.
+
+### Testes
+
+243 → **266 asserções**, todas passando. Cobertura nova: campos do editor,
+filtros preservados, excluir dentro de "mais opções", título como campo
+aditivo, busca por título e os três modos de tema.
+
+---
+
 ## [1.3.0] — 2026-08-04 — Foundation Architecture
 
 Versão de arquitetura e desempenho. **Nenhuma funcionalidade nova, nenhuma
